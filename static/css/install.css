@@ -1,0 +1,30 @@
+::-webkit-scrollbar {width: 3px;height: 10px;}
+::-webkit-scrollbar-corner, ::-webkit-scrollbar-track {background-color: #e2e2e2;}
+::-webkit-scrollbar-thumb {border-radius: 0;background-color: rgba(149, 219, 241, 0.7);}
+*{margin:0;padding:0;box-sizing: border-box;}
+html,body{width:100%;height:100%;font-size:16px;}
+a,button{cursor:pointer;outline:none;}
+.install{position: absolute;top: 1rem;left: 0;right: 0;bottom: 2rem;width: 60%;margin: 0 auto;box-shadow: 0 0 20px #e8e8e8;border: 1px solid #eee;}
+.install .title{height: 2.8rem;line-height: 2.8rem;padding: 0 1rem;color: #fff;background: #19afdc;}
+.install .content{width: 100%;height: calc(100% - 5.3rem);overflow-x: hidden;overflow-y: auto;padding: 0 1rem;}
+.install .footer{height: 2.5rem;line-height: 2.5rem;padding: 0 1rem;text-align: right;}
+.install .footer button{border: 1px solid #b3dce8;padding: 0.25rem 1rem;background: #eefbff;margin-left: 1rem;}
+.install .footer button.success{background: #19afdc;color: #fff;border-color: #19afdc;}
+.step2_item{height: 2rem;line-height: 2rem;}
+.step2_item .tit{width: 10rem;float: left;color: #888;}
+.step2_item span font{color: #f40;}
+.group_title{font-size: 1.1rem;margin-top: 2rem;margin-bottom: 1rem;color: #888;}
+.me_input{margin-bottom: 0.5rem;}
+.me_input:after{content:'';display:block;height:0;clear:both;}
+.me_input > label{height: 1.8rem;line-height: 1.8rem;float:left;margin-right: 0.5rem;}
+.me_input input{height: 1.8rem;line-height: 1.8rem;border: 1px solid #ccc;padding: 0 0.3rem;width: 14rem;float:left;}
+.me_input select{height: 1.8rem;line-height: 1.8rem;padding: 0 0.5rem;}
+.me_input textarea{width: 25rem;height: 8rem;padding:0.3rem;}
+.successBox{height: 60%;background: #19afdc;margin-left: -1rem;margin-right: -1rem;color: #fff;}
+.successBox .msg{padding-top: 4rem;text-align: center;}
+.successBox .msg b{font-size: 2rem;}
+.successBox .msg p{margin-top: 2rem;color: #fbff00;}
+.successBtn{height: 40%;padding: 7rem 0;text-align: center;}
+.successBtn a{border: 1px solid #b3dce8;padding: 1rem 3rem;border-radius: 1.5rem;margin: 0 2rem;background: #eefbff;text-decoration: none;color: #333;}
+.successBtn a.color{background: #19afdc;color: #fff;border-color: #19afdc;}
+.tip{position: fixed;top: 0;left: 0;right: 0;bottom: 0;width: 100%;height: 100%;z-index: 99999;text-align: center;display: flex;align-items: center;justify-content: center;background: rgba(255, 255, 255, 0.7);}

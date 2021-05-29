@@ -18,7 +18,6 @@
 				{$data['content']|content2keyword}
 			</div>
 		</div>
-		{hook:down_show($listId)}
 		<div class="share">
 			<p class="diggit"><a href="javascript:;" class="praise" data-val="{$listId}">赞一下(<i>{$data['upnum']}</i>)</a></p>
 		</div>

@@ -19,6 +19,5 @@
 <script src="/static/js/me.min.js"></script>
 <script src="{$tempUrl}/js/default.js"></script>
 {hook:index_footer}
-{hook:wstools_show}
 </body>
 </html>

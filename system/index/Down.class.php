@@ -20,7 +20,7 @@ class Down extends base{
 		if(!file_exists($attrfile)){
 			return rpMsg('下载错误，附件错误或不存在');
 		}
-		\rp\Hook::doHook('index_down',$attr);
+		\rp\Hook::doHook('index_down',array($attr));
 		$zip=new Zip($attrfile);
 		$zip->down($attr['filename']);
 	}

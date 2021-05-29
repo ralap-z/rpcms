@@ -34,9 +34,9 @@ class App{
 	}
 	
 	public function run(){
+		register_shutdown_function('Debug_Shutdown_Handler');
 		set_error_handler('Debug_Error_Handler');
         set_exception_handler('Debug_Exception_Handler');
-        //register_shutdown_function('Debug_Shutdown_Handler');
 		$this->route=$this->parseModule();
 		$this->denyModule();//检查module是否允许访问
 		$this->isInstall();
@@ -64,7 +64,7 @@ class App{
 			rpMsg($action.' action is not find');
 		}
 		$htmlData=$controller->$action();
-		echo $htmlData;
+		echo is_array($htmlData) ? rpMsg('请求错误') : $htmlData;
 		exit;
 	}
 	
@@ -114,7 +114,7 @@ class App{
 	private function isInstall(){
 		if(!file_exists(CMSPATH .'/data/install.lock')){
 			if($this->route['module'] != 'install'){
-				redirect('install/index');
+				redirect('/install/index');
 			}
 		}else{
 			$option=Cache::read('option');

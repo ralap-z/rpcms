@@ -28,7 +28,7 @@ class Special extends base{
 			rpMsg('当前专题不存在！');
 		}
 		$LogsMod=new LogsMod();
-		$logData=$LogsMod->page($page)->where(array('a.specialId'=>$specialId))->order(array('a.isTop'=>'desc','a.upateTime'=>'desc','a.id'=>'desc'))->select();
+		$logData=$LogsMod->page($page)->where(array('a.specialId'=>$specialId))->order($this->getLogOrder(array('a.isTop'=>'desc')))->select();
 		$title=$special[$specialId]['title'];
 		$pageHtml=pageInationHome($logData['count'],$logData['limit'],$logData['page'],'special',$specialId);
 		$template=!empty($special[$specialId]['temp_list']) ? $special[$specialId]['temp_list'] : 'special';

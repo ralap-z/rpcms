@@ -4,6 +4,8 @@ namespace rp\index;
 use rp\Db;
 use rp\Config;
 use rp\Hook;
+use rp\Url;
+use rp\Cache;
 use rp\index\CommentMod;
 
 class Comment extends base{
@@ -41,8 +43,9 @@ class Comment extends base{
 	
 	public function add(){
 		$param=input('post.');
-		$param['vid']=intval($param['vid']);
-		$param['topId']=intval($param['topId']);
+		$param['vid']=isset($param['vid']) ? intval($param['vid']) : 0;
+		$param['topId']=isset($param['topId']) ? intval($param['topId']) : 0;
+		$param['userId']=0;
 		if(empty($param['vid']) || !isset($param['topId'])){
 			return $this->msg('数据错误',-1);
 		}
@@ -68,6 +71,13 @@ class Comment extends base{
 		if(!empty($lastTime) && ($newTime-$lastTime) < Config::get('webConfig.commentInterval')){
 			return $this->msg('速度太快了，休息一下吧',-1);
 		}
+		$user=self::$user;
+		if(isset($user['id']) && !empty($user['id'])){
+			$param['username']=$user['nickname'];
+			$param['email']=$user['email'];
+			$param['home']=Url::other('author',$user['id']);
+			$param['userId']=$user['id'];
+		}
 		if(empty($param['username'])){
 			return $this->msg('评论名称不可为空',-1);
 		}
@@ -91,33 +101,36 @@ class Comment extends base{
 				return $this->msg('验证码错误',101);
 			}
 		}
-		$user=self::$user;
 		$data=array();
 		$data['logId']=$param['types'] == 'logs' ? $param['vid'] : 0;
 		$data['pageId']=$param['types'] == 'pages' ? $param['vid'] : 0;
 		$data['topId']=$param['topId'];
 		$data['authorId']=$res['authorId'];
-		$data['userId']=isset($user['id']) ? $user['id'] : 0;
-		$data['levels']=$top['levels'] + 1;
+		$data['userId']=$param['userId'];
+		$data['levels']=(isset($top['levels']) ? $top['levels'] : 0) + 1;
 		$data['nickname']=subString($param['username'],0,20);
 		$data['email']=strip_tags($param['email']);
 		$data['home']=strip_tags($param['home']);
 		$data['content']=subString($param['content'],0,1000);
 		$data['ip']=ip();
-		$data['agent']=$this->App::server('HTTP_USER_AGENT');
+		$data['agent']=input('server.HTTP_USER_AGENT');
 		$data['createTime']=date('Y-m-d H:i:s');
 		$data['status']=Config::get('webConfig.commentCheck') == 1 ? 1 : 0;
-		Hook::doHook('comment_post',$data);
-		$res1=Db::name('comment')->insert($data);
-		if($param['types'] == 'pages'){
-			$res2=Db::name('pages')->where('id='.$param['vid'])->setInc('comnum');
-		}else{
-			$res2=Db::name('logs')->where('id='.$param['vid'])->setInc('comnum');
-		}
+		Hook::doHook('comment_post',array(&$data));
+		$res=Db::name('comment')->insert($data);
 		cookie('comment_cookie_last',$newTime, Config::get('webConfig.commentInterval') + 5);
-		if($res1 && $res2){
+		if($res){
+			if(Config::get('webConfig.commentCheck') != 1){
+				if($param['types'] == 'pages'){
+					$res2=Db::name('pages')->where('id='.$param['vid'])->setInc('comnum');
+				}else{
+					$res2=Db::name('logs')->where('id='.$param['vid'])->setInc('comnum');
+				}
+				
+			}
 			$msg=Config::get('webConfig.commentCheck') == 1 ? '，等待后台审核' : '';
-			Hook::doHook('comment_save',$data);
+			Hook::doHook('comment_save',array($data));
+			Cache::update('total');
 			return $this->msg('评论成功'.$msg, 200);
 		}
 		return $this->msg('评论失败，请稍后重试', -1);

@@ -9,7 +9,8 @@
 		<div class="tab_list">
 			<a href="#tab1" class="tab_link active">基本设置</a>
 			<a href="#tab2" class="tab_link">优化设置</a>
-			<a href="#tab3" class="tab_link">评论/其他</a>
+			<a href="#tab3" class="tab_link">API/其他</a>
+			<a href="#tab4" class="tab_link">评论</a>
 		</div>
 		<div class="tabs">
 			<div id="tab1" class="tab active">
@@ -26,6 +27,16 @@
 				<div class="me_input big"><label>前台分页大小</label><input type="number" name="pagesize" value="{$option['pagesize']|default=''}"></div>
 				<div class="me_input big"><label>附件类型</label><input type="text" name="fileTypes" value="{$option['fileTypes']|default=''}"></div>
 				<div class="me_input big"><label>附件大小(MB)</label><input type="text" name="fileSize" value="{$option['fileSize']|default=''}"></div>
+				<div class="me_input big">
+					<label>排序方式</label>
+					
+						<div class="me_input me_input_line"><label>创建时间</label><input type="checkbox" name="logOrder[0]" value="id" {if isset($option['logOrder']) && in_array('id',$option['logOrder'])}checked{/if}></div>
+						<div class="me_input me_input_line"><label>修改时间</label><input type="checkbox" name="logOrder[1]" value="updateTime" {if isset($option['logOrder']) && in_array('updateTime',$option['logOrder'])}checked{/if}></div>
+						<div class="me_input me_input_line"><label>智能权重</label><input type="checkbox" name="logOrder[2]" value="weight" {if isset($option['logOrder']) && in_array('weight',$option['logOrder'])}checked{/if}></div>
+						<p class="tips">除首页外的其他列表排序。排序顺序：智能权重>修改时间>创建时间</p>
+					
+				</div>
+				<div class="me_input big"><label>权重配比</label><textarea name="logWeight">{$option['logWeight']|default=''}</textarea><p class="tips">仅“智能权重”项勾选时生效，支持变量：views,comnum,upnum，格式：变量=权重数，一行一个</p></div>
 				<div class="me_input me_input_line"><label>启用分类别名</label><input type="checkbox" name="cateAlias" value="1" {if isset($option['cateAlias']) && $option['cateAlias'] == 1}checked{/if}></div>
 				<div class="me_input me_input_line"><label>启用文章别名</label><input type="checkbox" name="logAlias" value="1" {if isset($option['logAlias']) && $option['logAlias'] == 1}checked{/if}></div>
 				<div class="me_input me_input_line"><label>启用单页别名</label><input type="checkbox" name="pageAlias" value="1" {if isset($option['pageAlias']) && $option['pageAlias'] == 1}checked{/if}></div>
@@ -33,6 +44,19 @@
 				<div class="me_input me_input_line"><label>启用专题别名</label><input type="checkbox" name="specialAlias" value="1" {if isset($option['specialAlias']) && $option['specialAlias'] == 1}checked{/if}></div>
 			</div>
 			<div id="tab3" class="tab">
+				<div class="me_input me_input_line"><label>开启API</label><input type="checkbox" name="api_status" value="1" {if isset($option['api_status']) && $option['api_status'] == 1}checked{/if}></div>
+				<div class="me_input big"><label>API限流(分钟)</label><input type="text" name="api_max_req" value="{$option['api_max_req']|default=''}"><p class="tips">每分钟最大的请求次数，为空或者0时表示不限流，如果需要限流，请先下载并启用<a href="http://app.rpcms.cn/index/app.html?id=116" target="_blank">filecache插件</a></p></div>
+				<br>
+				<div class="me_input"><label>自动跳转</label><input type="checkbox" name="wap_auto" value="1" {if isset($option['wap_auto']) && $option['wap_auto'] == 1}checked{/if}><p class="tips" style="line-height: 2.4rem;">开启后，手机端用户访问将自动跳转到设置的二级域名</p></div>
+				<div class="me_input big"><label>手机端域名</label><input type="text" name="wap_domain" value="{$option['wap_domain']|default=''}"><p class="tips">手机端二级域名，如为m.xxx.com，则填写m</p></div>
+				<div class="me_input big"><label>手机端模板</label><select name="wap_template">
+					<option value="">选择手机端模板</option>
+				{foreach $tempList as $k=>$v}
+					<option value="{$v}" {php}echo $option['wap_template'] == $v ? 'selected' : '';{/php}>{$v}</option>
+				{/foreach}
+				</select><p class="tips" style="line-height: 2.4rem;">手机端模板名称，请确保填写的模板存在</p></div>
+			</div>
+			<div id="tab4" class="tab">
 				<div class="me_input me_input_line"><label>缩略图</label>
 					<input type="number" name="attImgWitch" value="{$option['attImgWitch']|default=''}" placeholder="缩略图宽度">
 					<span class="text" style="width: auto;background: transparent;">x</span>
@@ -48,14 +72,6 @@
 				</select></div>
 				<div class="me_input big"><label>每页显示数量</label><input type="number" name="commentPage" value="{$option['commentPage']|default=''}"></div>
 				<div class="me_input big"><label>评论间隔时间(秒)</label><input type="number" name="commentInterval" value="{$option['commentInterval']|default='0'}"></div>
-				<br/>
-				<div class="me_input"><label>自动跳转</label><input type="checkbox" name="wap_auto" value="1" {if isset($option['wap_auto']) && $option['wap_auto'] == 1}checked{/if}><p class="tips" style="line-height: 2.4rem;">开启后，手机端用户访问将自动跳转到设置的二级域名</p></div>
-				<div class="me_input big"><label>手机端域名</label><input type="text" name="wap_domain" value="{$option['wap_domain']|default=''}"><p class="tips">手机端二级域名，如为m.xxx.com，则填写m</p></div>
-				<div class="me_input big"><label>手机端模板</label><select name="wap_template">
-				{foreach $tempList as $k=>$v}
-					<option value="{$v}" {php}echo $option['wap_template'] == $v ? 'selected' : '';{/php}>{$v}</option>
-				{/foreach}
-				</select><p class="tips" style="line-height: 2.4rem;">手机端模板名称，请确保填写的模板存在</p></div>
 			</div>
 		</div>
 		<button type="sumbit" class="rp_btn success sendPost">保存设置</button>
@@ -77,6 +93,7 @@ $(document).ready(function(){
 				'commentCheck':0,
 				'commentCN':0,
 				'commentVcode':0,
+				'logOrder[0]':'id',
 			};
 		$.each(a, function(d,e){
 			param[e.name] = e.value;

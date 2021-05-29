@@ -69,6 +69,35 @@ class Base{
 		(new \rp\Captcha())->outImg($id);
 	}
 	
+	public function getLogOrder($orderAdd=array()){
+		$order=array();
+		if(in_array('id',$this->webConfig['logOrder'])){
+			$order['a.id']='desc';
+		}
+		if(in_array('updateTime',$this->webConfig['logOrder'])){
+			$order['a.upateTime']='desc';
+		}
+		if(in_array('weight',$this->webConfig['logOrder'])){
+			$logWeight=explode(PHP_EOL,$this->webConfig['logWeight']);
+			$logWeight=array_map(function($v){
+				list($sk, $sv)=explode('=',$v);
+				return array($sk=>$sv);
+			},$logWeight);
+			$logWeight=array_reduce($logWeight, 'array_merge', array());
+			$orderStr=array();
+			$orderStr[]=isset($logWeight['views']) ? 'views*'.$logWeight['views'] : '';
+			$orderStr[]=isset($logWeight['comnum']) ? 'comnum*'.$logWeight['comnum'] : '';
+			$orderStr[]=isset($logWeight['upnum']) ? 'upnum*'.$logWeight['upnum'] : '';
+			$orderStr=array_filter($orderStr);
+			if(!empty($orderStr)){
+				$order['('.join('+',$orderStr).')']='desc';
+			}
+		}
+		$order=array_merge($orderAdd,array_reverse($order));
+		Hook::doHook('index_logs_order',array(&$order));
+		return $order;
+	}
+	
 	protected function setKeywords($keyword=''){
 		if(!empty($keyword)){
 			$key=explode(',',$keyword);

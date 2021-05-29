@@ -101,6 +101,7 @@ function cookie($name,$value='',$expire=0,$path='/'){
 }
 
 function json($data=array()){
+	header('Content-Type: application/json; charset=utf-8');
 	echo json_encode($data);
 	exit;
 }
@@ -123,7 +124,7 @@ function strDeep($value){
 		$value=array_map('strDeep', $value);
 	}else{
 		$value=stripslashes(trim($value));
-		if(!get_magic_quotes_gpc()){
+		if(!function_exists('get_magic_quotes_gpc') || !get_magic_quotes_gpc()){
 			$value=addslashes($value);
 		}
 	}
@@ -318,7 +319,7 @@ function GetFilePermsOct($file){
 
 /*截取指定长度字符*/
 function getContentByLength($content, $strlen = 180){
-	$content = strip_tags($content);
+	$content = preg_replace('/\s/u','',strip_tags($content));
 	return subString($content, 0, $strlen);
 }
 
@@ -355,7 +356,7 @@ function formatDate($time,$level=7,$format='Y-m-d H:i:s'){
 
 
 /*标签关键字替换*/
-function content2keyword($content){
+function content2keyword($content,$limit=1){
 	$tages =rp\Cache::read('tages');
 	if(!is_array($tages) || empty($tages)){
 		return $content;
@@ -370,7 +371,7 @@ function content2keyword($content){
 	$content='<div>'. PHP_EOL .$content. PHP_EOL .'</div>';
 	foreach($tages as $val){
 		$tagurl = '<a title="'.$val['tagName'].'" href="'.rp\Url::tag($val['id']).'" target="_blank">'.$val['tagName'].'</a>';
-		$content = preg_replace('/('.$val['tagName'].')(?=[^<>]*<)/', $tagurl, $content);
+		$content = preg_replace('/('.$val['tagName'].')(?=[^<>]*<)/', $tagurl, $content, $limit);
 	}
 	$content=trim(ltrim(rtrim($content,'</div>'),'<div>'));
 	//$content=trim(rtrim(ltrim($content,'<div>'),'</div>'));
@@ -688,7 +689,21 @@ function me_createSpecialOption($specialId=''){
 	return $html;
 }
 
-
+function Debug_Shutdown_Handler(){
+	$error=error_get_last();
+	if(!empty($error)){
+		switch($error['type']){
+			case E_ERROR:
+			case E_PARSE:
+			case E_CORE_ERROR:
+			case E_COMPILE_ERROR:
+			case E_USER_ERROR:  
+				ob_end_clean();
+				Debug_Error_Handler($error['type'],$error['message'],$error['file'],$error['line']);
+				break;
+		}
+	}
+}
 function Debug_Error_Handler($errno, $errstr, $errfile, $errline){
 	if(!rp\Config::get('webConfig.isDevelop')){
 		$errfile=str_replace(CMSPATH,'',$errfile);
@@ -696,7 +711,7 @@ function Debug_Error_Handler($errno, $errstr, $errfile, $errline){
 	rpMsg($errstr.'<br>'.$errfile.'&nbsp;&nbsp;&nbsp;&nbsp;Line:  '.$errline);
 }
 function Debug_Exception_Handler($exception){
-	rpMsg($exception->getMessage());
+	rpMsg(rp\Config::get('webConfig.isDevelop') ? $exception->getMessage() : '未找到页面');
 }
 
 /**
@@ -741,7 +756,7 @@ function rpMsg($msg, $url = 'javascript:history.back(-1);', $isAuto = false){
 			\rp\View::assign('message',$msg);
 			\rp\View::assign('url',$url);
 			\rp\View::assign('isAuto',$isAuto);
-			echo \rp\View::display('/'.$App->indexTemp .'/404');
+			echo \rp\View::display('/404');
 			exit;
 		}
 		echo '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">

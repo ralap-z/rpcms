@@ -33,7 +33,7 @@ class Tags extends base{
 			rpMsg('当前标签不存在！');
 		}
 		$LogsMod=new LogsMod();
-		$logData=$LogsMod->page($page)->order(array('a.isTop'=>'desc','a.upateTime'=>'desc','a.id'=>'desc'))->tages($tagId)->select();
+		$logData=$LogsMod->page($page)->order($this->getLogOrder(array('a.isTop'=>'desc')))->tages($tagId)->select();
 		$title=$tages[$tagId]['tagName'];
 		$pageHtml=pageInationHome($logData['count'],$logData['limit'],$logData['page'],'tag',$tagId);
 		$template=!empty($tages[$tagId]['template']) ? $tages[$tagId]['template'] : 'list';

@@ -35,7 +35,7 @@ class Logs extends base{
 		if(empty($dateStr)){
 			rpMsg('当前栏目不存在！');
 		}
-		$logData=$this->LogsMod->page($page)->order(array('a.upateTime'=>'desc','a.id'=>'desc'));
+		$logData=$this->LogsMod->page($page)->order(array('a.createTime'=>'desc','a.id'=>'desc'));
 		if(strlen($dateStr) == 6){
 			$date2=date('Ym',strtotime($dateStr.'01'));
 			$logData=$logData->whereStr('DATE_FORMAT(a.createTime,"%Y%m") = "'.$date2.'"');
@@ -59,15 +59,14 @@ class Logs extends base{
 	
 	public function search(){
 		if(Hook::hasHook('index_search')){
-			$data='';
-			return Hook::doHook('index_search',$data,true)[0];
+			return Hook::doHook('index_search',array(),true)[0];
 		}
 		$key=input('q');
 		$page=intval(input('page')) ? intval(input('page')) : 1;
 		if(empty($key)){
 			redirect($this->App->baseUrl);
 		}
-		$logData=$this->LogsMod->search($key)->page($page)->order(array('a.upateTime'=>'desc','a.id'=>'desc'))->select();
+		$logData=$this->LogsMod->search($key)->page($page)->select();
 		$pageHtml=pageInationHome($logData['count'],$logData['limit'],$logData['page'],'search',$key);
 		$key2='搜索 '.$key;
 		$this->setKeywords();
@@ -87,7 +86,7 @@ class Logs extends base{
 			$logId=intval($dateStr);
 		}else{
 			$logAlias2=array_flip($logAlias);
-			$logId=isset($logAlias2[$dateStr]) ? $logAlias2[$dateStr] : '';
+			$logId=isset($logAlias2[$dateStr]) ? intval($logAlias2[$dateStr]) : 0;
 		}
 		$data=Db::name('logs')->where('id='.$logId)->find();
 		if(empty($logId) || empty($data)){
@@ -124,7 +123,7 @@ class Logs extends base{
 		$data['author']=$user[$data['authorId']]['nickname'];
 		$data['authorUrl']=Url::other('author',$data['authorId']);
 		$data['extend'] =json_decode($data['extend'],true);
-		Hook::doHook('index_logs_detail',$data);
+		Hook::doHook('index_logs_detail',array(&$data));
 		if(!empty($data['template'])){
 			$template=$data['template'];
 		}elseif(!empty($category[$data['cateId']]['temp_logs'])){

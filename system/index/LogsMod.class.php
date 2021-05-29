@@ -21,6 +21,7 @@ class LogsMod{
 		$this->limit=!empty(Config::get('webConfig.pagesize')) ? Config::get('webConfig.pagesize') : 10;
 		$this->tagesData=Cache::read('tages');
 		$this->cateData=Cache::read('category');
+		$this->order=(new \rp\index\Base())->getLogOrder();
 	}
 	
 	public function cate($ids){
@@ -115,7 +116,7 @@ class LogsMod{
 		$list=Db::name('logs')->alias('a')->join(array(
 			array('category b','a.cateId=b.id','left'),
 			array('user c','a.authorId=c.id','left'),
-		))->where($this->whereArr)->where($this->whereStr)->field('a.id,a.title,a.authorId,a.cateId,a.excerpt,a.keywords,a.content,a.tages,a.isTop,a.views,a.comnum,a.upnum,a.upateTime,a.createTime,a.extend,a.status,b.cate_name as cateName,c.nickname as author')->limit(($this->page-1)*$this->limit.','.$this->limit)->order($this->order)->select();
+		))->where($this->whereArr)->where($this->whereStr)->field('a.id,a.title,a.authorId,a.cateId,a.excerpt,a.keywords,a.content,a.tages,a.isTop,a.views,a.comnum,a.upnum,a.upateTime,a.createTime,a.extend,a.status,b.cate_name as cateName,c.nickname as author,c.email as authorEmail')->limit(($this->page-1)*$this->limit.','.$this->limit)->order($this->order)->select();
 		foreach($list as $k=>$v){
 			$list[$k]['extend'] =json_decode($v['extend'],true);
 			$list[$k]['url'] = Url::logs($v['id']);
@@ -123,7 +124,7 @@ class LogsMod{
 			$list[$k]['cateLogNum'] = isset($this->cateData[$v['cateId']]) ? $this->cateData[$v['cateId']]['logNum'] : 0;
 			$list[$k]['tagesData'] = $this->getTages($v['tages']);
 		}
-		Hook::doHook('index_logs_list',$list);
+		Hook::doHook('index_logs_list',array(&$list));
 		return array('count'=>$count,'limit'=>$this->limit,'page'=>$this->page,'list'=>$list);
 	}
 	
@@ -142,6 +143,8 @@ class LogsMod{
 			$prev['cateUrl'] = Url::cate($prev['cateId']);
 			$prev['cateLogNum'] = isset($this->cateData[$prev['cateId']]) ? $this->cateData[$prev['cateId']]['logNum'] : 0;
 			$prev['tagesData'] = $this->getTages($prev['tages']);
+		}else{
+			$prev=array();
 		}
 		if(!empty($next)){
 			$next['url']=Url::logs($next['id']);
@@ -149,9 +152,11 @@ class LogsMod{
 			$next['cateUrl'] = Url::cate($next['cateId']);
 			$next['cateLogNum'] = isset($this->cateData[$next['cateId']]) ? $this->cateData[$next['cateId']]['logNum'] : 0;
 			$next['tagesData'] = $this->getTages($next['tages']);
+		}else{
+			$next=array();
 		}
-		Hook::doHook('index_logs_detail',$prev);
-		Hook::doHook('index_logs_detail',$next);
+		Hook::doHook('index_logs_detail',array(&$prev));
+		Hook::doHook('index_logs_detail',array(&$next));
 		return array('prev'=>$prev,'next'=>$next);
 	}
 	
@@ -164,8 +169,8 @@ class LogsMod{
 	public function related($logData=array(),$type='cate',$limit=10){
 		$this->whereArr=array('a.status'=>0);
 		$this->whereStr='';
-		if($type == 'tages'){
-			$this->whereArr['a.tages']=array('in',arrayIdFilter($logData['tages']));
+		if($type == 'tages' && !empty($logData['tages'])){
+			$this->whereArr['a.tages']=array('in',arrayIdFilter(array_column($logData['tages'],'id')));
 		}else{
 			$this->whereArr['a.cateId']=intval($logData['cateId']);
 		}
@@ -182,7 +187,7 @@ class LogsMod{
 			$list[$k]['cateLogNum'] = isset($this->cateData[$v['cateId']]) ? $this->cateData[$v['cateId']]['logNum'] : 0;
 			$list[$k]['tagesData'] = $this->getTages($v['tages']);
 		}
-		Hook::doHook('index_logs_list',$list);
+		Hook::doHook('index_logs_list',array(&$list));
 		return $list;
 	}
 }

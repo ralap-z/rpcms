@@ -98,7 +98,7 @@ function related($data,$type='cate',$limit=10){
 /*友情链接*/
 function links(){
 	$links=Cache::read('links');
-	$linksHtml='<ul class="links"><li>友情链接：</li>';
+	$linksHtml='<ul class="links">';
 	foreach($links as $k=>$v){
 		$linksHtml.='<li><a href="'.$v['siteurl'].'" target="_blank" title="'.$v['sitedesc'].'">'.$v['sitename'].'</a></li>';
 	}

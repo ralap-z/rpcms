@@ -58,33 +58,33 @@ class CommentMod{
 	}
 	
 	public function select(){
-		$count=Db::name('comment')->alias('a')->where($this->whereArr)->field('a.id')->count();
-		/*
-		$pages = ceil($count / $this->limit);
-        if($this->page >= $pages && $pages > 0){
-            $this->page = $pages;
-        }
-		*/
-		$list=Db::name('comment')->alias('a')->where($this->whereArr)->field('a.*')->order($this->order)->select();
-		$list=array_column($list,NULL,'id');
-		$commentTopAll=array();
-		foreach($list as $k=>$v){
-			$list[$k]['nickname'] = strip_tags($v['nickname']);
-			$list[$k]['email'] = htmlspecialchars($v['email']);
-			$list[$k]['home'] = htmlspecialchars($v['home']);
-			$list[$k]['content'] = strip_tags($v['content']);
-			!isset($list[$k]['children']) && $list[$k]['children']=array();
-			$v['topId'] == 0 && $commentTopAll[]=$v['id'];
-			$v['topId'] != 0 && isset($list[$v['topId']]) && $list[$v['topId']]['children'][]=$v['id'];
+		$count=Db::name('comment')->alias('a')->where($this->whereArr)->where(array('a.topId'=>0))->field('a.id')->count();
+		$commentTop=Db::name('comment')->alias('a')->where($this->whereArr)->where(array('a.topId'=>0))->field('a.id')->limit(($this->page-1)*$this->limit.','.$this->limit)->order($this->order)->select();
+		$commentTop=array_column($commentTop,'id');
+		$list=array();
+		if(!empty($commentTop)){
+			$commentSon=$this->getSon($commentTop);
+			$list=Db::name('comment')->alias('a')->where($this->whereArr)->where(array('a.id'=>array('in',join(',',array_merge($commentTop,$commentSon)))))->field('a.*')->order($this->order)->select();
+			$list=array_column($list,NULL,'id');
+			foreach($list as $k=>$v){
+				$list[$k]['nickname'] = strip_tags($v['nickname']);
+				$list[$k]['email'] = htmlspecialchars($v['email']);
+				$list[$k]['home'] = htmlspecialchars($v['home']);
+				$list[$k]['content'] = strip_tags($v['content']);
+				!isset($list[$k]['children']) && $list[$k]['children']=array();
+				$v['topId'] != 0 && isset($list[$v['topId']]) && $list[$v['topId']]['children'][]=$v['id'];
+			}
 		}
-		if(Config::get('webConfig.commentSort') == 'old'){
-			$list=array_reverse($list,true);
-			$commentTopAll=array_reverse($commentTopAll);
-		}
-		
-		$commentTop = array_slice($commentTopAll, ($this->page - 1) * $this->limit, $this->limit);
-		return array('count'=>count($commentTopAll),'limit'=>$this->limit,'page'=>$this->page,'list'=>array('lists'=>$list,'top'=>$commentTop));
+		return array('count'=>$count,'limit'=>$this->limit,'page'=>$this->page,'list'=>array('lists'=>$list,'top'=>$commentTop));
 	}
 	
-	
+	private function getSon($ids,$sonList=array()){
+		$son=Db::name('comment')->alias('a')->where($this->whereArr)->where(array('a.topId'=>array('in',join(',',$ids))))->field('a.id')->select();
+		if(!empty($son)){
+			$son=array_column($son,'id');
+			$sonList=array_merge($sonList,$son);
+			return $this->getSon($son,$sonList);
+		}
+		return $sonList;
+	}
 }

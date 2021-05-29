@@ -28,7 +28,7 @@ class Author extends base{
 			rpMsg('当前作者不存在！');
 		}
 		$LogsMod=new LogsMod();
-		$logData=$LogsMod->page($page)->order(array('a.isTop'=>'desc','a.upateTime'=>'desc','a.id'=>'desc'))->author($userId)->select();
+		$logData=$LogsMod->page($page)->order($this->getLogOrder(array('a.isTop'=>'desc')))->author($userId)->select();
 		$title=$user[$userId]['nickname'];
 		$pageHtml=pageInationHome($logData['count'],$logData['limit'],$logData['page'],'author',$userId);
 		$this->setKeywords();

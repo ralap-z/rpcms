@@ -46,7 +46,7 @@ class Pages extends base{
 		$data['author']=$user[$data['authorId']]['nickname'];
 		$data['authorUrl']=Url::other('author',$data['authorId']);
 		$data['extend'] =json_decode($data['extend'],true);
-		Hook::doHook('index_logs_detail',$data);
+		Hook::doHook('index_logs_detail',array(&$data));
 		$template=!empty($pages[$pageId]['template']) ? $pages[$pageId]['template'] : 'page';
 		$CommentData=(new Comment())->getListByPages($pageId);
 		$this->setKeywords($pages[$pageId]['seo_key']);

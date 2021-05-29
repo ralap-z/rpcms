@@ -13,6 +13,8 @@ class Logs extends Base{
 	
 	public function index(){
 		$key=input('key') ? input('key') : '';
+		$sort=input('sort') ? input('sort') : '';
+		$order=input('order') ? input('order') : '';
 		$cateId=intval(input('cateId')) ? intval(input('cateId')) : '';
 		$authorId=intval(input('authorId')) ? intval(input('authorId')) : '';
 		$tagId=intval(input('tagId')) ? intval(input('tagId')) : '';
@@ -41,6 +43,15 @@ class Logs extends Base{
 			$where['a.status']=$status;
 			$search[]="status=".$status;
 		}
+		$orderBy=array('a.isTop'=>'desc','a.id'=>'desc');
+		if(!empty($sort) && !empty($order)){
+			$search[]="sort=".$sort;
+			$search[]="order=".$order;
+			$orderBy=array(
+				'a.'.$sort=>$order,
+				'a.id'=>'desc',
+			);
+		}
 		$count=Db::name('logs')->alias('a')->where($where)->field('a.id')->count();
 		$pages = ceil($count / $limit);
         if($page >= $pages && $pages > 0){
@@ -49,7 +60,7 @@ class Logs extends Base{
 		$res=Db::name('logs')->alias('a')->join(array(
 			array('category b','a.cateId=b.id','left'),
 			array('user c','a.authorId=c.id','left'),
-		))->where($where)->field('a.id,a.title,a.comnum,a.upnum,a.views,a.isTop,a.createTime,a.status,b.cate_name,c.nickname')->order(array('a.isTop'=>'desc','a.id'=>'desc'))->limit(($page-1)*$limit.','.$limit)->select();
+		))->where($where)->field('a.id,a.title,a.comnum,a.upnum,a.views,a.isTop,a.createTime,a.status,b.cate_name,c.nickname')->order($orderBy)->limit(($page-1)*$limit.','.$limit)->select();
 		$pageHtml=pageInation($count,$limit,$page,'',join('&',$search));
 		View::assign('categoryHtml',me_createCateOption($cateId));
 		View::assign('authorHtml',me_createAuthorOption($authorId));
@@ -57,8 +68,9 @@ class Logs extends Base{
 		View::assign('list',$res);
 		View::assign('s_status',$status);
 		View::assign('s_key',$key);
+		View::assign('s_sort',$sort);
+		View::assign('s_order',$order);
 		View::assign('pageHtml',$pageHtml);
-		
 		return View::display('/logs_index');
 	}
 	
@@ -79,11 +91,11 @@ class Logs extends Base{
 	
 	public function update(){
 		$id=intval(input('id')) ? intval(input('id')) : 0;
-		if(empty($id)){
+		$logData=Db::name('logs')->where('id='.$id)->find();
+		if(empty($logData)){
 			redirect(url('logs/add'));
 		}
 		$tages=Cache::read('tages');
-		$logData=Db::name('logs')->where('id='.$id)->find();
 		$tagName=array();
 		$tagArr=explode(',',$logData['tages']);
 		foreach($tagArr as $v){
@@ -114,7 +126,7 @@ class Logs extends Base{
 			return json(array('code'=>-1, 'msg'=>'正文不能为空'));
 		}
 		$logid=intval($param['logid']);
-		$data['excerpt']=!empty(strip_tags($param['excerpt'])) ? strip_tags($param['excerpt']) : getContentByLength($param['content']);
+		$data['excerpt']=!empty(strip_tags($param['excerpt'])) ? preg_replace('/\s/u','',strip_tags($param['excerpt'])) : getContentByLength($param['content']);
 		$data['keywords']=str_replace('，',',',strip_tags($param['keywords']));
 		$data['cateId']=intval($param['cateId']);
 		$data['authorId']=intval($param['authorId']);
@@ -143,7 +155,6 @@ class Logs extends Base{
 			if(!empty($data['alias']) && ($key && $key != $logid)){
 				return json(array('code'=>-1, 'msg'=>'别名重复，请更换别名'));
 			}
-			$data['upateTime']=date('Y-m-d H:i:s');
 			$res=Db::name('logs')->where('id='.$logid)->update($data);
 		}else{
 			if(!empty($data['alias']) && array_search($data['alias'],$logAlias)){
@@ -157,7 +168,7 @@ class Logs extends Base{
 		if($param['type'] != 2){
 			$this->updateCache();
 		}
-		Hook::doHook('admin_logs_save',$logid);
+		Hook::doHook('admin_logs_save',array($logid));
 		return json(array('code'=>200,'msg'=>$msg,'data'=>$logid));
 	}
 	
@@ -198,7 +209,7 @@ class Logs extends Base{
 		$res2=Db::name('attachment')->where(array('logId'=>array('in',$ids)))->dele();//删除附件
 		$res2=Db::name('comment')->where(array('logId'=>array('in',$ids)))->dele();//删除评论
 		$this->updateCache();
-		Hook::doHook('admin_logs_dele',$ids);
+		Hook::doHook('admin_logs_dele',array($ids));
 		return json(array('code'=>200,'msg'=>'删除成功'));
 	}
 	
@@ -227,7 +238,7 @@ class Logs extends Base{
 		$value = !empty($value) ? $value : 0;
 		$res=Db::name('logs')->where(array('id'=>array('in',$ids)))->update(array('status'=>$value));
 		$this->updateCache();
-		Hook::doHook('admin_logs_status',$ids);
+		Hook::doHook('admin_logs_status',array($ids));
 		return json(array('code'=>200,'msg'=>'状态设置成功'));
 	}
 	
@@ -259,6 +270,4 @@ class Logs extends Base{
 		Cache::update('logRecord');
 		Cache::update('logAlias');
 	}
-	
-	
 }

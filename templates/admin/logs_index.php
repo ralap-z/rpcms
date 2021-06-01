@@ -2,6 +2,8 @@
 {include:/header}
 <style>
 .rp_row .me_input_line{margin-bottom:0;}
+.order{margin-left: 5px;font-weight: bold;color: #ccc;cursor: pointer;}
+.order.active{color: #1fbae8;}
 </style>
 <div class="subMenu">
 	{hook:admin_logs_submenu_hook}
@@ -42,11 +44,11 @@
 	<table class="me_table">
 		<colgroup>
 			<col width="5%">
-			<col width="10%">
+			<col width="6%">
 			<col width="35%">
 			<col width="10%">
 			<col width="10%">
-			<col width="8%">
+			<col width="11%">
 			<col width="8%">
 			<col>
 		</colgroup>
@@ -56,8 +58,8 @@
 				<th>标题</th>
 				<th>分类</th>
 				<th>作者</th>
-				<th>评论/点赞</th>
-				<th>阅读</th>
+				<th>评论<i class="me-icon order {$s_sort == 'comnum' ? 'active' : ''} {$s_sort == 'comnum' && $s_order == 'asc' ? 'me-icon-up' : 'me-icon-down'}" data-sort="comnum" data-order="{$s_order|default='desc'}"></i>/点赞<i class="me-icon order {$s_sort == 'upnum' ? 'active' : ''} {$s_sort == 'upnum' && $s_order == 'asc' ? 'me-icon-up' : 'me-icon-down'}" data-sort="upnum" data-order="{$s_order|default='desc'}"></i></th>
+				<th>阅读<i class="me-icon order {$s_sort == 'views' ? 'active' : ''} {$s_sort == 'views' && $s_order == 'asc' ? 'me-icon-up' : 'me-icon-down'}" data-sort="views" data-order="{$s_order|default='desc'}"></i></th>
 				<th>时间</th>
 			</tr> 
 		</thead>
@@ -124,6 +126,28 @@ $(document).ready(function(){
 	},function(){
 		$(".ids").prop("checked", false);
 	});
+	$(".order").click(function(){
+		var sort=$(this).data("sort"),
+			order=$(this).data("order"),
+			url=window.location.href,
+			reSort = new RegExp("([?&])sort=.*?(&|$)", "i"),
+			reOrder = new RegExp("([?&])order=.*?(&|$)", "i");
+		if($(this).hasClass("active")){
+			order=order=='asc' ? 'desc' : 'asc';
+			$(this).data('order',order);
+		}
+		if(url.match(reSort)){
+			url=url.replace(reSort, "$1sort="+sort+"$2");
+		}else{
+			url+=(url.indexOf('?') !== -1 ? "&" : "?")+"sort="+sort;
+		}
+		if(url.match(reOrder)){
+			url=url.replace(reOrder, "$1order="+order+"$2");
+		}else{
+			url+=(url.indexOf('?') !== -1 ? "&" : "?")+"order="+order;
+		}
+		window.location.href=url;
+	})
 })
 
 function logOper(type){

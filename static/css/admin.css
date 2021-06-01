@@ -122,8 +122,8 @@ img{display: inline-block;vertical-align: middle;border: none;}
 .totalBox{flex-wrap: wrap;background: #fff;padding: 1rem;}
 .totalBox li{width: 25%;height: 2rem;line-height: 2;}
 .totalBox li label{margin-right: 1rem;color: #666;}
-.cacheUpdate,.cmsUpdate{background: #fff;margin-top: 1rem;}
-.cacheUpdate .title,.cmsUpdate .title{padding: 1rem;font-weight: bold;}
+.cacheUpdate,.cmsUpdate,.adminMsg{background: #fff;margin-top: 1rem;}
+.cacheUpdate .title,.cmsUpdate .title,.adminMsg .title{padding: 1rem;font-weight: bold;}
 .cacheUpdate .contents{padding: 0 1rem 1rem;flex-flow: wrap;}
 .cacheUpdate .contents li{padding: 0.5rem 1rem;width: 13rem;}
 .cacheUpdate .contents button{}
@@ -169,16 +169,16 @@ img{display: inline-block;vertical-align: middle;border: none;}
 .me_anim_bounce{-webkit-animation-name: me_bounceIn;animation-name: me_bounceIn}
 .me_anim_fade{-webkit-animation-name: me_fadeIn;animation-name: me_fadeIn}
 
-
-
-
-
-
-
-
 .me_list{}
 .me_list dd,.me_list li{line-height: 2.2rem;}
 .me_list dd:after,.me_list li:after{content:'';display:block;height:0;clear:both;}
 .me_list dd{background: #808080;color: #f3f3f3;}
 .me_list span{display: block;float: left;text-align: center;overflow: hidden;text-overflow: ellipsis;word-break: break-all;}
 .me_list li:hover{background: #eafaff;}
+
+.adminMsg_list{padding-bottom: 1rem;}
+.adminMsg_list li{padding: 0.25rem 1rem;}
+.adminMsg_list li a{color: inherit;}
+.adminMsg_list li a:hover{color: #1fbae8;text-decoration: underline;}
+.adminMsg_list li a.c{color: #f40;font-weight: bold;}
+.adminMsg_list li img{height: 60px;}

@@ -23,6 +23,7 @@ class Temp extends Base{
 		$tempDefault=Db::name('config')->where('cname = "template"')->field('cvalue')->find();
 		View::assign('list',$temp);
 		View::assign('tempDefault',$tempDefault['cvalue']);
+		View::assign('wapTemp',Config::get('webConfig.wap_template'));
 		return View::display('/temp_index');
 	}
 	
@@ -53,6 +54,10 @@ class Temp extends Base{
 			if(file_exists($default)){
 				View::assign('settingFile',$settingFile);
 				View::update('/temp_setting');
+			}
+			$cashFiles=CMSPATH .'/data/cache/plugin';
+			if(file_exists($cashFiles)){
+				deleteFile($cashFiles);
 			}
 			return json(array('code'=>200,'msg'=>'模板切换成功'));
 		}
@@ -95,12 +100,19 @@ class Temp extends Base{
 		if($sendpost == 1){
 			$data=input('post.');
 			unset($data['sendpost']);
+			$default=TMPPATH . '/index/'.$temp . '/default.php';
+			$defaultArr=array();
+			if(file_exists($default)){
+				$defaultArr=include_once $default;
+			}
+			$data=array_merge($defaultArr,$data);
 			if($cfg){
 				$res=Db::name('config')->where('cname = "temp_'.$temp.'"')->update(array('cvalue'=>addslashes(json_encode($data))));
 			}else{
 				$res=Db::name('config')->insert(array('cname' => 'temp_'.$temp,'cvalue'=>addslashes(json_encode($data))));
 			}
-			Cache::update($temp == $wapTemp ? 'waptemplate' : 'template');
+			Cache::update('template');
+			Cache::update('waptemplate');
 			$referer=!empty($this->App->server('REQUEST_URI')) ? $this->App->server('REQUEST_URI') : $this->App->server('HTTP_REFERER');
 			redirect($referer);
 		}else{

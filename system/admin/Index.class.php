@@ -55,6 +55,7 @@ class Index extends Base{
 			$updata['password']=psw($password);
 		}
 		if($res=Db::name('user')->where('id='.$this->user['id'])->update($updata)){
+			Cache::update('user');
 			return json(array('code'=>200,'msg'=>'修改成功','data'=>!empty($password) ? 1 : 0));
 		}
 		return json(array('code'=>-1,'msg'=>'修改失败，请稍后重试'));

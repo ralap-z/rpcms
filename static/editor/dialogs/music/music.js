@@ -23,6 +23,14 @@ function Music() {
             domUtils.on($G("J_searchBtn"), "click", function () {
                 me.dosearch();
             });
+			(function(){
+				var music = editor.selection.getRange().getClosedNode(),url;
+				if(music && music.className){
+					if(music.className == "edui-faked-music") {
+						$G("songurl").value = url = music.getAttribute("_url");
+					}
+				}
+			})();
         },
         callback:function (data) {
             var me = this;

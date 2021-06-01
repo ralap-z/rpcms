@@ -95,7 +95,7 @@ class Pages extends Base{
 		}
 		Cache::update('pages');
 		Cache::update('total');
-		Hook::doHook('admin_pages_save',$pageId);
+		Hook::doHook('admin_pages_save',array($pageId));
 		return json(array('code'=>200,'msg'=>(empty($pageId) ? '添加成功' : '修改成功'),'data'=>$pageId));
 	}
 	
@@ -112,7 +112,7 @@ class Pages extends Base{
 		$res=Db::name('pages')->where(array('id'=>array('in',$idsArr)))->dele();
 		Cache::update('pages');
 		Cache::update('total');
-		Hook::doHook('admin_pages_dele',$idsArr);
+		Hook::doHook('admin_pages_dele',array($idsArr));
 		return json(array('code'=>200,'msg'=>'删除成功'));
 	}
 	

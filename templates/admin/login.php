@@ -33,6 +33,9 @@
 	<script>
 		var base='{:url("index")}';
 		$(document).ready(function(){
+			$(".username,.password").keyup(function(e){
+				e.which==13 && $(".loginBtn").click();
+			});
 			$('.loginBtn').click(function(){
 				var param={
 					'username':$.trim($('.username').val()),

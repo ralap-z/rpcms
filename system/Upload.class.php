@@ -47,7 +47,7 @@ class Upload{
 			if($isThumb && in_array($this->fileTypes, array('.jpg','.jpeg','.png','.gif','.bmp'))){
 				$this->createThumbnail($this->filePath);
 			}
-			Hook::doHook('admin_attach_upload',$this->filePath);
+			Hook::doHook('admin_attach_upload',array($this->filePath));
             return array('code'=>200, 'msg'=>'SUCCESS', 'data'=>$this->fullName);
         }
     }
@@ -62,13 +62,10 @@ class Upload{
 			if($isThumb && in_array($this->fileTypes, array('.jpg','.jpeg','.png','.gif','.bmp'))){
 				$this->createThumbnail($this->filePath);
 			}
-			Hook::doHook('admin_attach_upload',$this->filePath);
+			Hook::doHook('admin_attach_upload',array($this->filePath));
             return array('code'=>200, 'msg'=>'SUCCESS', 'data'=>$this->fullName);
         }
 	}
-	
-	
-	
 	
 	/*保存附件信息到数据库*/
 	public function saveAttr(){

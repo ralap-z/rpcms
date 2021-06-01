@@ -92,7 +92,8 @@ class Cache{
 			array('(select authorId,count(*) as logNum FROM '.$this->prefix.'logs where status =0 group by authorId) b','a.id=b.authorId','left'),
 			array('(select authorId,count(*) as pageNum FROM '.$this->prefix.'pages where status =0 group by authorId) c','a.id=c.authorId','left'),
 			array('(select authorId,count(*) as commentNum FROM '.$this->prefix.'comment where status =0 group by authorId) d','a.id=d.authorId','left'),
-		))->where('a.status = 0')->field('a.id,a.username,a.nickname,a.role,a.status,b.logNum,c.pageNum,d.commentNum')->select();
+			array('(select userId,count(*) as commentPostNum FROM '.$this->prefix.'comment where status =0 group by userId) e','a.id=e.userId','left'),
+		))->where('a.status = 0')->field('a.id,a.username,a.nickname,a.role,a.status,IFNULL(b.logNum,0) as logNum,IFNULL(c.pageNum,0) as pageNum,IFNULL(d.commentNum,0) as commentNum,IFNULL(e.commentPostNum,0) as commentPostNum')->select();
 		$user=array_column($user,NULL,'id');
 		$this->cacheWrite(json_encode($user), 'user');
 	}
@@ -202,7 +203,7 @@ class Cache{
 	/*分类缓存*/
 	private function me_category() {
         $cate_cache = array();
-		$category=Db::name('category')->alias('a')->join('(select cateId,count(*) as logNum FROM '.$this->prefix.'logs where status =0 group by cateId) b','a.id=b.cateId','left')->order(array('a.topId'=>'asc','a.sort'=>'ASC'))->field('a.*,b.logNum')->select();
+		$category=Db::name('category')->alias('a')->join('(select cateId,count(*) as logNum FROM '.$this->prefix.'logs where status =0 group by cateId) b','a.id=b.cateId','left')->order(array('a.topId'=>'asc','a.sort'=>'ASC'))->field('a.*,IFNULL(b.logNum,0) as logNum')->select();
 		foreach($category as $k=>$v){
 			$cate_cache[$v['id']]=$v;
 			$cate_cache[$v['id']]['children']=array();
@@ -215,7 +216,7 @@ class Cache{
 	
 	/*专题缓存*/
 	private function me_special() {
-		$special=Db::name('special')->alias('a')->join('(select specialId,count(*) as logNum FROM '.$this->prefix.'logs where status =0 group by specialId) b','a.id=b.specialId','left')->field('a.*,b.logNum')->select();
+		$special=Db::name('special')->alias('a')->join('(select specialId,count(*) as logNum FROM '.$this->prefix.'logs where status =0 group by specialId) b','a.id=b.specialId','left')->field('a.*,IFNULL(b.logNum,0) as logNum')->select();
 		$special = array_column($special,NULL,'id');
         $this->cacheWrite(json_encode($special), 'special');
     }

@@ -1,0 +1,18 @@
+<?php
+namespace rp\api;
+
+use rp\Cache;
+use rp\Url;
+
+class Nav extends Base{
+	
+	public function __construct(){
+		parent::__construct();
+	}
+	
+	public function getList(){
+		$this->response(Cache::read('nav'));
+	}
+	
+	
+}

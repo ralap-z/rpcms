@@ -74,7 +74,7 @@
 				"<div class='me_input'><label>数据库名称</label><input type='text' name='dbname' class='dbname' value=''></div>",
 				"<div class='me_input'><label>数据表前缀</label><input type='text' name='tablepre' class='tablepre' value='rp_'></div>",
 				"<p class='group_title'>管理员信息</p>",
-				"<div class='me_input'><label>自定义地址</label><input type='text' name='diyname' class='diyname' value=''><span class='tips'>自定义的后台访问地址，为空则默认为admin</span></div>",
+				"<div class='me_input'><label>自定义地址</label><input type='text' name='diyname' class='diyname' value='admin'><span class='tips'>自定义的后台访问地址，为空则默认为admin</span></div>",
 				"<div class='me_input'><label>管理员名称</label><input type='text' name='username' class='username' value=''></div>",
 				"<div class='me_input'><label>管理员密码</label><input type='text' name='userpsw' class='userpsw' value=''></div>",
 			].join(''));

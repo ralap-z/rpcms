@@ -66,7 +66,7 @@ class Upgrade extends Base{
 		}else{
 			$filePath=CMSPATH.'/'.$file;
 			$fileDir=dirname($filePath);
-			if(!file_exists($fileDir) && !mkdir($dir2, 0777, true)){
+			if(!file_exists($fileDir) && !mkdir($fileDir, 0777, true)){
 				return array('code'=>-1, 'msg'=>'写入权限不足，无法正常升级');
 			}
 			if(file_put_contents($filePath,base64_decode($resArr['data']))){

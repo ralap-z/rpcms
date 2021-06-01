@@ -76,7 +76,7 @@ class View{
 		if(isset($App->indexTemp) && !empty($App->indexTemp)){
 			$tempDir=TMPPATH .'/index/'. $App->indexTemp .'/'. $temp. '.php';
 		}else{
-			$tempDir=TMPPATH .'/'.$App->route['module']. $temp. '.php';
+			$tempDir=TMPPATH .'/'.$App->route['module'].'/'. $temp. '.php';
 		}
 		return is_file($tempDir);
 	}
@@ -156,11 +156,7 @@ class View{
 			if(0 !== strpos($temp, '/')){
 				$temp='/'.$App->route['controller'] .'/'. $temp;
 			}
-<<<<<<< HEAD
-			if($App->route['module'] == 'plugin'){
-=======
-			if(in_array($App->route['module'],array('index','plugin','api')) || !is_dir(LIBPATH .'/'. $App->route['module']) || (file_exists(CMSPATH .'/data/install.lock') && $App->route['module'] == 'install')){
->>>>>>> 2b2a8a3 (V1.7)
+			if($App->route['module'] == 'plugin' || $temp == '/404'){
 				$temp='index/'.$App->indexTemp. $temp. '.php';
 			}else{
 				$temp=$App->route['module']. $temp. '.php';
@@ -232,7 +228,7 @@ class View{
         $content = preg_replace_callback('/\{:([a-zA-Z0-9_]+?)\((.*?)\)\}/', array($this, 'parse_funtion_do'), $content);
     }
 	private function parse_hook(&$content){
-		$content = preg_replace('/\{hook:([^\}]+)\(([^\}]+)\)\}/', '{php}foreach(\rp\Hook::doHook(\'\\1\',\\2) as $hk=>$hv){echo $hv;}{/php}', $content);
+		$content = preg_replace('/\{hook:([^\}]+)\(([^\}]+)\)\}/', '{php}$hookAegs=array(\\2);foreach(\rp\Hook::doHook(\'\\1\',$hookAegs) as $hk=>$hv){echo $hv;}unset($hookAegs);{/php}', $content);
 		$content = preg_replace('/\{hook:([^\}]+)\}/', '{php}foreach(\rp\Hook::doHook(\'\\1\') as $hk=>$hv){echo $hv;}{/php}', $content);
 	}
 	private function parse_if(&$content){

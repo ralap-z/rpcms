@@ -24,7 +24,7 @@ return array(
 	),
 	array(
 		'model'=>'index/rss/index',
-		'pattern'=>'|^rss(/\w+)?/?$|',
+		'pattern'=>'|^sitemap(/\w+)?/?$|',
 	),
 	array(
 		'model'=>'index/author/index',

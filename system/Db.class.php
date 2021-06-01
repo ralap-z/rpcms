@@ -107,7 +107,7 @@ class Db{
 					$k='('.$k.')';
 				}
 				$kn=explode('#',str_replace(array('&','|','(',')'),array('#','#','',''),$k));
-				$kn = array_map(function($item){return '/'.$item.'/';}, $kn);
+				$kn = array_map(function($item){return '/\b'.trim($item).'\b/';}, $kn);
 				$k=str_replace(array('&','|'),array(' and ',' or '),$k);
 				if(is_array($v)){
 					$v=count($v) == count($v,1) ? $this->parseItem($v) : array_map(array($this,'buildValue'), $v);
@@ -185,7 +185,7 @@ class Db{
 				$strs[]=$k." ".$v;
 			}
 			$order=join(" , ",$strs);
-			$this->order=" order by ".$order;
+			!empty($order) && $this->order=" order by ".$order;
 		}else{
 			!empty($order) && $this->order=" order by ".$order." ".$by;
 		}

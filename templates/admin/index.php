@@ -29,9 +29,21 @@
 		<div class="title">系统升级<button type="button" class="rp_btn checkUpgrade" style="margin-left: 1rem;">检测更新</button></div>
 		<div class="contents" style="padding-bottom: 1rem;"></div>
 	</div>
-	
+	<div class="adminMsg">
+		<div class="title">最新动态</div>
+		<ul class="contents adminMsg_list"></ul>
+	</div>
 	<script>
+		function getAdminMsg(){
+			$.getJSON("http://www.rpcms.cn/upgrade/message?v={RP.RPCMS_VERSION}", function(res){
+				$(".adminMsg_list").html("");
+				$.each(res.data, function(i, item){
+					$(".adminMsg_list").append('<li>'+(item.type == 'img' ? '<a href="'+item.url+'" target="_blank"><img src="'+item.title+'"/></a>' : '<a href="'+item.url+'" target="_blank" class="'+(item.class == 1 ? 'c' : '')+'">'+item.title+'</a>')+'</li>');
+				});
+			});
+		}
 		$(document).ready(function(){
+			getAdminMsg();
 			$(".cacheUpdate button.rp_btn").click(function(){
 				var a=$(this).data("type");
 				a && $.ajaxpost("{:url('index/cacheUpdate')}",{'type':a},function(res){
@@ -65,6 +77,7 @@
 				})
 			})
 			$(".checkUpgrade").click(function(){
+				$(".cmsUpdate .contents").html('');
 				$.ajaxpost("{:url('upgrade/check')}",{},function(res){
 					if(res.code == 200){
 						var upgradeHtml='<table class="me_table" style="width: 98%;margin: 0 auto;"><colgroup><col width="5%"><col width="35%"><col width="10%"><col width="20%"><col></colgroup><thead><tr><th>选择</th><th>文件</th><th>方式</th><th>时间</th></tr></thead><tbody class="rowList">';

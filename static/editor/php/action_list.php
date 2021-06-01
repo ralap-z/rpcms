@@ -19,6 +19,7 @@ switch ($_GET['action']) {
     /* 列出文件 */
     case 'listfile':
         $allowFiles = $CONFIG['fileManagerAllowFiles'];
+		$noAllowFiles = '';
         $listSize = $CONFIG['fileManagerListSize'];
         $path = $CONFIG['fileManagerListPath'];
         break;
@@ -26,6 +27,7 @@ switch ($_GET['action']) {
     case 'listimage':
     default:
         $allowFiles = $CONFIG['imageManagerAllowFiles'];
+        $noAllowFiles = 'thum-';
         $listSize = $CONFIG['imageManagerListSize'];
         $path = $CONFIG['imageManagerListPath'];
 }
@@ -38,7 +40,7 @@ $end = $start + $size;
 
 /* 获取文件列表 */
 $path = $_SERVER['DOCUMENT_ROOT'] . (substr($path, 0, 1) == "/" ? "":"/") . $path;
-$files = getfiles($path, $allowFiles);
+$files = getfiles($path, $allowFiles, $noAllowFiles);
 if (!count($files)) {
     return json_encode(array(
         "state" => "no match file",
@@ -75,7 +77,7 @@ return $result;
  * @param array $files
  * @return array
  */
-function getfiles($path, $allowFiles, &$files = array())
+function getfiles($path, $allowFiles, $noAllowFiles, &$files = array())
 {
     if (!is_dir($path)) return null;
     if(substr($path, strlen($path) - 1) != '/') $path .= '/';
@@ -84,9 +86,9 @@ function getfiles($path, $allowFiles, &$files = array())
         if ($file != '.' && $file != '..') {
             $path2 = $path . $file;
             if (is_dir($path2)) {
-                getfiles($path2, $allowFiles, $files);
+                getfiles($path2, $allowFiles, $noAllowFiles, $files);
             } else {
-                if (preg_match("/\.(".$allowFiles.")$/i", $file)) {
+                if (preg_match("/\.(".$allowFiles.")$/i", $file) && (!empty($noAllowFiles) && !preg_match('/'.$noAllowFiles.'/i',$file))) {
                     $files[] = array(
                         'url'=> substr($path2, strlen($_SERVER['DOCUMENT_ROOT'])),
                         'mtime'=> filemtime($path2)

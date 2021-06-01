@@ -36,22 +36,32 @@ class Hook{
 		return true;
 	}
 	
-	public static function doHook($hook, &$args='', $isReturn=false){
+	public static function doHook($hook, $args=array(), $isReturn=false){
 		$fun='';
 		if(is_string($args) && strstr($args,'::')){
 			$fun=$args;
-			$args=!is_bool($isReturn) ? $isReturn : '';
+			$args=!is_bool($isReturn) ? $isReturn : array();
 			$isReturn=func_num_args() == 4 ? func_get_arg(3) : $isReturn; 
 		}
 		$res=array();
 		if(!empty($hook) && isset(self::$hookData[$hook])){
+			$pass=array();
 			if(!empty($fun)){
 				$funArr=explode('::',$fun);
 				if(isset($funArr[1])){
 					$class=new ReflectionClass($funArr[0]);
 					$class=$class->newInstanceArgs();
 					$reflect = new ReflectionMethod($class, $funArr[1]);
-					$res[]=$reflect->invokeArgs($class, array(&$args));
+					foreach($reflect->getParameters() as $k=>$param){
+						if(isset($args[$param->getName()])){
+							$pass[] = &$args[$param->getName()];
+						}elseif(isset($args[$k])){
+							$pass[] =&$args[$k] ;
+						}else{
+							$pass[] = $param->isDefaultValueAvailable() ? $param->getDefaultValue() : '';
+						}
+					}
+					$res[]=$reflect->invokeArgs($class, $pass);
 				}
 			}else{
 				foreach(self::$hookData[$hook] as $fun){
@@ -60,7 +70,16 @@ class Hook{
 						$class=new ReflectionClass($funArr[0]);
 						$class=$class->newInstanceArgs();
 						$reflect = new ReflectionMethod($class, $funArr[1]);
-						$res[]=$reflect->invokeArgs($class, array(&$args));
+						foreach($reflect->getParameters() as $k=>$param){
+							if(isset($args[$param->getName()])){
+								$pass[] = &$args[$param->getName()];
+							}elseif(isset($args[$k])){
+								$pass[] =&$args[$k] ;
+							}else{
+								$pass[] = $param->isDefaultValueAvailable() ? $param->getDefaultValue() : '';
+							}
+						}
+						$res[]=$reflect->invokeArgs($class, $pass);
 						if($isReturn) return $res;
 					}
 				}
@@ -108,6 +127,4 @@ class Hook{
 	public static function setHookNull(){
 		self::$hookData=array();
 	}
-	
-	
 }

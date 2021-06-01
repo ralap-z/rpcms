@@ -30,7 +30,6 @@ class Base{
 		View::assign('hasLeftMenu',!empty($leftMenu));
 	}
 	
-	
 	private function getCommentExamNum(){
 		$num=Db::name('comment')->where('status=1')->count();
 		View::assign('commentExamNum',$num);
@@ -38,7 +37,7 @@ class Base{
 	
 	protected function checkAlias($alias=''){
 		if(!empty($alias)){
-			if(!preg_match('/^[A-Za-z0-9\-]+$/u',$alias)){
+			if(!preg_match('/^(?!\d+$)[A-Za-z0-9\-]+$/u',$alias)){
 				return json(array('code'=>-1, 'msg'=>'别名错误，应由字母、数字、短横线组成'));
 			}
 			if(in_array($alias,$this->me_alias)){

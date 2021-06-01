@@ -74,8 +74,9 @@ class Comment extends Base{
 			$res=Db::name('comment')->where('id='.$id)->update(array('status'=>0));
 		}
 		$res=Db::name('comment')->insert($data);
-		Cache::update('total');
-		Hook::doHook('comment_reply',$data);
+		Hook::doHook('comment_reply',array($data));
+		$this->me_updateCommentNum($data);
+		$this->me_updateCache();
 		return json(array('code'=>200,'msg'=>'回复成功'));
 	}
 	
@@ -119,40 +120,68 @@ class Comment extends Base{
 	
 	/*删除评论*/
 	private function me_dele($ids){
-		$vid=Db::name('comment')->where(array('id'=>array('in',$ids)))->field('logId,pageId')->select();
-		$logIds=$pageIds=array();
-		foreach($vid as $k=>$v){
-			!empty($v['logId']) && $logIds[]=$v['logId'];
-			!empty($v['pageId']) && $pageIds[]=$v['pageId'];
+		$ids=explode(',',arrayIdFilter($ids));
+		foreach($ids as $k=>$v){
+			$data=Db::name('comment')->where(array('id'=>$v))->find();
+			$res=Db::name('comment')->where(array('id'=>$v))->dele();
+			if($data['status'] == 0){
+				$this->me_updateCommentNum($data,-1);
+			}
+			if($res){
+				$this->me_dele_child($v);
+			}
 		}
-		$res1=$res2=array();
-		!empty($logIds) && $res1=Db::name('comment')->where(array('topId'=>array('<>',0),'logId'=>array('in',join(',',$logIds))))->field('id,topId')->order('id','asc')->select();
-		!empty($pageIds) && $res2=Db::name('comment')->where(array('topId'=>array('<>',0),'pageId'=>array('in',join(',',$pageIds))))->field('id,topId')->order('id','asc')->select();
-		$sonList=array_filter(array_merge($res1,$res2));
-		$sonArr=explode(',',$ids);
-		foreach($sonList as $k=>$v){
-			if(in_array($v['topId'],$sonArr)){
-                $sonArr[] = $v['id'];
-            }
-		}
-		$res=Db::name('comment')->where(array('id'=>array('in',join(',',$sonArr))))->dele();
-		Cache::update('total');
+		$this->me_updateCache();
 		return json(array('code'=>200,'msg'=>'删除成功'));
 	}
 	
 	/*审核评论*/
 	private function me_exam($ids){
 		$res=Db::name('comment')->where(array('id'=>array('in',$ids)))->update(array('status'=>0));
-		Cache::update('total');
+		$data=Db::name('comment')->where(array('id'=>array('in',$ids)))->select();
+		foreach($data as $k=>$v){
+			$this->me_updateCommentNum($v);
+		}
+		$this->me_updateCache();
 		return json(array('code'=>200,'msg'=>'审核成功'));
 	}
 	
 	/*审核评论*/
 	private function me_unexam($ids){
 		$res=Db::name('comment')->where(array('id'=>array('in',$ids)))->update(array('status'=>1));
-		Cache::update('total');
+		$data=Db::name('comment')->where(array('id'=>array('in',$ids)))->select();
+		foreach($data as $k=>$v){
+			$this->me_updateCommentNum($v,-1);
+		}
+		$this->me_updateCache();
 		return json(array('code'=>200,'msg'=>'反审成功'));
 	}
 	
+	private function me_dele_child($id){
+		$childList=Db::name('comment')->where(array('topId'=>$id))->select();
+		foreach($childList as $k=>$v){
+			$data=Db::name('comment')->where(array('id'=>$v['id']))->find();
+			$res=Db::name('comment')->where(array('id'=>$v['id']))->dele();
+			if($data['status'] == 0){
+				$this->me_updateCommentNum($data,-1);
+			}
+			if($res){
+				$this->me_dele_child($v['id']);
+			}
+		}
+	}
 	
+	private function me_updateCommentNum($data,$num=1){
+		if(!empty($data['pageId'])){
+			$res=Db::name('pages')->where('id='.$data['pageId'])->setInc('comnum',$num);
+		}else{
+			$res2=Db::name('logs')->where('id='.$data['logId'])->setInc('comnum',$num);
+		}
+	}
+	
+	private function me_updateCache(){
+		Cache::update('total');
+		Cache::update('pages');
+		Cache::update('user');
+	}
 }

@@ -55,13 +55,14 @@
 					<option value="{$v}" {php}echo $option['wap_template'] == $v ? 'selected' : '';{/php}>{$v}</option>
 				{/foreach}
 				</select><p class="tips" style="line-height: 2.4rem;">手机端模板名称，请确保填写的模板存在</p></div>
-			</div>
-			<div id="tab4" class="tab">
+				<br/>
 				<div class="me_input me_input_line"><label>缩略图</label>
 					<input type="number" name="attImgWitch" value="{$option['attImgWitch']|default=''}" placeholder="缩略图宽度">
 					<span class="text" style="width: auto;background: transparent;">x</span>
 					<input type="number" name="attImgHeight" value="{$option['attImgHeight']|default=''}" placeholder="缩略图高度">
-				</div><br/><br/>
+				</div>
+			</div>
+			<div id="tab4" class="tab">
 				<div class="me_input me_input_line"><label>评论开启</label><input type="checkbox" name="commentStatus" value="1" {if isset($option['commentStatus']) && $option['commentStatus'] == 1}checked{/if}></div>
 				<div class="me_input me_input_line"><label>评论审核</label><input type="checkbox" name="commentCheck" value="1" {if isset($option['commentCheck']) && $option['commentCheck'] == 1}checked{/if}></div>
 				<div class="me_input me_input_line"><label>内容包含中文</label><input type="checkbox" name="commentCN" value="1" {if isset($option['commentCN']) && $option['commentCN'] == 1}checked{/if}></div>

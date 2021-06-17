@@ -22,7 +22,7 @@ class Logs extends Base{
 	
 	public function getList(){
 		$this->chechAuth(true);
-		$cateId=input('cate');//支持多分类，如：1,2,3
+		$cateId=(string)input('cate');//支持多分类，如：1,2,3
 		$authorId=(int)input('author');
 		$date=input('date');//支持202102和20210325
 		$tag=(int)input('tag');
@@ -30,11 +30,8 @@ class Logs extends Base{
 		$page=(int)input('page') ? (int)input('page') : 1;
 		$where=array('a.status'=>0);
 		$wherestr=array();
+		$cateId=arrayIdFilter($cateId);
 		if(!empty($cateId)){
-			if(!is_array($cateId)){
-				$cateId=array((int)$cateId);
-			}
-			$cateId=arrayIdFilter($cateId);
 			$where['a.cateId']=array('in',$cateId);
 		}
 		if(self::$user['role'] != 'admin'){
@@ -217,19 +214,16 @@ class Logs extends Base{
 	
 	public function dele(){
 		$this->chechAuth(true);
-		$ids=input('post.ids');
-		$idsArr=explode(',',$ids);
-		foreach($idsArr as $k=>$v){
-			if(!intval($v)) unset($idsArr[$k]);
-		}
-		if(empty($idsArr)){
+		$ids=(string)input('post.ids');
+		$ids=arrayIdFilter($ids);
+		if(empty($ids)){
 			$this->response('',401,'无效参数！');
 		}
 		if(self::$user['role'] != 'admin'){
-			$idsSelect=Db::name('logs')->where(array('authorId'=>self::$user['id'],'id'=>array('in',join(',',$idsArr))))->field('id')->select();
-			$idsArr=array_column($idsSelect,'id');
+			$idsSelect=Db::name('logs')->where(array('authorId'=>self::$user['id'],'id'=>array('in',$ids)))->field('id')->select();
+			$ids=array_column($idsSelect,'id');
+			$ids=join(',',$ids);
 		}
-		$ids=join(',',$idsArr);
 		$res=Db::name('logs')->where(array('id'=>array('in',$ids)))->dele();//删除文章
 		$res2=Db::name('attachment')->where(array('logId'=>array('in',$ids)))->dele();//删除附件
 		$res2=Db::name('comment')->where(array('logId'=>array('in',$ids)))->dele();//删除评论

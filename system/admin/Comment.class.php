@@ -104,23 +104,20 @@ class Comment extends Base{
 	
 	public function oper(){
 		$type=input('type') ? input('type') : '';
-		$ids=input('ids') ? input('ids') : '';
+		$ids=(string)input('ids') ? (string)input('ids') : '';
 		if(!method_exists($this,'me_'.$type)){
 			return json(array('code'=>-1,'msg'=>'无效操作'));
 		}
-		$idsArr=explode(',',$ids);
-		foreach($idsArr as $k=>$v){
-			if(!intval($v)) unset($idsArr[$k]);
-		}
+		$idsArr=arrayIdFilter($ids);
 		if(empty($idsArr)){
 			return json(array('code'=>-1,'msg'=>'提交评论项为空'));
 		}
-		return call_user_func(array($this, 'me_' . $type),join(',',$idsArr));
+		return call_user_func(array($this, 'me_' . $type),$idsArr);
 	}
 	
 	/*删除评论*/
 	private function me_dele($ids){
-		$ids=explode(',',arrayIdFilter($ids));
+		$ids=explode(',',$ids);
 		foreach($ids as $k=>$v){
 			$data=Db::name('comment')->where(array('id'=>$v))->find();
 			$res=Db::name('comment')->where(array('id'=>$v))->dele();

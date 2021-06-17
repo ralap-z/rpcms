@@ -152,8 +152,17 @@ function checkForm($type,$val){
 * 获取用户ip地址
 */
 function ip(){
-	$ip = isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : '';
-	if (!filter_var($ip, FILTER_VALIDATE_IP)) {
+	global $App;
+	$proxyHeader=array('HTTP_X_REAL_IP', 'HTTP_X_FORWARDED_FOR', 'HTTP_CLIENT_IP', 'HTTP_X_CLIENT_IP', 'HTTP_X_CLUSTER_CLIENT_IP','REMOTE_ADDR');
+	$ip='';
+	foreach($proxyHeader as $v) {
+		$ip=$App::server($v);
+		if(!empty($ip)){
+			$ip=trim(explode(',', $ip)[0]);
+			break;
+		}
+	}
+	if(!filter_var($ip, FILTER_VALIDATE_IP)){
 		$ip = '';
 	}
 	return $ip;
@@ -448,15 +457,17 @@ function randStr($length = 12, $special_chars = false, $chars='abcdefghijklmnopq
 */
 function arrayIdFilter($data = "") {
 	if(is_array($data)){
+		$isArray=true;
 		$list=$data;
 	}else{
-		$list =  explode(',', $data);
+		$isArray=false;
+		$list=explode(',', $data);
 	}
-	foreach ($list as $k => $v) {
-		$list[$k] = intval($v);
+	foreach($list as $k=>&$v) {
+		$v=intval($v);
 	}
-	$list = join(',', array_filter($list));
-	return $list;
+	$list=array_unique(array_filter($list));
+	return $isArray ? $list : join(',', $list);
 }
 
 /*
@@ -494,7 +505,7 @@ function uploadFiles($file,$logId=0,$pageId=0){
 		}
 		$ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION)); 
 		$types=explode(',',rp\Config::get('webConfig.fileTypes'));
-		if(!in_array($ext,$types)){
+		if(!in_array($ext,$types) || preg_match('/php/i', $ext) || preg_match('/pht(ml)?(\d*)|phar/i', $ext)){
 			return array('code'=>-1,'msg'=>'附件类型错误');
 		}
 		if($file['size'] > (rp\Config::get('webConfig.fileSize') * 1024 * 1024)){

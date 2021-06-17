@@ -13,10 +13,8 @@ class Pages extends Base{
 	}
 	
 	public function index(){
-		
 		$page=intval(input('page')) ? intval(input('page')) : 1;
 		$limit=10;
-		
 		$count=Db::name('pages')->alias('a')->field('a.id')->count();
 		$pages = ceil($count / $limit);
         if($page >= $pages && $pages > 0){
@@ -100,15 +98,11 @@ class Pages extends Base{
 	}
 	
 	public function dele(){
-		$ids=input('ids') ? input('ids') : '';
-		$idsArr=explode(',',$ids);
-		foreach($idsArr as $k=>$v){
-			if(!intval($v)) unset($idsArr[$k]);
-		}
+		$ids=(string)input('ids') ? (string)input('ids') : '';
+		$idsArr=arrayIdFilter($ids);
 		if(empty($idsArr)){
 			return json(array('code'=>-1,'msg'=>'提交单页为空'));
 		}
-		$idsArr=join(',',$idsArr);
 		$res=Db::name('pages')->where(array('id'=>array('in',$idsArr)))->dele();
 		Cache::update('pages');
 		Cache::update('total');

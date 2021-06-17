@@ -69,8 +69,9 @@ class User extends Base{
 			return json(array('code'=>-1,'msg'=>'无效操作'));
 		}
 		$idsArr=explode(',',$ids);
+		$idsArr=arrayIdFilter($idsArr);
 		foreach($idsArr as $k=>$v){
-			if(!intval($v) || $v == 1) unset($idsArr[$k]);
+			if($v == 1) unset($idsArr[$k]);
 		}
 		if(empty($idsArr)){
 			return json(array('code'=>-1,'msg'=>'提交用户为空'));

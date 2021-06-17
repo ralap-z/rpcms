@@ -175,18 +175,15 @@ class Logs extends Base{
 	public function oper(){
 		$type=input('type') ? input('type') : '';
 		$value=intval(input('value')) ? intval(input('value')) : '';
-		$ids=input('ids') ? input('ids') : '';
+		$ids=(string)input('ids') ? (string)input('ids') : '';
 		if(!method_exists($this,'me_'.$type)){
 			return json(array('code'=>-1,'msg'=>'无效操作'));
 		}
-		$idsArr=explode(',',$ids);
-		foreach($idsArr as $k=>$v){
-			if(!intval($v)) unset($idsArr[$k]);
-		}
+		$idsArr=arrayIdFilter($ids);
 		if(empty($idsArr)){
 			return json(array('code'=>-1,'msg'=>'提交文章为空'));
 		}
-		return call_user_func(array($this, 'me_' . $type),join(',',$idsArr),$value);
+		return call_user_func(array($this, 'me_' . $type),$idsArr,$value);
 	}
 	
 	public function upload(){

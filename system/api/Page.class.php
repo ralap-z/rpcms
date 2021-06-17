@@ -104,19 +104,16 @@ class Page extends Base{
 	
 	public function dele(){
 		$this->chechAuth(true);
-		$ids=input('post.ids');
-		$idsArr=explode(',',$ids);
-		foreach($idsArr as $k=>$v){
-			if(!intval($v)) unset($idsArr[$k]);
-		}
-		if(empty($idsArr)){
+		$ids=(string)input('post.ids');
+		$ids=arrayIdFilter($ids);
+		if(empty($ids)){
 			$this->response('',401,'无效参数！');
 		}
 		if(self::$user['role'] != 'admin'){
-			$idsSelect=Db::name('pages')->where(array('authorId'=>self::$user['id'],'id'=>array('in',join(',',$idsArr))))->field('id')->select();
-			$idsArr=array_column($idsSelect,'id');
+			$idsSelect=Db::name('pages')->where(array('authorId'=>self::$user['id'],'id'=>array('in',$ids)))->field('id')->select();
+			$ids=array_column($idsSelect,'id');
+			$ids=join(',',$ids);
 		}
-		$ids=join(',',$idsArr);
 		$res=Db::name('pages')->where(array('id'=>array('in',$ids)))->dele();
 		Cache::update('pages');
 		Cache::update('total');

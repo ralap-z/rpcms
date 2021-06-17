@@ -30,6 +30,15 @@ class Index extends Base{
 	
 	public function webPost(){
 		$data=input('post.');
+		if(isset($data['fileTypes'])){
+			$fileTypesArr=explode(',',$data['fileTypes']);
+			$fileTypesArr=array_filter($fileTypesArr,function($v){
+				$v=trim($v);
+				return !in_array($v,array('php','asp','py','java'));
+			});
+			$fileTypesArr=array_map(function($v){return trim($v);},$fileTypesArr);
+			$data['fileTypes']=join(',',$fileTypesArr);
+		}
 		if(Db::name('config')->where('cname="webconfig"')->find()){
 			$res=Db::name('config')->where('cname="webconfig"')->update(array('cvalue'=>addslashes(json_encode($data))));
 		}else{

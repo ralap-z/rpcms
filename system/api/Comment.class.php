@@ -179,11 +179,9 @@ class Comment extends Base{
 		if(self::$user['role'] != 'admin'){
 			$this->response('',401,'无权限操作！');
 		}
-		$ids=input('ids') ? input('ids') : '';
+		$ids=(string)input('ids') ? (string)input('ids') : '';
+		$ids=arrayIdFilter($ids);
 		$idsArr=explode(',',$ids);
-		foreach($idsArr as $k=>$v){
-			if(!intval($v)) unset($idsArr[$k]);
-		}
 		if(empty($idsArr)){
 			$this->response('',401,'无效参数！');
 		}
@@ -200,8 +198,8 @@ class Comment extends Base{
 		Cache::update('total');
 		Cache::update('pages');
 		Cache::update('user');
-		Hook::doHook('api_comment_dele',array($idsArr));
-		$this->response($idsArr,200,'操作成功！');
+		Hook::doHook('api_comment_dele',array($ids));
+		$this->response($ids,200,'操作成功！');
 	}
 	
 	public function check(){
@@ -209,24 +207,21 @@ class Comment extends Base{
 		if(self::$user['role'] != 'admin'){
 			$this->response('',401,'无权限操作！');
 		}
-		$ids=input('ids') ? input('ids') : '';
-		$idsArr=explode(',',$ids);
-		foreach($idsArr as $k=>$v){
-			if(!intval($v)) unset($idsArr[$k]);
-		}
-		if(empty($idsArr)){
+		$ids=(string)input('ids') ? (string)input('ids') : '';
+		$ids=arrayIdFilter($ids);
+		if(empty($ids)){
 			$this->response('',401,'无效参数！');
 		}
-		$res=Db::name('comment')->where(array('id'=>array('in',join(',',$idsArr))))->update(array('status'=>0));
-		$data=Db::name('comment')->where(array('id'=>array('in',join(',',$idsArr))))->select();
+		$res=Db::name('comment')->where(array('id'=>array('in',$ids)))->update(array('status'=>0));
+		$data=Db::name('comment')->where(array('id'=>array('in',$ids)))->select();
 		foreach($data as $k=>$v){
 			$this->updateCommentNum($v);
 		}
 		Cache::update('total');
 		Cache::update('pages');
 		Cache::update('user');
-		Hook::doHook('api_comment_check',array($idsArr));
-		$this->response($idsArr,200,'操作成功！');
+		Hook::doHook('api_comment_check',array($ids));
+		$this->response($ids,200,'操作成功！');
 	}
 	
 	public function replay(){
@@ -258,7 +253,7 @@ class Comment extends Base{
 			'home'=>$App->baseUrl,
 			'content'=>$content,
 			'ip'=>ip(),
-			'agent'=>$App::server('HTTP_USER_AGENT'),
+			'agent'=>input('SERVER.HTTP_USER_AGENT'),
 			'createTime'=>date('Y-m-d H:i:s'),
 			'status'=>0,
 		);

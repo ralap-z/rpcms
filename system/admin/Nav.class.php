@@ -61,12 +61,12 @@ class Nav extends Base{
 	}
 	
 	public function addCate(){
-		$ids=input('ids');
+		$ids=(string)input('ids');
 		$topId=intval(input('topId')) ? intval(input('topId')) : 0;
 		$ids = str_replace(array(';','，','、'), ',', $ids);
 		$ids = RemoveSpaces(strip_tags($ids));
 		$idsArr = explode(',', $ids);
-		$idsArr = array_filter(array_unique($idsArr));
+		$idsArr=arrayIdFilter($idsArr);
 		if(empty($idsArr)){
 			return json(array('code'=>-1,'msg'=>'所选分类为空'));
 		}
@@ -84,12 +84,12 @@ class Nav extends Base{
 	}
 	
 	public function addPage(){
-		$ids=input('ids');
+		$ids=(string)input('ids');
 		$topId=intval(input('topId')) ? intval(input('topId')) : 0;
 		$ids = str_replace(array(';','，','、'), ',', $ids);
 		$ids = RemoveSpaces(strip_tags($ids));
 		$idsArr = explode(',', $ids);
-		$idsArr = array_filter(array_unique($idsArr));
+		$idsArr=arrayIdFilter($idsArr);
 		if(empty($idsArr)){
 			return json(array('code'=>-1,'msg'=>'所选单页为空'));
 		}

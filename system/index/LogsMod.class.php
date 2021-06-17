@@ -29,7 +29,7 @@ class LogsMod{
 			$ids=array($ids);
 		}
 		$ids=arrayIdFilter($ids);
-		$this->whereArr['a.cateId']=array('in',$ids);
+		$this->whereArr['a.cateId']=array('in',join(',',$ids));
 		return $this;
 	}
 	
@@ -170,7 +170,7 @@ class LogsMod{
 		$this->whereArr=array('a.status'=>0);
 		$this->whereStr='';
 		if($type == 'tages' && !empty($logData['tages'])){
-			$this->whereArr['a.tages']=array('in',arrayIdFilter(array_column($logData['tages'],'id')));
+			$this->whereArr['a.tages']=array('in',join(',',arrayIdFilter(array_column($logData['tages'],'id'))));
 		}else{
 			$this->whereArr['a.cateId']=intval($logData['cateId']);
 		}

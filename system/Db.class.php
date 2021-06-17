@@ -174,20 +174,27 @@ class Db{
 	
 	
 	public function limit($limit){
-		!empty($limit) && $this->limit=" limit ".$limit;
+		(!empty($limit) && false === strpos($limit, '(')) && $this->limit=" limit ".$limit;
 		return $this;
 	}
 	
 	public function order($order,$by="desc"){
+		$by=strtolower($by);
+		$by=$by == 'asc' ? 'asc' : 'desc';
 		if(is_array($order)){
 			$strs=array();
 			foreach($order as $k=>$v){
-				$strs[]=$k." ".$v;
+				if(preg_match('/^[\w\.]+$/', $k)){
+					$v=$v == 'asc' ? 'asc' : 'desc';
+					$strs[]=$k." ".$v;
+				}
 			}
 			$order=join(" , ",$strs);
 			!empty($order) && $this->order=" order by ".$order;
 		}else{
-			!empty($order) && $this->order=" order by ".$order." ".$by;
+			if(preg_match('/^[\w\.]+$/', $order)){
+				$this->order=" order by ".$order." ".$by;
+			}
 		}
 		return $this;
 	}
@@ -293,6 +300,7 @@ class Db{
 		$val_arr=array();
 		foreach($dataval as $k=>$v){
 			if(!is_array($v)) continue;
+			$v=array_map(function($vv){return $this->escapeString($vv);},$v);
 			$val_arr[]="('".join("','",$v)."')";
 		}
 		$key="(`".join("`,`",$key_arr)."`)";
@@ -306,7 +314,7 @@ class Db{
 	public function update($data=array()){
 		$strs=array();
 		foreach($data as $k=>$v){
-			$strs[]=$v === NULL  ? "`".$k."` = NULL" : "`".$k."` ='".$v."'";
+			$strs[]=$v === NULL  ? "`".$k."` = NULL" : "`".$k."` ='".$this->escapeString($v)."'";
 		}
 		$updata=join(" , ",$strs);
 		$sql="update ".self::$table." SET ".$updata.$this->buildWhere();
@@ -366,7 +374,7 @@ class Db{
 		return $res;
 	}
 	protected function escapeString($str){
-        return addslashes($str);
+        return addslashes(stripslashes($str));
     }
 	protected function error($msg,$sql=""){
 		global $App;

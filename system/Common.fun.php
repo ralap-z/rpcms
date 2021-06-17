@@ -627,9 +627,9 @@ function http_post($url,$param){
 	if(extension_loaded('zlib')){
 		curl_setopt($ch, CURLOPT_ENCODING, 'gzip');
 	}
+	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+	curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
 	if(stripos($url,"https://")!==FALSE){
-		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
-		curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
 		curl_setopt($ch, CURLOPT_SSLVERSION, 1);
 	}
 	if (is_string($param)) {

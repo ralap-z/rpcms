@@ -33,7 +33,6 @@ class Upgrade extends Base{
 			}
 		}
 		if(!empty($upgradefile)){
-			sort($upgradefile);
 			return json(array('code'=>200,'msg'=>'有文件需要更新','data'=>$upgradefile));
 		}else{
 			return json(array('code'=>-1,'msg'=>'您的系统无任何文件需要更新'));

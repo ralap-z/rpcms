@@ -88,6 +88,10 @@ class Index{
 		if($row[0] > 0){
 			return json(array('code'=>-1, 'msg'=>'您已经安装RPCMS，请手动删除所有数据表后再安装'));
 		}
+		$keyData=json_decode(http_post('http://www.rpcms.cn/upgrade/auth/getKey', array('host'=>$App->baseUrl)),true);
+		if(!isset($keyData['data']) || empty($keyData['data'])){
+			return json(array('code'=>-1, 'msg'=>'请求数据失败'));
+		}
 		$installSql=CMSPATH . '/data/defend/sql.sql';
 		if(!file_exists($installSql)){
 			return json(array('code'=>-1, 'msg'=>'安装的数据库文件丢失'));
@@ -95,7 +99,42 @@ class Index{
 		$sql = @file_get_contents($installSql);
 		$this->_sql_execute($sql,$data['tablepre']);
 		$this->_sql_execute("INSERT INTO ".$data['tablepre']."user (`username`,`password`,`nickname`,`role`,`status`) VALUES ('".$data['username']."','".psw($data['userpsw'])."','".$data['username']."','admin','0')");
-		$this->_sql_execute("INSERT INTO ".$data['tablepre']."config (`cname`,`cvalue`) VALUES ('webconfig','{\"isDevelop\":\"0\",\"webStatus\":\"0\",\"cateAlias\":\"0\",\"logAlias\":\"0\",\"pageAlias\":\"0\",\"tagAlias\":\"0\",\"commentStatus\":\"0\",\"commentCheck\":\"0\",\"commentCN\":\"0\",\"commentVcode\":\"0\",\"logOrder\":[\"id\"],\"webName\":\"\",\"keyword\":\"\",\"description\":\"\",\"icp\":\"\",\"totalCode\":\"\",\"closeText\":\"\",\"pagesize\":\"10\",\"fileTypes\":\"rar,zip,gz,gif,jpg,jpeg,png,txt,pdf,docx,doc,xls,xlsx\",\"fileSize\":\"20\",\"logWeight\":\"\",\"api_status\":\"0\",\"api_max_req\":\"\",\"attImgWitch\":\"400\",\"attImgHeight\":\"400\",\"commentSort\":\"new\",\"commentPage\":\"10\",\"commentInterval\":\"30\",\"wap_auto\":\"0\",\"wap_domain\":\"\",\"wap_template\":\"\"}'),('template','defaults'),('temp_defaults', '{\"layout\":\"right\",\"appWidth\":\"1000\",\"bgColor\":\"#f1f1f1\"}');");
+		$config=array(
+			'webName'=>'',
+			'keyword'=>'',
+			'description'=>'',
+			'key'=>$keyData['data'],
+			'icp'=>'',
+			'totalCode'=>'',
+			'isDevelop'=>'0',
+			'webStatus'=>'0',
+			'closeText'=>'',
+			'pagesize'=>'10',
+			'fileTypes'=>'rar,zip,gz,gif,jpg,jpeg,png,txt,pdf,docx,doc,xls,xlsx',
+			'fileSize'=>'20',
+			'logOrder'=>array('id'),
+			'logWeight'=>'',
+			'cateAlias'=>'0',
+			'logAlias'=>'0',
+			'pageAlias'=>'0',
+			'tagAlias'=>'0',
+			'specialAlias'=>'0',
+			'api_status'=>'0',
+			'api_max_req'=>'',
+			'wap_auto'=>'0',
+			'wap_domain'=>'',
+			'wap_template'=>'',
+			'attImgWitch'=>'400',
+			'attImgHeight'=>'400',
+			'commentStatus'=>'0',
+			'commentCheck'=>'0',
+			'commentCN'=>'0',
+			'commentVcode'=>'0',
+			'commentSort'=>'new',
+			'commentPage'=>'10',
+			'commentInterval'=>'30',
+		);
+		$this->_sql_execute("INSERT INTO ".$data['tablepre']."config (`cname`,`cvalue`) VALUES ('webconfig','".json_encode($config)."'),('template','defaults'),('temp_defaults', '{\"layout\":\"right\",\"appWidth\":\"1000\",\"bgColor\":\"#f1f1f1\"}');");
 		$this->_sql_execute("INSERT INTO ".$data['tablepre']."links (`sitename`,`sitedesc`,`siteurl`) VALUES ('RPCMS', 'RPCMS内容管理系统', 'http://www.rpcms.cn');");
 		$data['baseUrl']=$App->baseUrl;
 		if($this->setConfig($data)){
@@ -129,7 +168,7 @@ class Index{
 		//默认跳转地址，当没有referer的时候
 		'app_default_referer'    => '".$data['baseUrl']."',
 		//数据加密key
-		'app_key'                => 'rpcms',
+		'app_key'                => 'rpcms".randStr(6)."',
 		//默认module
 		'default_module'         => 'index',
 		//默认controller

@@ -142,7 +142,7 @@ class Db{
 					break;
 				case 'between':
 				case 'not between':
-					return '($0 '.$value[0].' '.$this->escapeString($value[1]).' and '.$this->escapeString($value[2]).')';
+					return '($0 '.$value[0].' \''.$this->escapeString($value[1]).'\' and \''.$this->escapeString($value[2]).'\')';
 					break;
 				case 'exp':
 					return "($0 regexp '".$this->escapeString($value[1])."')";
@@ -185,7 +185,7 @@ class Db{
 			$strs=array();
 			foreach($order as $k=>$v){
 				if(preg_match('/^[\w\.]+$/', $k)){
-					$v=$v == 'asc' ? 'asc' : 'desc';
+					$v=strtolower($v) == 'asc' ? 'asc' : 'desc';
 					$strs[]=$k." ".$v;
 				}
 			}

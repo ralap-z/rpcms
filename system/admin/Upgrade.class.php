@@ -16,6 +16,7 @@ class Upgrade extends Base{
 		$param=array(
 			'version'=>RPCMS_VERSION,
 			'site'=>$this->App->baseUrl,
+			'key'=>$this->getKey(),
 		);
 		$resArr=@json_decode(http_post($url,$param),true);
 		if($resArr['code'] != 200){
@@ -47,6 +48,8 @@ class Upgrade extends Base{
 		$url=$this->server.'/upgrade/index/getFile';
 		$param=array(
 			'file'=>$file,
+			'site'=>$this->App->baseUrl,
+			'key'=>$this->getKey(),
 		);
 		$resArr=@json_decode(http_post($url,$param),true);
 		if($resArr['code'] != 200){

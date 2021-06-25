@@ -3,6 +3,7 @@ namespace rp\admin;
 use rp\View;
 use rp\Db;
 use rp\Cache;
+use rp\Url;
 
 class Nav extends Base{
 	
@@ -19,8 +20,19 @@ class Nav extends Base{
 	
 	public function index(){
 		$diyTop=Db::name('nav')->where('status = 0 and topId = 0')->field('id,navname')->select();
+		$navList=array();
+		$nav=Db::name('nav')->order(array('topId'=>'asc','sort'=>'asc'))->select();
+		foreach($nav as $k=>$v){
+			$v['url']=Url::nav($v['types'],$v['typeId'],$v['url'],true);
+			if($v['topId'] == 0){
+				$navList[$v['id']]=$v;
+				$navList[$v['id']]['children']=array();
+			}elseif(isset($navList[$v['topId']])){
+				$navList[$v['topId']]['children'][] = $v;
+			}
+		}
 		View::assign('types',$this->types);
-		View::assign('list',Cache::read('nav'));
+		View::assign('list',$navList);
 		View::assign('pages',Cache::read('pages'));
 		View::assign('cateCheckbox',me_createCateCheckbox());
 		View::assign('diyTop',$diyTop);

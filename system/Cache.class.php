@@ -101,8 +101,7 @@ class Cache{
 	/*导航缓存*/
 	private function me_nav() {
         $nav_cache = array();
-		$nav=Db::name('nav')->order(array('topId'=>'asc','sort'=>'ASC'))->select();
-		$category=$this->read('category');
+		$nav=Db::name('nav')->where('status=0')->order(array('topId'=>'asc','sort'=>'ASC'))->select();
 		foreach($nav as $k=>$v){
 			$v['url']=Url::nav($v['types'],$v['typeId'],$v['url'],true);
 			if($v['topId'] == 0){
@@ -230,6 +229,7 @@ class Cache{
 	/*tag标签缓存*/
 	private function me_tages(){
 		$allTag=Db::name('logs')->where('status =0')->field('status,GROUP_CONCAT(tages) as alltages')->group('status')->find();
+		$allTag['alltages']=isset($allTag['alltages']) ? $allTag['alltages'] : '';
 		$allTagArr=array_filter(explode(',',$allTag['alltages']));
 		$allTagArr=array_count_values($allTagArr);
 		$tages=Db::name('tages')->select();

@@ -51,6 +51,7 @@ class Index extends Plugin{
 		$data=array_slice($query,1);
 		$data['token']=$this->token;
 		$data['host']=$this->App->baseUrl;
+		$data['key']=isset($this->webConfig->key) ? $this->webConfig->key : '';
 		switch($action){
 			case 'index':
 				$res=$curl->http_curl('index',$data);

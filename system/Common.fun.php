@@ -717,6 +717,7 @@ function Debug_Shutdown_Handler(){
 }
 function Debug_Error_Handler($errno, $errstr, $errfile, $errline){
 	if(!rp\Config::get('webConfig.isDevelop')){
+		$errstr=str_replace(CMSPATH,'',$errstr);
 		$errfile=str_replace(CMSPATH,'',$errfile);
 	}
 	rpMsg($errstr.'<br>'.$errfile.'&nbsp;&nbsp;&nbsp;&nbsp;Line:  '.$errline);

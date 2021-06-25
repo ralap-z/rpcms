@@ -3,6 +3,7 @@ namespace rp\admin;
 use rp\View;
 use rp\Db;
 use rp\Hook;
+use rp\Cache;
 
 class Base{
 	protected $user;
@@ -66,5 +67,10 @@ class Base{
 			}
 		}
 		return !empty($extend) ? addslashes(json_encode($extend)) : '';
+	}
+	
+	protected function getKey(){
+		$option=Cache::read('option');
+		return isset($option['key']) ? $option['key'] : '';
 	}
 }

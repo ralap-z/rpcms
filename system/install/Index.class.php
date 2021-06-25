@@ -98,7 +98,6 @@ class Index{
 		}
 		$sql = @file_get_contents($installSql);
 		$this->_sql_execute($sql,$data['tablepre']);
-		$this->_sql_execute("INSERT INTO ".$data['tablepre']."user (`username`,`password`,`nickname`,`role`,`status`) VALUES ('".$data['username']."','".psw($data['userpsw'])."','".$data['username']."','admin','0')");
 		$config=array(
 			'webName'=>'',
 			'keyword'=>'',
@@ -139,6 +138,7 @@ class Index{
 		$data['baseUrl']=$App->baseUrl;
 		if($this->setConfig($data)){
 			\rp\Config::set(include CMSPATH . '/config.php');
+			$this->_sql_execute("INSERT INTO ".$data['tablepre']."user (`username`,`password`,`nickname`,`role`,`status`) VALUES ('".$data['username']."','".psw($data['userpsw'])."','".$data['username']."','admin','0')");
 			Cache::update();
 			$lock=@file_put_contents(CMSPATH .'/data/install.lock', 'installed');
 			return json(array('code'=>200, 'msg'=>'success', 'data'=>$data['baseUrl']));

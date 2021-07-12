@@ -115,7 +115,7 @@ class Index extends Base{
 				Cache::update('nav');
 				break;
 			case 'logs':
-				Cache::update(array('logRecord','logAlias'));
+				Cache::update('logRecord');
 				break;
 			case 'cate':
 				Cache::update('category');

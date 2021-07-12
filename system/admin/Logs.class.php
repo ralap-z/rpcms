@@ -7,8 +7,10 @@ use rp\Hook;
 
 class Logs extends Base{
 	
+	private $config;
 	public function __construct(){
 		parent::__construct();
+		$this->config=Cache::read('option');
 	}
 	
 	public function index(){
@@ -58,8 +60,8 @@ class Logs extends Base{
             $page = $pages;
         }
 		$res=Db::name('logs')->alias('a')->join(array(
-			array('category b','a.cateId=b.id','left'),
-			array('user c','a.authorId=c.id','left'),
+			array('category as b force index(PRIMARY)','a.cateId=b.id','left'),
+			array('user as c force index(PRIMARY)','a.authorId=c.id','left'),
 		))->where($where)->field('a.id,a.title,a.comnum,a.upnum,a.views,a.isTop,a.createTime,a.status,b.cate_name,c.nickname')->order($orderBy)->limit(($page-1)*$limit.','.$limit)->select();
 		$pageHtml=pageInation($count,$limit,$page,'',join('&',$search));
 		View::assign('categoryHtml',me_createCateOption($cateId));
@@ -143,21 +145,25 @@ class Logs extends Base{
 		$msg='于'.date('H:i:s');
 		$this->checkAlias($data['alias']);
 		$this->checkTemplate($data['template']);
-		$logAlias=Cache::read('logAlias');
 		if($param['type'] != 2){
 			$data['tages']=$this->replaceTages($param['tagesName']);
 		}
 		if($param['click'] == 'true'){
 			$msg=(empty($logid) || ($data['status'] == 0 && $param['status'] != 0)) ? '添加成功' : '修改成功';
 		}
+		$checkAlias=array();
+		if(!empty($data['alias'])){
+			$checkAlias=Db::name('logs')->where(array('alias'=>$data['alias']))->field('id')->find();
+		}else{
+			unset($data['alias']);
+		}
 		if(!empty($logid)){
-			$key=array_search($data['alias'],$logAlias);
-			if(!empty($data['alias']) && ($key && $key != $logid)){
+			if(!empty($checkAlias) && $checkAlias['id'] != $logid){
 				return json(array('code'=>-1, 'msg'=>'别名重复，请更换别名'));
 			}
 			$res=Db::name('logs')->where('id='.$logid)->update($data);
 		}else{
-			if(!empty($data['alias']) && array_search($data['alias'],$logAlias)){
+			if(!empty($checkAlias)){
 				return json(array('code'=>-1, 'msg'=>'别名重复'));
 			}
 			$logid=Db::name('logs')->insert($data);
@@ -260,11 +266,11 @@ class Logs extends Base{
 	}
 	
 	private function updateCache(){
+		if(!isset($this->config['isPostUpCache']) || $this->config['isPostUpCache'] != 1) return;
 		Cache::update('tages');
 		Cache::update('category');
 		Cache::update('special');
 		Cache::update('total');
 		Cache::update('logRecord');
-		Cache::update('logAlias');
 	}
 }

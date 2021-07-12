@@ -167,6 +167,7 @@ function sendPostFrom(){
 		return !1;
 	}
 	!c && logtype ==  2 && $('.tips').text('正在保存');
+	c && $.loading('正在保存数据...');
 	$.post('{:url("logs/dopost")}',param,function(res){
 		ispost=false;
 		res.code == 200 && (logid=res.data,attrReload.logid=res.data);

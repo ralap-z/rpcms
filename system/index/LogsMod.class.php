@@ -105,18 +105,12 @@ class LogsMod{
 	}
 	
 	public function select(){
-		$count=Db::name('logs')->alias('a')->join(array(
-			array('category b','a.cateId=b.id','left'),
-			array('user c','a.authorId=c.id','left'),
-		))->where($this->whereArr)->where($this->whereStr)->field('a.id')->count();
-		$pages = ceil($count / $this->limit);
-        if($this->page >= $pages && $pages > 0){
-            $this->page = $pages;
-        }
+		$sonSql=Db::name('logs')->alias('a')->where($this->whereArr)->where($this->whereStr)->field('a.id')->limit(($this->page-1)*$this->limit.','.$this->limit)->order($this->order)->getSql();
 		$list=Db::name('logs')->alias('a')->join(array(
-			array('category b','a.cateId=b.id','left'),
-			array('user c','a.authorId=c.id','left'),
-		))->where($this->whereArr)->where($this->whereStr)->field('a.id,a.title,a.authorId,a.cateId,a.excerpt,a.keywords,a.content,a.tages,a.isTop,a.views,a.comnum,a.upnum,a.upateTime,a.createTime,a.extend,a.status,b.cate_name as cateName,c.nickname as author,c.email as authorEmail')->limit(($this->page-1)*$this->limit.','.$this->limit)->order($this->order)->select();
+			array('('.$sonSql.') as l','a.id=l.id','inner'),
+			array('category as b force index(PRIMARY)','a.cateId=b.id','left'),
+			array('user as c force index(PRIMARY)','a.authorId=c.id','left'),
+		))->field('a.id,a.title,a.authorId,a.cateId,a.excerpt,a.keywords,a.content,a.tages,a.isTop,a.views,a.comnum,a.upnum,a.upateTime,a.createTime,a.extend,a.status,b.cate_name as cateName,c.nickname as author,c.email as authorEmail')->select();
 		foreach($list as $k=>$v){
 			$list[$k]['extend'] =json_decode($v['extend'],true);
 			$list[$k]['url'] = Url::logs($v['id']);
@@ -125,18 +119,21 @@ class LogsMod{
 			$list[$k]['tagesData'] = $this->getTages($v['tages']);
 		}
 		Hook::doHook('index_logs_list',array(&$list));
-		return array('count'=>$count,'limit'=>$this->limit,'page'=>$this->page,'list'=>$list);
+		return array('count'=>0,'limit'=>$this->limit,'page'=>$this->page,'list'=>$list);
+	}
+	
+	public function getCount(){
+		return Db::name('logs')->alias('a')->where($this->whereArr)->where($this->whereStr)->count();
 	}
 	
 	public function neighbor($logId){
-		$where1=$this->whereArr;
-		$where2=$this->whereArr;
+		$where1=$where2=array('a.status'=>0);
 		$where1['a.id']=array('<',$logId);
-		$order1=array('a.id'=>'DESC');
 		$where2['a.id']=array('>',$logId);
+		$order1=array('a.id'=>'DESC');
 		$order2=array('a.id'=>'ASC');
-		$prev=Db::name('logs')->alias('a')->where($where1)->where($this->whereStr)->field('a.id,a.title,a.authorId,a.cateId,a.excerpt,a.keywords,a.content,a.tages,a.views,a.comnum,a.upnum,a.upateTime,a.createTime,a.extend')->order($order1)->find();
-		$next=Db::name('logs')->alias('a')->where($where2)->where($this->whereStr)->field('a.id,a.title,a.authorId,a.cateId,a.excerpt,a.keywords,a.content,a.tages,a.views,a.comnum,a.upnum,a.upateTime,a.createTime,a.extend')->order($order2)->find();
+		$prev=Db::name('logs')->alias('a')->where($where1)->field('a.id,a.title,a.authorId,a.cateId,a.excerpt,a.keywords,a.content,a.tages,a.views,a.comnum,a.upnum,a.upateTime,a.createTime,a.extend')->limit(1)->order($order1)->find();
+		$next=Db::name('logs')->alias('a')->where($where2)->field('a.id,a.title,a.authorId,a.cateId,a.excerpt,a.keywords,a.content,a.tages,a.views,a.comnum,a.upnum,a.upateTime,a.createTime,a.extend')->limit(1)->order($order2)->find();
 		if(!empty($prev)){
 			$prev['url']=Url::logs($prev['id']);
 			$prev['extend'] =json_decode($prev['extend'],true);
@@ -175,19 +172,7 @@ class LogsMod{
 			$this->whereArr['a.cateId']=intval($logData['cateId']);
 		}
 		$this->whereArr['a.id']=array('<>',intval($logData['id']));
-		
-		$list=Db::name('logs')->alias('a')->join(array(
-			array('category b','a.cateId=b.id','left'),
-			array('user c','a.authorId=c.id','left'),
-		))->where($this->whereArr)->where($this->whereStr)->field('a.id,a.title,a.authorId,a.cateId,a.excerpt,a.keywords,a.content,a.tages,a.isTop,a.views,a.comnum,a.upnum,a.upateTime,a.createTime,a.extend,a.status,b.cate_name as cateName,c.nickname as author')->limit('0,'.$limit)->order($this->order)->select();
-		foreach($list as $k=>$v){
-			$list[$k]['extend'] =json_decode($v['extend'],true);
-			$list[$k]['url'] = Url::logs($v['id']);
-			$list[$k]['cateUrl'] = Url::cate($v['cateId']);
-			$list[$k]['cateLogNum'] = isset($this->cateData[$v['cateId']]) ? $this->cateData[$v['cateId']]['logNum'] : 0;
-			$list[$k]['tagesData'] = $this->getTages($v['tages']);
-		}
-		Hook::doHook('index_logs_list',array(&$list));
-		return $list;
+		$data=$this->select();
+		return $data['list'];
 	}
 }

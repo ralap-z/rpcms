@@ -101,16 +101,16 @@ class Url{
 	/*文章URL*/
 	public static function logs($logId, $page=null){
 		global $App;
-		$alias=Cache::read('logAlias');
-		if(!isset($alias[$logId])){
-			return $App->baseUrl;
-		}
 		$logUrl = $App->baseUrl.'/post/';
-		$logUrl.= (Config::get('webConfig.logAlias') && !empty($alias[$logId])) ? $alias[$logId] : $logId;
+		if(Config::get('webConfig.logAlias')){
+			$res=Db::name('logs')->where(array('id'=>$logId))->field('alias')->find();
+			$logUrl.= !empty($res['alias']) ? $res['alias'] : $logId;
+		}else{
+			$logUrl.= $logId;
+		}
 		$logUrl.= !empty($page) ? '_'.$page : '';
 		$logUrl.= '.'.$App->pageExt;
 		return $logUrl;
-		
 	}
 	
 	/*分类URL*/

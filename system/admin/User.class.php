@@ -37,13 +37,13 @@ class User extends Base{
         if($page >= $pages && $pages > 0){
             $page = $pages;
         }
-		$options=Config::get('db');
-		$prefix=$options["prefix"];
-		$res=Db::name('user')->alias('a')->join(array(
-			array('(select authorId,count(*) as logNum FROM '.$prefix.'logs where status =0 group by authorId) b','a.id=b.authorId','left'),
-			array('(select authorId,count(*) as pageNum FROM '.$prefix.'pages where status =0 group by authorId) c','a.id=c.authorId','left'),
-			array('(select authorId,count(*) as commentNum FROM '.$prefix.'comment where status =0 group by authorId) d','a.id=d.authorId','left'),
-		))->where($where)->field('a.*,b.logNum,c.pageNum,d.commentNum')->limit(($page-1)*$limit.','.$limit)->order('a.id','desc')->select();
+		$res=Db::name('user')->alias('a')->where($where)->field('a.*')->limit(($page-1)*$limit.','.$limit)->order('a.id','desc')->select();
+		$user=Cache::read('user');
+		foreach($res as $k=>&$v){
+			$v['logNum']=isset($user[$v['id']]) ? $user[$v['id']]['logNum'] : 0;
+			$v['pageNum']=isset($user[$v['id']]) ? $user[$v['id']]['pageNum'] : 0;
+			$v['commentNum']=isset($user[$v['id']]) ? $user[$v['id']]['commentNum'] : 0;
+		}
 		$pageHtml=pageInation($count,$limit,$page,'',join('&',$search));
 		View::assign('list',$res);
 		View::assign('s_status',$status);

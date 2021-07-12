@@ -18,8 +18,10 @@ class Logs extends base{
 	}
 	
 	public function index(){
+		$total=Cache::read('total');
 		$page=isset($this->params[2]) ? intval($this->params[2]) : 1;
 		$logData=$this->LogsMod->page($page)->order(array('a.upateTime'=>'desc','a.id'=>'desc'))->select();
+		$logData['count']=!empty($total) ? $total['logNum'] : 0;
 		$pageHtml=pageInationHome($logData['count'],$logData['limit'],$logData['page'],'index');
 		$this->setKeywords();
 		$this->setDescription();
@@ -35,16 +37,18 @@ class Logs extends base{
 		if(empty($dateStr)){
 			rpMsg('当前栏目不存在！');
 		}
-		$logData=$this->LogsMod->page($page)->order(array('a.createTime'=>'desc','a.id'=>'desc'));
+		$logDataObj=$this->LogsMod->page($page)->order(array('a.id'=>'desc'));
 		if(strlen($dateStr) == 6){
 			$date2=date('Ym',strtotime($dateStr.'01'));
-			$logData=$logData->whereStr('DATE_FORMAT(a.createTime,"%Y%m") = "'.$date2.'"');
+			$dataStart=$date2.'01';
+			$logDataObj=$logDataObj->whereStr('a.createTime BETWEEN "'.date('Y-m-d 00:00:00',strtotime($dataStart)).'" AND "'.date('Y-m-d 23:59:59',strtotime($dataStart." +1 month -1 day")).'"');
 		}else{
 			$dateStr=str_pad($dateStr,8,0,STR_PAD_RIGHT);
 			$date2=date('Ymd',strtotime($dateStr));
-			$logData=$logData->whereStr('DATE_FORMAT(a.createTime,"%Y%m%d") = "'.$date2.'"');
+			$logDataObj=$logDataObj->whereStr('a.createTime BETWEEN "'.date('Y-m-d 00:00:00',strtotime($date2)).'" AND "'.date('Y-m-d 23:59:59',strtotime($date2)).'"');
 		}
-		$logData=$logData->select();
+		$logData=$logDataObj->select();
+		$logData['count']=$logDataObj->getCount();
 		$pageHtml=pageInationHome($logData['count'],$logData['limit'],$logData['page'],'date',$date2);
 		$date2.='归档';
 		$this->setKeywords();
@@ -66,7 +70,8 @@ class Logs extends base{
 		if(empty($key)){
 			redirect($this->App->baseUrl);
 		}
-		$logData=$this->LogsMod->search($key)->page($page)->select();
+		$logData=$this->LogsMod->title($key)->page($page)->select();
+		$logData['count']=$this->LogsMod->getCount();
 		$pageHtml=pageInationHome($logData['count'],$logData['limit'],$logData['page'],'search',$key);
 		$key2='搜索 '.$key;
 		$this->setKeywords();
@@ -81,15 +86,13 @@ class Logs extends base{
 	
 	public function detail(){
 		$dateStr=isset($this->params[1]) ? strip_tags(strDeep($this->params[1])) : '';
-		$logAlias=array_filter(Cache::read('logAlias'));
 		if(is_numeric($dateStr)){
-			$logId=intval($dateStr);
+			$where=array('id'=>intval($dateStr));
 		}else{
-			$logAlias2=array_flip($logAlias);
-			$logId=isset($logAlias2[$dateStr]) ? intval($logAlias2[$dateStr]) : 0;
+			$where=array('alias'=>$dateStr);
 		}
-		$data=Db::name('logs')->where('id='.$logId)->find();
-		if(empty($logId) || empty($data)){
+		$data=Db::name('logs')->where($where)->find();
+		if(empty($data)){
 			rpMsg('当前文章不存在！');
 		}
 		if($data['status'] != 0){
@@ -99,11 +102,11 @@ class Logs extends base{
 		$data['cateName']=isset($category[$data['cateId']]['cate_name']) ? $category[$data['cateId']]['cate_name'] : '未分类';
 		$GLOBALS['title']=$data['title'];
 		$this->assign('title',$data['title'].'-'.$data['cateName'].'-'.$this->webConfig['webName']);
-		$this->assign('listId',$logId);
+		$this->assign('listId',$data['id']);
 		if(!empty($data['password'])){
 			$postpwd=input('post.pagepwd');
-			$cookiepwd=cookie('rpcms_logspsw_'.$logId);
-			$this->checkPassword($postpwd,$cookiepwd,$data['password'],'logspsw_'.$logId);
+			$cookiepwd=cookie('rpcms_logspsw_'.$data['id']);
+			$this->checkPassword($postpwd,$cookiepwd,$data['password'],'logspsw_'.$data['id']);
 		}
 		$tages=Cache::read('tages');
 		$user=Cache::read('user');
@@ -131,8 +134,8 @@ class Logs extends base{
 		}else{
 			$template='detail';
 		}
-		$CommentData=(new Comment())->getListByLogs($logId);
-		$res=Db::name('logs')->where('id='.$logId)->setInc('views');
+		$CommentData=(new Comment())->getListByLogs($data['id']);
+		$res=Db::name('logs')->where('id='.$data['id'])->setInc('views');
 		$this->setKeywords($data['keywords']);
 		$this->setDescription($data['excerpt']);
 		$this->assign('listType','logs');

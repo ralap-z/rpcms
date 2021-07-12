@@ -116,7 +116,7 @@ class Cache{
 	
 	/*统计缓存*/
 	private function me_total(){
-		$log=Db::name('logs')->field('count(*) as logNum,authorId,status')->group('authorId,status')->select();
+		$log=Db::name('logs')->field('count(*) as logNum,authorId,status')->group('status,authorId')->select();
 		$pages=Db::name('pages')->field('count(*) as pageNum,authorId')->group('authorId')->select();
 		$comment=Db::name('comment')->field('count(*) as commentNum,authorId,status')->group('authorId,status')->select();
 		$total=array(
@@ -192,13 +192,6 @@ class Cache{
 		$this->cacheWrite(json_encode($logRecord), 'logRecord');
 	}
 	
-	/*文章别名缓存*/
-	private function me_logAlias(){
-		$log=Db::name('logs')->field('id,alias')->select();
-		$logAlias = array_column($log,'alias','id');
-		$this->cacheWrite(json_encode($logAlias), 'logAlias');
-	}
-	
 	/*分类缓存*/
 	private function me_category() {
         $cate_cache = array();
@@ -228,13 +221,11 @@ class Cache{
 	
 	/*tag标签缓存*/
 	private function me_tages(){
-		$allTag=Db::name('logs')->where('status =0')->field('status,GROUP_CONCAT(tages) as alltages')->group('status')->find();
-		$allTag['alltages']=isset($allTag['alltages']) ? $allTag['alltages'] : '';
-		$allTagArr=array_filter(explode(',',$allTag['alltages']));
-		$allTagArr=array_count_values($allTagArr);
+		$allTag=Db::name('logs')->alias('a')->join('tages as b','find_in_set(b.id,a.tages)')->where('a.status =0 and a.tages != ""')->field('b.id,COUNT(*) as num')->group('b.id')->select();
+		$allTag=array_column($allTag,'num','id');
 		$tages=Db::name('tages')->select();
 		foreach($tages as $k=>$v){
-			$tages[$k]['logNum']=isset($allTagArr[$v['id']]) ? $allTagArr[$v['id']] : 0;
+			$tages[$k]['logNum']=isset($allTag[$v['id']]) ? $allTag[$v['id']] : 0;
 		}
 		$tages=array_column($tages,NULL,'id');
 		$this->cacheWrite(json_encode($tages), 'tages');

@@ -31,8 +31,7 @@ CREATE TABLE IF NOT EXISTS `%pre%category` (
   PRIMARY KEY (`id`),
   KEY `alias` (`alias`),
   KEY `sort` (`sort`),
-  KEY `topId` (`topId`),
-  KEY `is_submit` (`is_submit`)
+  KEY `topId` (`topId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='文章分类';
 
 CREATE TABLE IF NOT EXISTS `%pre%comment` (
@@ -83,10 +82,10 @@ CREATE TABLE IF NOT EXISTS `%pre%links` (
 CREATE TABLE IF NOT EXISTS `%pre%logs` (
   `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
   `title` varchar(255) NOT NULL,
-  `alias` varchar(200) DEFAULT '',
-  `authorId` int(10) NOT NULL COMMENT '作者ID',
-  `cateId` int(10) NOT NULL COMMENT '分类ID',
-  `specialId` INT(11) NULL DEFAULT '0',
+  `alias` varchar(200) DEFAULT NULL,
+  `authorId` int(10) UNSIGNED NOT NULL COMMENT '作者ID',
+  `cateId` int(10) UNSIGNED NOT NULL DEFAULT '0' COMMENT '分类ID',
+  `specialId` INT(11) UNSIGNED NULL DEFAULT '0',
   `excerpt` varchar(255) NOT NULL COMMENT '摘要',
   `keywords` VARCHAR(255) NULL DEFAULT '' COMMENT '关键词',
   `password` varchar(255) DEFAULT '' COMMENT '访问密码',
@@ -103,17 +102,13 @@ CREATE TABLE IF NOT EXISTS `%pre%logs` (
   `extend` longtext NULL DEFAULT NULL COMMENT '扩展数据',
   `status` tinyint(1) DEFAULT '0' COMMENT '状态, 0发布 1审核 2草稿 -1下架 -2审核不通过',
   PRIMARY KEY (`id`),
-  KEY `title` (`title`),
-  KEY `alias` (`alias`),
-  KEY `authorId` (`authorId`),
-  KEY `cateId` (`cateId`),
-  KEY `tages` (`tages`),
-  KEY `isTop` (`isTop`),
-  KEY `views` (`views`),
+  UNIQUE KEY `id` (`id`),
+  UNIQUE KEY `alias` (`alias`) USING BTREE,
   KEY `comnum` (`comnum`),
-  KEY `upnum` (`upnum`),
+  KEY `isTop` (`isTop`),
+  KEY `rpcms_index` (`status`,`cateId`,`specialId`,`authorId`,`title`,`alias`,`tages`,`createTime`,`isTop`,`views`,`upnum`,`upateTime`) USING BTREE,
   KEY `upateTime` (`upateTime`),
-  KEY `status` (`status`)
+  KEY `views` (`views`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='文章列表';
 
 CREATE TABLE IF NOT EXISTS `%pre%nav` (

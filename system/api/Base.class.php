@@ -16,6 +16,9 @@ class Base{
 		if(!isset($this->webConfig['api_status'])){
 			$this->webConfig['api_status']=0;
 		}
+		if(!isset($this->webConfig['api_token_key'])){
+			$this->webConfig['api_token_key']='';
+		}
 		$this->checkStatus();
 		$this->checkthrottle($this->webConfig['api_max_req'],60);
 		$this->getUser();
@@ -84,7 +87,7 @@ class Base{
 		}else if($token=$this->getToken()){
 			$token=base64_decode($token);
 			$tokenData=explode('|',$token);
-			if(count($tokenData) != 2){
+			if(count($tokenData) != 2 || !preg_match('/^[\w]+$/', $tokenData[0])){
 				return;
 			}
 			$userInfo=Db::name('user')->where(array('username'=>_decrypt($tokenData[0])))->find();
@@ -132,7 +135,7 @@ class Base{
 	
 	protected function setToken($user){
 		$appkey=Config::get('app_key');
-		$hash=hash_hmac('sha256', $user['id'].'-'.$appkey, $user['password']);
+		$hash=hash_hmac('sha256', $this->webConfig['api_token_key'].'-'.$user['id'].'-'.$appkey, $user['password']);
 		return base64_encode(_encrypt($user['username']).'|'.$hash);
 	}
 	
@@ -141,7 +144,7 @@ class Base{
 			return false;
 		}
 		$appkey=Config::get('app_key');
-		$hash=hash_hmac('sha256', $user['id'].'-'.$appkey, $user['password']);
+		$hash=hash_hmac('sha256', $this->webConfig['api_token_key'].'-'.$user['id'].'-'.$appkey, $user['password']);
 		return $hash == $token ? true : false;
 	}
 	

@@ -31,6 +31,7 @@ class Category extends base{
 		$children[]=intval($cateId);
 		$LogsMod=new LogsMod();
 		$logData=$LogsMod->page($page)->order($this->getLogOrder(array('a.isTop'=>'desc')))->cate($children)->select();
+		$logData['count']=$category[$cateId]['logNum'];
 		$title=$category[$cateId]['cate_name'];
 		$pageHtml=pageInationHome($logData['count'],$logData['limit'],$logData['page'],'cate',$cateId);
 		$template=!empty($category[$cateId]['temp_list']) ? $category[$cateId]['temp_list'] : 'list';

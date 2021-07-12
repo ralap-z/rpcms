@@ -29,6 +29,7 @@ class Author extends base{
 		}
 		$LogsMod=new LogsMod();
 		$logData=$LogsMod->page($page)->order($this->getLogOrder(array('a.isTop'=>'desc')))->author($userId)->select();
+		$logData['count']=$user[$userId]['logNum'];
 		$title=$user[$userId]['nickname'];
 		$pageHtml=pageInationHome($logData['count'],$logData['limit'],$logData['page'],'author',$userId);
 		$this->setKeywords();

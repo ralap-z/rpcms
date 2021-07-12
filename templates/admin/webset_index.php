@@ -30,12 +30,10 @@
 				<div class="me_input big"><label>附件大小(MB)</label><input type="text" name="fileSize" value="{$option['fileSize']|default=''}"></div>
 				<div class="me_input big">
 					<label>排序方式</label>
-					
-						<div class="me_input me_input_line"><label>创建时间</label><input type="checkbox" name="logOrder[0]" value="id" {if isset($option['logOrder']) && in_array('id',$option['logOrder'])}checked{/if}></div>
-						<div class="me_input me_input_line"><label>修改时间</label><input type="checkbox" name="logOrder[1]" value="updateTime" {if isset($option['logOrder']) && in_array('updateTime',$option['logOrder'])}checked{/if}></div>
-						<div class="me_input me_input_line"><label>智能权重</label><input type="checkbox" name="logOrder[2]" value="weight" {if isset($option['logOrder']) && in_array('weight',$option['logOrder'])}checked{/if}></div>
-						<p class="tips">除首页外的其他列表排序。排序顺序：智能权重>修改时间>创建时间</p>
-					
+					<div class="me_input me_input_line"><label>创建时间</label><input type="checkbox" name="logOrder[0]" value="id" {if isset($option['logOrder']) && in_array('id',$option['logOrder'])}checked{/if}></div>
+					<div class="me_input me_input_line"><label>修改时间</label><input type="checkbox" name="logOrder[1]" value="updateTime" {if isset($option['logOrder']) && in_array('updateTime',$option['logOrder'])}checked{/if}></div>
+					<div class="me_input me_input_line"><label>智能权重</label><input type="checkbox" name="logOrder[2]" value="weight" {if isset($option['logOrder']) && in_array('weight',$option['logOrder'])}checked{/if}></div>
+					<p class="tips">除首页外的其他列表排序。排序顺序：智能权重>修改时间>创建时间</p>
 				</div>
 				<div class="me_input big"><label>权重配比</label><textarea name="logWeight">{$option['logWeight']|default=''}</textarea><p class="tips">仅“智能权重”项勾选时生效，支持变量：views,comnum,upnum，格式：变量=权重数，一行一个</p></div>
 				<div class="me_input me_input_line"><label>启用分类别名</label><input type="checkbox" name="cateAlias" value="1" {if isset($option['cateAlias']) && $option['cateAlias'] == 1}checked{/if}></div>
@@ -46,6 +44,7 @@
 			</div>
 			<div id="tab3" class="tab">
 				<div class="me_input me_input_line"><label>开启API</label><input type="checkbox" name="api_status" value="1" {if isset($option['api_status']) && $option['api_status'] == 1}checked{/if}></div>
+				<div class="me_input big"><label>API-token加密key</label><input type="text" name="api_token_key" value="{$option['api_token_key']|default=''}"><p class="tips">如果API的token泄露，可以更换此参数</a></p></div>
 				<div class="me_input big"><label>API限流(分钟)</label><input type="text" name="api_max_req" value="{$option['api_max_req']|default=''}"><p class="tips">每分钟最大的请求次数，为空或者0时表示不限流，如果需要限流，请先下载并启用<a href="http://app.rpcms.cn/index/app.html?id=116" target="_blank">filecache插件</a></p></div>
 				<br>
 				<div class="me_input"><label>自动跳转</label><input type="checkbox" name="wap_auto" value="1" {if isset($option['wap_auto']) && $option['wap_auto'] == 1}checked{/if}><p class="tips" style="line-height: 2.4rem;">开启后，手机端用户访问将自动跳转到设置的二级域名</p></div>
@@ -62,6 +61,7 @@
 					<span class="text" style="width: auto;background: transparent;">x</span>
 					<input type="number" name="attImgHeight" value="{$option['attImgHeight']|default=''}" placeholder="缩略图高度">
 				</div>
+				<div class="me_input"><label>发布更新缓存</label><input type="checkbox" name="isPostUpCache" value="1" {if isset($option['isPostUpCache']) && $option['isPostUpCache'] == 1}checked{/if}><p class="tips" style="line-height: 2.4rem;">关闭后不会自动更新，需手动更新缓存（标签、分类、专题、统计、文章归档）</p></div>
 			</div>
 			<div id="tab4" class="tab">
 				<div class="me_input me_input_line"><label>评论开启</label><input type="checkbox" name="commentStatus" value="1" {if isset($option['commentStatus']) && $option['commentStatus'] == 1}checked{/if}></div>

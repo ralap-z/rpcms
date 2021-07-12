@@ -46,7 +46,9 @@ function newLogs($limit=10){
 /*随机文章*/
 function randLog($limit=10){
 	$LogsMod=new LogsMod();
-	$logData=$LogsMod->limit($limit)->order('RAND()')->select();
+	$obj=\rp\Db::instance()->query('SELECT ROUND(RAND() * ((SELECT MAX(id) FROM rp_logs)-(SELECT MIN(id) FROM rp_logs)-'.$limit.')+(SELECT MIN(id) FROM rp_logs)) as startId');
+	$id=$obj->result();
+	$logData=$LogsMod->limit($limit)->where(array('a.id'=>array('>',$id['startId'])))->select();
 	return $logData['list'];
 }
 
@@ -87,7 +89,7 @@ function neighbor($logId){
 function related($data,$type='cate',$limit=10){
 	$LogsMod=new LogsMod();
 	//随机获取order传参rand()
-	$res=$LogsMod->order(array('views'=>'desc'))->related($data,$type,$limit);
+	$res=$LogsMod->order(array('a.views'=>'desc'))->related($data,$type,$limit);
 	$html='';
 	foreach($res as $k=>$v){
 		$html.='<li><a href="'.$v['url'].'" title="'.$v['title'].'">'.$v['title'].'</a></li>';

@@ -78,7 +78,7 @@ class Db{
 			foreach($table as $key=>$val){
 				if(is_array($val) && !empty($val)){
 					$jtype=(isset($val[2]) && !empty($val[2])) ? $val[2] : $type;
-					$jointable = is_array($val[0]) ? $val[0][0].' '.$val[0][1] : (false !== strpos($val[0], '(') ? $val[0] : self::$prefix . $val[0]);
+					$jointable = is_array($val[0]) ? $val[0][0].' '.$val[0][1] : (0 === strpos($val[0], '(') ? $val[0] : self::$prefix . $val[0]);
 					$this->join.=" ".$jtype." join ". $jointable;
 					!empty($val[1]) && $this->join.=" on ".$val[1];
 				}
@@ -86,7 +86,7 @@ class Db{
 		}else{
 			if(is_array($table)){
 				$jointable = $table[0].' '.$table[1];
-			}else if(false !== strpos($table, '(')) {
+			}else if(0 === strpos($table, '(')) {
 				$jointable = $table;
             }else{
 				$jointable = self::$prefix . $table;
@@ -184,7 +184,7 @@ class Db{
 		if(is_array($order)){
 			$strs=array();
 			foreach($order as $k=>$v){
-				if(preg_match('/^[\w\.]+$/', $k)){
+				if(preg_match('/^[\w\.\*\+\(\)]+$/', $k)){
 					$v=strtolower($v) == 'asc' ? 'asc' : 'desc';
 					$strs[]=$k." ".$v;
 				}
@@ -192,7 +192,7 @@ class Db{
 			$order=join(" , ",$strs);
 			!empty($order) && $this->order=" order by ".$order;
 		}else{
-			if(preg_match('/^[\w\.]+$/', $order)){
+			if(preg_match('/^[\w\.\*\+\(\)]+$/', $order)){
 				$this->order=" order by ".$order." ".$by;
 			}
 		}
@@ -205,6 +205,7 @@ class Db{
 	}
 	
 	public function find($type="assoc"){
+		$this->limit=' limit 1';
 		$sql="select ".$this->field." from ".self::$table.$this->join.$this->buildWhere().$this->group.$this->order.$this->limit;
 		$this->results=$this->execute($sql);
 		$res=$this->result($type);
@@ -234,6 +235,10 @@ class Db{
 		$res=$this->result($type,"all");
 		$this->_reset_sql();
 		return $res;
+	}
+	
+	public function getSql(){
+		return "select ".$this->field." from ".self::$table.$this->join.$this->buildWhere().$this->group.$this->order.$this->limit;
 	}
 	
 	public function query($sql){
@@ -285,6 +290,7 @@ class Db{
 			}
 		}
 		$this->results->free();
+		$this->results = '';
 		return $res;
 	}
 
@@ -340,7 +346,6 @@ class Db{
 		return $this->execute($sql);
 	}
 	
-	
 	public function insert_id(){
 		return self::$_mysqli->insert_id;
 	}
@@ -365,7 +370,6 @@ class Db{
 		$this->limit = '';
 		$this->order = '';
 		$this->group = '';
-		$this->results = '';
 	}
 	
 	protected function execute($sql){

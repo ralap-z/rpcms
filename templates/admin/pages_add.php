@@ -99,6 +99,7 @@ function sendPostFrom(){
 	if(param.alias && 0 != isalias(param.alias)){
 		$.Msg("别名错误，应由字母、数字、短横线组成");return !1;
 	}
+	$.loading('正在保存数据...');
 	$.post('{:url("pages/dopost")}',param,function(res){
 		if(attrClick){
 			pageId=res.data || '';

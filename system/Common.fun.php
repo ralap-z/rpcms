@@ -138,7 +138,7 @@ function checkForm($type,$val){
 	$pattern=array(
 		'url'=>"/^((https|http|ftp|rtsp|mms)?:\/\/)(([0-9]{1,3}\.){3}[0-9]{1,3}|([0-9a-z_!~*'()-]+\.)*([0-9a-z][0-9a-z-]{0,61})?[0-9a-z]\.[a-z]{2,6})(:[0-9]{1,4})?((\/?)|(\/[0-9a-z_!~*'().;?:@&=+$,%#-]+)+\/?)$/i",
 		'email'=>'/^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/i',
-		'phone'=>'/^1[3,4,5,7,8]\d{9}$/i',
+		'phone'=>'/^1[3,4,5,6,7,8]\d{9}$/i',
 		'telephone'=>'/^0(([1,2]\d)|([3-9]\d{2}))-\d{7,8}$/i',
 		'en'=>'/^[a-z][A-Z]$/i',
 	);
@@ -622,7 +622,7 @@ function get_contents($url){
 }
 
 /*post数据*/
-function http_post($url,$param){
+function http_post($url,$param,$header=array()){
 	$ch = curl_init();
 	if(extension_loaded('zlib')){
 		curl_setopt($ch, CURLOPT_ENCODING, 'gzip');
@@ -636,6 +636,9 @@ function http_post($url,$param){
 		$poststr = $param;
 	}else {
 		$poststr=http_build_query($param);
+	}
+	if(!empty($header)){
+		curl_setopt($ch, CURLOPT_HTTPHEADER, $header);
 	}
 	curl_setopt($ch, CURLOPT_URL, $url);
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1 );

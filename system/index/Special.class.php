@@ -29,6 +29,7 @@ class Special extends base{
 		}
 		$LogsMod=new LogsMod();
 		$logData=$LogsMod->page($page)->where(array('a.specialId'=>$specialId))->order($this->getLogOrder(array('a.isTop'=>'desc')))->select();
+		$logData['count']=$special[$specialId]['logNum'];
 		$title=$special[$specialId]['title'];
 		$pageHtml=pageInationHome($logData['count'],$logData['limit'],$logData['page'],'special',$specialId);
 		$template=!empty($special[$specialId]['temp_list']) ? $special[$specialId]['temp_list'] : 'special';

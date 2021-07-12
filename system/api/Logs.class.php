@@ -12,12 +12,14 @@ class Logs extends Base{
 	private $limit;
 	private $tagesData;
 	private $cateData;
+	private $config;
 	
 	public function __construct(){
 		parent::__construct();
 		$this->limit=!empty(Config::get('webConfig.pagesize')) ? Config::get('webConfig.pagesize') : 10;
 		$this->tagesData=Cache::read('tages');
 		$this->cateData=Cache::read('category');
+		$this->config=Cache::read('option');
 	}
 	
 	public function getList(){
@@ -42,11 +44,12 @@ class Logs extends Base{
 		if(!empty($date)){
 			if(strlen($date) == 6){
 				$date2=date('Ym',strtotime($date.'01'));
-				$wherestr[]='DATE_FORMAT(a.createTime,"%Y%m") = "'.$date2.'"';
+				$dataStart=$date2.'01';
+				$wherestr[]='a.createTime BETWEEN "'.date('Y-m-d 00:00:00',strtotime($dataStart)).'" AND "'.date('Y-m-d 23:59:59',strtotime($dataStart." +1 month -1 day")).'"';
 			}else{
 				$date=str_pad($date,8,0,STR_PAD_RIGHT);
 				$date2=date('Ymd',strtotime($date));
-				$wherestr[]='DATE_FORMAT(a.createTime,"%Y%m%d") = "'.$date2.'"';
+				$wherestr[]='a.createTime BETWEEN "'.date('Y-m-d 00:00:00',strtotime($date2)).'" AND "'.date('Y-m-d 23:59:59',strtotime($date2)).'"';
 			}
 		}
 		if(!empty($tag)){
@@ -59,14 +62,10 @@ class Logs extends Base{
 		}
 		$order=$this->getOrder(array('id'=>'a','isTop'=>'a','views'=>'a','comnum'=>'a','upnum'=>'a','upateTime'=>'a','createTime'=>'a'));
 		
-		$count=Db::name('logs')->alias('a')->join(array(
-			array('category b','a.cateId=b.id','left'),
-			array('user c','a.authorId=c.id','left'),
-		))->where($where)->where(join(' and ',$wherestr))->field('a.id')->count();
-		
+		$count=Db::name('logs')->alias('a')->where($where)->where(join(' and ',$wherestr))->count();
 		$list=Db::name('logs')->alias('a')->join(array(
-			array('category b','a.cateId=b.id','left'),
-			array('user c','a.authorId=c.id','left'),
+			array('category as b force index(PRIMARY)','a.cateId=b.id','left'),
+			array('user as c force index(PRIMARY)','a.authorId=c.id','left'),
 		))->where($where)->where(join(' and ',$wherestr))->field('a.id,a.title,a.authorId,a.cateId,a.excerpt,a.keywords,a.content,a.tages,a.isTop,a.views,a.comnum,a.upnum,a.upateTime,a.createTime,a.status,b.cate_name as cateName,c.nickname as author')->limit(($page-1)*$this->limit.','.$this->limit)->order($order)->select();
 		foreach($list as $k=>$v){
 			$list[$k]['url'] = Url::logs($v['id']);
@@ -186,18 +185,22 @@ class Logs extends Base{
 		$data['status']=intval($param['type']) == 3 ? intval($param['status']) : intval($param['type']);
 		$this->checkAlias($data['alias']);
 		$this->checkTemplate($data['template']);
-		$logAlias=Cache::read('logAlias');
 		if($param['type'] != 2){
 			$data['tages']=$this->replaceTages($param['tagesName']);
 		}
+		$checkAlias=array();
+		if(!empty($data['alias'])){
+			$checkAlias=Db::name('logs')->where(array('alias'=>$data['alias']))->field('id')->find();
+		}else{
+			unset($data['alias']);
+		}
 		if(!empty($logid)){
-			$key=array_search($data['alias'],$logAlias);
-			if(!empty($data['alias']) && ($key && $key != $logid)){
+			if(!empty($checkAlias) && $checkAlias['id'] != $logid){
 				$this->response('',401,'别名重复，请更换别名！');
 			}
 			$res=Db::name('logs')->where('id='.$logid)->update($data);
 		}else{
-			if(!empty($data['alias']) && array_search($data['alias'],$logAlias)){
+			if(!empty($checkAlias)){
 				$this->response('',401,'别名重复，请更换别名！');
 			}
 			$logid=Db::name('logs')->insert($data);
@@ -268,11 +271,11 @@ class Logs extends Base{
 	}
 	
 	private function updateCache(){
+		if(!isset($this->config['isPostUpCache']) || $this->config['isPostUpCache'] != 1) return;
 		Cache::update('tages');
 		Cache::update('category');
 		Cache::update('special');
 		Cache::update('total');
 		Cache::update('logRecord');
-		Cache::update('logAlias');
 	}
 }

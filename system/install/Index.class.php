@@ -69,6 +69,7 @@ class Index{
 	
 	public function step4(){
 		global $App;
+		set_error_handler(null);
 		$data=input('post.');
 		$data['tablepre']=!empty($data['tablepre']) ? $data['tablepre'] : 'me_';
 		if(empty($data['dbhost']) || empty($data['dbuser']) || empty($data['dbpsw']) || empty($data['dbname']) || empty($data['username']) || empty($data['userpsw'])){
@@ -136,8 +137,19 @@ class Index{
 		$this->_sql_execute("INSERT INTO ".$data['tablepre']."config (`cname`,`cvalue`) VALUES ('webconfig','".json_encode($config)."'),('template','defaults'),('temp_defaults', '{\"layout\":\"right\",\"appWidth\":\"1000\",\"bgColor\":\"#f1f1f1\"}');");
 		$this->_sql_execute("INSERT INTO ".$data['tablepre']."links (`sitename`,`sitedesc`,`siteurl`) VALUES ('RPCMS', 'RPCMS内容管理系统', 'http://www.rpcms.cn');");
 		$data['baseUrl']=$App->baseUrl;
-		if($this->setConfig($data)){
-			\rp\Config::set(include CMSPATH . '/config.php');
+		$randStr=randStr(6);
+		if($this->setConfig($data,$randStr)){
+			\rp\Config::set(array(
+				'db'=>array(
+					'hostname'=>$data['dbhost'],
+					'username'=>$data['dbuser'],
+					'password'=>$data['dbpsw'],
+					'database'=>$data['dbname'],
+					'prefix'=>$data['tablepre'],
+					'charset'=>'utf8',
+				),
+				'app_key' => 'rpcms'.$randStr,
+			));
 			$this->_sql_execute("INSERT INTO ".$data['tablepre']."user (`username`,`password`,`nickname`,`role`,`status`) VALUES ('".$data['username']."','".psw($data['userpsw'])."','".$data['username']."','admin','0')");
 			Cache::update();
 			$lock=@file_put_contents(CMSPATH .'/data/install.lock', 'installed');
@@ -146,7 +158,7 @@ class Index{
 		return json(array('code'=>-1, 'msg'=>'config.php写入失败，请确保文件存在并拥有读写权限'));
 	}
 	
-	private function setConfig($data){
+	private function setConfig($data,$randStr){
 		$app_default_path=\rp\Config::get('app_default_path');
 		$config="<?php
 	return array(
@@ -168,7 +180,7 @@ class Index{
 		//默认跳转地址，当没有referer的时候
 		'app_default_referer'    => '".$data['baseUrl']."',
 		//数据加密key
-		'app_key'                => 'rpcms".randStr(6)."',
+		'app_key'                => 'rpcms".$randStr."',
 		//默认module
 		'default_module'         => 'index',
 		//默认controller

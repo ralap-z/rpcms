@@ -48,6 +48,12 @@ class Db{
         return new \rp\Db();
     }
 	
+	public static function close(){
+		self::$_mysqli->close();
+		self::$_mysqli=NULL;
+		self::$instance=NULL;
+	}
+	
 	public static function name($table){
 		$con=self::connect();
 		self::$table=self::$prefix . $table;

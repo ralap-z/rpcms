@@ -58,6 +58,10 @@ class App{
 			$controllerName = '\plugin\\'. $this->route['controller'].'\\'.$this->route['action'];
 			$this->route['action']=isset($this->routePath[3]) ? $this->routePath[3] : 'index';
 		}
+		if(!in_array($this->route['module'],array('index','install','admin','api')) && file_exists(CMSPATH .'/'.$this->route['module'].'_config.php')){
+			\rp\Config::set(include_once CMSPATH .'/'.$this->route['module'].'_config.php');
+			\rp\Db::close();
+		}
 		$controller = new $controllerName($this->params);
 		$action=$this->route['action'];
 		if(!method_exists($controller,$action)){

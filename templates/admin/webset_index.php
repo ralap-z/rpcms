@@ -18,7 +18,7 @@
 				<div class="me_input big"><label>关键字</label><input type="text" name="keyword" value="{$option['keyword']|default=''}"><p class="tips">多个关键词用“,”隔开</p></div>
 				<div class="me_input big"><label>描述</label><textarea name="description">{$option['description']|default=''}</textarea></div>
 				<div class="me_input big"><label>ICP备案号</label><input type="text" name="icp" value="{$option['icp']|default=''}"></div>
-				<div class="me_input big"><label>系统KEY</label><input type="text" name="icp" value="{$option['key']|default=''}"><p class="tips">系统升级、插件安装、授权的唯一标识，请勿随意修改，如果没有KEY，请联系客服获取</p></div>
+				<div class="me_input big"><label>系统KEY</label><input type="text" name="key" value="{$option['key']|default=''}"><p class="tips">系统升级、插件安装、授权的唯一标识，请勿随意修改，如果没有KEY，请联系客服获取</p></div>
 				<div class="me_input big"><label>统计代码</label><textarea name="totalCode">{$option['totalCode']|default=''|stripslashes}</textarea></div>
 			</div>
 			<div id="tab2" class="tab">

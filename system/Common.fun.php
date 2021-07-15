@@ -355,7 +355,7 @@ function formatDate($time,$level=7,$format='Y-m-d H:i:s'){
 	);
 	$level=$level-1;
 	foreach($interval as $k=>$v){
-		if($k <= $level && $v['time'] <= $etime && $etime < $interval[$k+1]['time']){
+		if($k <= $level && $v['time'] <= $etime && (!isset($interval[$k+1]) || (isset($interval[$k+1]) && $etime < $interval[$k+1]['time']))){
 			$d = $etime / $v['time'];
 			return str_replace('%date%',date($format,$time),round($d) . $v['str']);
 		}
@@ -737,19 +737,19 @@ function Debug_Exception_Handler($exception){
 * @param boolean $isAuto 是否自动返回 true false
 */
 function rpMsg($msg, $url = 'javascript:history.back(-1);', $isAuto = false){
+	$trace = debug_backtrace();
+	$code=(isset($trace[1]['function']) && in_array($trace[1]['function'],array('Debug_Error_Handler','Debug_Exception_Handler')) && $msg != '404') ? 500 : 404;
 	if (!headers_sent()){
-		rp\Url::setCode(500);
+		rp\Url::setCode($code);
 		if(ob_get_length() > 0) ob_end_clean();
 	}
-	if ($msg == '404') {
-		rp\Url::setCode(404);
+	if ($msg == '404'){
 		$msg = '抱歉，你所请求的页面不存在！';
 	}
 	if(rp\Config::get('webConfig.isDevelop')){
 		$error=$msg;
 		$heading="Error Occurred";
 		$message=array();
-		$trace = debug_backtrace();
 		if(isset($trace[1]['args'][0]) && is_object($trace[1]['args'][0]) && method_exists($trace[1]['args'][0],'getTrace')){
 			$error.='<br>'.$trace[1]['args'][0]->getFile().'&nbsp;&nbsp;&nbsp;&nbsp;Line:  '.$trace[1]['args'][0]->getLine();
 			$trace=$trace[1]['args'][0]->getTrace();
@@ -768,6 +768,7 @@ function rpMsg($msg, $url = 'javascript:history.back(-1);', $isAuto = false){
 	}else{
 		global $App;
 		if(\rp\View::checkTemp('404')){
+			\rp\View::assign('code',$code);
 			\rp\View::assign('message',$msg);
 			\rp\View::assign('url',$url);
 			\rp\View::assign('isAuto',$isAuto);
@@ -797,7 +798,7 @@ function rpMsg($msg, $url = 'javascript:history.back(-1);', $isAuto = false){
 			<body>
 				<div class="main">
 					<img src="'.$App->appPath.'/static/images/404.png"/>
-					<span class="errorCode">404</span>
+					<span class="errorCode">'.$code.'</span>
 					<p class="errorText">'.$msg.'</p>'.($url != 'none' ? '<p class="btns"><a href="' . $url . '">点击返回</a></p>' : '').'
 				</div>
 			</body>

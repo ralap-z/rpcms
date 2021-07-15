@@ -46,7 +46,8 @@ function newLogs($limit=10){
 /*随机文章*/
 function randLog($limit=10){
 	$LogsMod=new LogsMod();
-	$obj=\rp\Db::instance()->query('SELECT ROUND(RAND() * ((SELECT MAX(id) FROM rp_logs)-(SELECT MIN(id) FROM rp_logs)-'.$limit.')+(SELECT MIN(id) FROM rp_logs)) as startId');
+	$dbConfig = Config::get('db');
+	$obj=\rp\Db::instance()->query('SELECT IF((SELECT MAX(id) FROM '.$dbConfig['prefix'].'logs) >= '.$limit.', ROUND(RAND() * ((SELECT MAX(id) FROM '.$dbConfig['prefix'].'logs)-(SELECT MIN(id) FROM '.$dbConfig['prefix'].'logs)-'.$limit.'))  , 0) as startId');
 	$id=$obj->result();
 	$logData=$LogsMod->limit($limit)->where(array('a.id'=>array('>',$id['startId'])))->select();
 	return $logData['list'];

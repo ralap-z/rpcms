@@ -43,7 +43,7 @@ class Base{
 		if(!empty(self::$user)) return;
 		$user=session('MEUSER');
 		if(!empty($user)){
-			$userData=Db::name('user')->where(array('id'=>intval($user['id']),'role'=>array('in',"'user','member'")))->field('id,username,phone,email,nickname,role,isCheck,status')->find();
+			$userData=Db::name('user')->where(array('id'=>intval($user['id']),'role'=>array('in',"'admin','user','member'")))->field('id,username,phone,email,nickname,role,isCheck,status')->find();
 			$userData['home']='';
 		}else{
 			$userData=array(

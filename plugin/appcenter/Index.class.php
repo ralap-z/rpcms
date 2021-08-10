@@ -51,7 +51,7 @@ class Index extends Plugin{
 		$data=array_slice($query,1);
 		$data['token']=$this->token;
 		$data['host']=$this->App->baseUrl;
-		$data['key']=isset($this->webConfig->key) ? $this->webConfig->key : '';
+		$data['key']=isset($this->webConfig['key']) ? $this->webConfig['key'] : '';
 		switch($action){
 			case 'index':
 				$res=$curl->http_curl('index',$data);
@@ -133,10 +133,12 @@ class Index extends Plugin{
 			case 'update':
 				$appType=input('post.type');
 				$app=strip_tags(input('post.app'));
-				$pluginName='plugin\\'.strtolower($app).'\\Index';
-				$pluginClass=new $pluginName;
-				if(method_exists($pluginClass,'update')){
-					$res=$pluginClass->update();
+				$pluginName=$appType == 'temp' ? 'templates\\index\\'.strtolower($app).'\\Hook' : 'plugin\\'.strtolower($app).'\\Index';
+				if(class_exists($pluginName,false)){
+					$pluginClass=new $pluginName;
+					if(method_exists($pluginClass,'update')){
+						$res=$pluginClass->update();
+					}
 				}
 				return json(array('code'=>200,'msg'=>'应用更新成功！'));
 			default:

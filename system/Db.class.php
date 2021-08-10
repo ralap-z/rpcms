@@ -66,6 +66,21 @@ class Db{
 		return $con;
 	}
 	
+	public static function transaction(){
+		$con=self::connect();
+		self::$_mysqli->begin_transaction();
+	}
+	
+	public static function commit(){
+		$con=self::connect();
+		self::$_mysqli->commit();
+	}
+	
+	public static function rollback(){
+		$con=self::connect();
+		self::$_mysqli->rollback();
+	}
+	
 	public function field($field='*'){
 		if(is_array($field)){
 			$field=join(",",$field);

@@ -186,7 +186,7 @@ class Url{
                 $url = (strpos($url, 'http') === 0 ? '' : $App->baseUrl) . $url;
                 break;
 		}
-        return $isPath ? str_replace($App->baseUrl,'',$url) : $url;
+        return $isPath ? str_replace($App->baseUrl,$App->appPath,$url) : $url;
 	}
 	
 	/*插件URL*/
@@ -230,7 +230,7 @@ class Url{
 				return self::special($data,$page);
 			case 'page':
 				return self::page($data,$page);
-			case 'tag':
+			case 'tages':
 				return self::tag($data,$page);
 		}
 		$url.=!empty($page) ? '_'.$page : '';

@@ -27,7 +27,7 @@ class Cate extends Base{
 		if(!empty($key) && !empty($value)){
 			$data=arraySequence($data,$key[0],$value);
 		}
-		$this->response($data);
+		$this->response(array_values($data));
 	}
 	
 	public function getData(){
@@ -102,7 +102,7 @@ class Cate extends Base{
 			$data['topId']=0;
 		}
 		if(!empty($cateId)){
-			$res=Db::name('category')->where('id='.$cateId)->update($data);
+			$res=Db::name('category')->where(array('id'=>$cateId))->update($data);
 			if(Db::name('nav')->where(array('types'=>2,'typeId'=>$cateId))->find()){
 				$res=Db::name('nav')->where(array('types'=>2,'typeId'=>$cateId))->update(array('navname'=>$data['cate_name']));
 				Cache::update('nav');
@@ -124,9 +124,9 @@ class Cate extends Base{
 		if(empty($id)){
 			$this->response('',401,'无效参数！');
 		}
-		$res=Db::name('category')->where('id='.$id)->dele();//删除分类
-		$res=Db::name('nav')->where('types = 2 and typeId ='.$id)->dele();//删除导航中的该分类
-		$res=Db::name('logs')->where('cateId='.$id)->update(array('cateId'=>0));//将该分类下的文章分类设置为0
+		$res=Db::name('category')->where(array('id'=>$id))->dele();//删除分类
+		$res=Db::name('nav')->where(array('types'=>2,'typeId'=>$id))->dele();//删除导航中的该分类
+		$res=Db::name('logs')->where(array('cateId'=>$id))->update(array('cateId'=>0));//将该分类下的文章分类设置为0
 		Cache::update('category');
 		Cache::update('nav');
 		Hook::doHook('api_cate_dele',array($id));

@@ -137,6 +137,7 @@ class Index{
 		$this->_sql_execute("INSERT INTO ".$data['tablepre']."config (`cname`,`cvalue`) VALUES ('webconfig','".json_encode($config)."'),('template','defaults'),('temp_defaults', '{\"layout\":\"right\",\"appWidth\":\"1000\",\"bgColor\":\"#f1f1f1\"}');");
 		$this->_sql_execute("INSERT INTO ".$data['tablepre']."links (`sitename`,`sitedesc`,`siteurl`) VALUES ('RPCMS', 'RPCMS内容管理系统', 'http://www.rpcms.cn');");
 		$data['baseUrl']=$App->baseUrl;
+		$data['appPath']=ltrim($App->appPath, '/');
 		$randStr=randStr(6);
 		if($this->setConfig($data,$randStr)){
 			\rp\Config::set(array(
@@ -159,7 +160,6 @@ class Index{
 	}
 	
 	private function setConfig($data,$randStr){
-		$app_default_path=\rp\Config::get('app_default_path');
 		$config="<?php
 	return array(
 		//数据库信息
@@ -172,7 +172,7 @@ class Index{
 			'charset'=>'utf8',
 		),
 		//cms安装目录，适用于子文件适用
-		'app_default_path'       => '".$app_default_path."',
+		'app_default_path'       => '".$data['appPath']."',
 		// 域名根，如：rpcms.com
 		'domain_root'        => '',
 		//二级域名绑定关系

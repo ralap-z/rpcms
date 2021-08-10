@@ -50,7 +50,7 @@ class Comment extends Base{
 					$list[$k]['nickname'] = strip_tags($v['nickname']);
 					$list[$k]['email'] = htmlspecialchars($v['email']);
 					$list[$k]['home'] = htmlspecialchars($v['home']);
-					$list[$k]['content'] = strip_tags($v['content']);
+					$list[$k]['content'] = htmlspecialchars($v['content']);
 					!isset($list[$k]['children']) && $list[$k]['children']=array();
 					$v['topId'] != 0 && isset($list[$v['topId']]) && $list[$v['topId']]['children'][]=$v['id'];
 				}
@@ -61,10 +61,13 @@ class Comment extends Base{
 	
 	public function getData(){
 		$id=(int)input('id');
-		$data=Db::name('comment')->where('id='.$id)->find();
+		$data=Db::name('comment')->where(array('id'=>$id))->find();
 		if(empty($data) || $data['status'] != 0){
 			$this->response('',404,'未找到评论数据！');
 		}
+		$data['email']=htmlspecialchars($data['email']);
+		$data['home']=htmlspecialchars($data['home']);
+		$data['content']=htmlspecialchars($data['content']);
 		$this->response($data);
 	}
 	
@@ -99,16 +102,16 @@ class Comment extends Base{
 			$this->response('',401,'系统评论功能已关闭');
 		}
 		if($param['types'] == 'pages'){
-			$res=Db::name('pages')->where('id='.$param['vid'])->field('authorId,isRemark')->find();
+			$res=Db::name('pages')->where(array('id'=>$param['vid']))->field('authorId,isRemark')->find();
 			$msgType='页面';
 		}else{
-			$res=Db::name('logs')->where('id='.$param['vid'])->field('authorId,isRemark')->find();
+			$res=Db::name('logs')->where(array('id'=>$param['vid']))->field('authorId,isRemark')->find();
 			$msgType='文章';
 		}
 		if($res['isRemark'] != 1){
 			$this->response('',401,'该'.$msgType.'评论功能已关闭');
 		}
-		$top=Db::name('comment')->where('id='.$param['topId'])->field('levels')->find();
+		$top=Db::name('comment')->where(array('id'=>$param['topId']))->field('levels')->find();
 		if(!empty($top) && $top['levels'] >= 4){
 			$this->response('',401,'回复级别最大4级');
 		}
@@ -117,6 +120,7 @@ class Comment extends Base{
 		if(!empty($lastTime) && ($newTime-$lastTime) < Config::get('webConfig.commentInterval')){
 			$this->response('',401,'速度太快了，休息一下吧');
 		}
+		$param['username']=isset($param['username']) ? strip_tags($param['username']) : '';
 		$user=self::$user;
 		if(isset($user['id']) && !empty($user['id'])){
 			$param['username']=$user['nickname'];
@@ -231,14 +235,14 @@ class Comment extends Base{
 			$this->response('',401,'无权限操作！');
 		}
 		$id=intval(input('id')) ? intval(input('id')) : 0;
-		$content=!empty(input('content')) ? strip_tags(input('content')) : '';
+		$content=!empty(input('content')) ? trim(input('content')) : '';
 		if(empty($id)){
 			$this->response('',401,'无效参数！');
 		}
 		if(empty($content)){
 			$this->response('',401,'回复内容不能为空');
 		}
-		$comment=Db::name('comment')->where('id='.$id)->find();
+		$comment=Db::name('comment')->where(array('id'=>$id))->find();
 		if(empty($comment)){
 			$this->response('',401,'该评论不存在，回复失败');
 		}
@@ -258,7 +262,7 @@ class Comment extends Base{
 			'status'=>0,
 		);
 		if($comment['status'] != 0){
-			$res=Db::name('comment')->where('id='.$id)->update(array('status'=>0));
+			$res=Db::name('comment')->where(array('id'=>$id))->update(array('status'=>0));
 		}
 		$res=Db::name('comment')->insert($data);
 		$this->updateCommentNum($data);
@@ -296,9 +300,9 @@ class Comment extends Base{
 	
 	private function updateCommentNum($data,$num=1){
 		if(!empty($data['pageId'])){
-			$res=Db::name('pages')->where('id='.$data['pageId'])->setInc('comnum',$num);
+			$res=Db::name('pages')->where(array('id'=>$data['pageId']))->setInc('comnum',$num);
 		}else{
-			$res2=Db::name('logs')->where('id='.$data['logId'])->setInc('comnum',$num);
+			$res2=Db::name('logs')->where(array('id'=>$data['logId']))->setInc('comnum',$num);
 		}
 	}
 	

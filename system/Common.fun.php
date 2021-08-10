@@ -18,7 +18,7 @@ function autoLoadClass($class){
 	$class=ltrim(join('/',$classArr),'\\');
 	$class= preg_replace('/\brp\b/', LIBPATH, $class);
 	$class= preg_replace('/\bplugin\b/', PLUGINPATH, $class);
-	$class= preg_replace('/\btemplate\b/', TMPPATH, $class);
+	$class= preg_replace('/\btemplates\b/', TMPPATH, $class);
 	$class = strtolower(str_replace('\\','/',$class));
 	if(empty($class)){
 		$class = LIBPATH;
@@ -721,7 +721,7 @@ function Debug_Shutdown_Handler(){
 function Debug_Error_Handler($errno, $errstr, $errfile, $errline){
 	if(!rp\Config::get('webConfig.isDevelop')){
 		$errstr=str_replace(CMSPATH,'',$errstr);
-		$errfile=str_replace(CMSPATH,'',$errfile);
+		$errfile='';
 	}
 	rpMsg($errstr.'<br>'.$errfile.'&nbsp;&nbsp;&nbsp;&nbsp;Line:  '.$errline);
 }
@@ -738,7 +738,7 @@ function Debug_Exception_Handler($exception){
 */
 function rpMsg($msg, $url = 'javascript:history.back(-1);', $isAuto = false){
 	$trace = debug_backtrace();
-	$code=(isset($trace[1]['function']) && in_array($trace[1]['function'],array('Debug_Error_Handler','Debug_Exception_Handler')) && $msg != '404') ? 500 : 404;
+	$code=(isset($trace[1]['function']) && in_array($trace[1]['function'],array('Debug_Error_Handler','Debug_Exception_Handler','error')) && $msg != '404') ? 500 : 404;
 	if (!headers_sent()){
 		rp\Url::setCode($code);
 		if(ob_get_length() > 0) ob_end_clean();

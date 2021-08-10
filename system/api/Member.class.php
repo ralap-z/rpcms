@@ -17,7 +17,7 @@ class Member extends Base{
 		$data['username']=!empty(input('post.username')) ? strip_tags(input('post.username')) : '';
 		$data['password']=!empty(input('post.password')) ? strip_tags(input('post.password')) : '';
 		$data['nickname']=!empty(input('post.nickname')) ? strip_tags(input('post.nickname')) : $data['username'];
-		$data['role']=!empty(input('post.role')) ? strip_tags(input('post.role')) : 'member';
+		$data['role']='member';
 		$data['email']=input('post.email');
 		$data['phone']=input('post.phone');
 		$data['status']=0;
@@ -63,9 +63,9 @@ class Member extends Base{
 			$this->response('',401,'用户名或密码不能为空');
 		}
 		if(checkForm('email',$username)){
-			$member=Db::name('user')->where(array('email'=>$username,'role'=>array('in',"'admin','user','member'")))->find();
+			$member=Db::name('user')->where(array('email'=>$username,'role'=>array('in',"'admin','member'")))->find();
 		}else{
-			$member=Db::name('user')->where(array('username'=>$username,'role'=>array('in',"'admin','user','member'")))->find();
+			$member=Db::name('user')->where(array('username'=>$username,'role'=>array('in',"'admin','member'")))->find();
 		}
 		if(empty($member) || $member['password'] != psw($password)){
 			$this->response('',401,'用户名或密码错误');
@@ -126,9 +126,9 @@ class Member extends Base{
 	
 	public function post(){
 		$this->chechAuth(true);
-		$nickname=input('post.nickname');
-		$password=input('post.password');
-		$password2=input('post.password2');
+		$nickname=strip_tags(input('post.nickname'));
+		$password=strip_tags(input('post.password'));
+		$password2=strip_tags(input('post.password2'));
 		if(empty($nickname)){
 			$this->response('',401,'昵称不可为空');
 		}
@@ -139,7 +139,7 @@ class Member extends Base{
 		if(!empty($password)){
 			$updata['password']=psw($password);
 		}
-		if($res=Db::name('user')->where('id='.self::$user['id'])->update($updata)){
+		if($res=Db::name('user')->where(array('id'=>self::$user['id']))->update($updata)){
 			Cache::update('user');
 			Hook::doHook('api_member_post',array(self::$user));
 			$this->response('',200,'修改成功');
@@ -153,7 +153,7 @@ class Member extends Base{
 		if(empty($id)){
 			$this->response('',401,'数据错误');
 		}
-		$member=Db::name('user')->where('id='.$id)->find();
+		$member=Db::name('user')->where(array('id'=>$id))->find();
 		if(empty($member)){
 			$this->response('',401,'获取数据失败');
 		}
@@ -190,12 +190,12 @@ class Member extends Base{
 		if(empty($id)){
 			$this->response('',401,'数据错误');
 		}
-		if(Db::name('user')->where("id=".$id)->find()){
-			$res=Db::name('user')->where('id='.$id)->dele();
-			$res2=Db::name('logs')->where('authorId='.$id)->update(array('authorId'=>self::$user['id']));//更改文章到当前管理名下
-			$res2=Db::name('pages')->where('authorId='.$id)->update(array('authorId'=>self::$user['id']));//更改单页到当前管理名下
-			$res2=Db::name('attachment')->where('authorId='.$id)->update(array('authorId'=>self::$user['id']));//更改附件到当前管理名下
-			$res2=Db::name('comment')->where('authorId='.$id)->update(array('authorId'=>self::$user['id']));//更改评论到当前管理名下
+		if(Db::name('user')->where(array("id"=>$id))->find()){
+			$res=Db::name('user')->where(array('id'=>$id))->dele();
+			$res2=Db::name('logs')->where(array('authorId'=>$id))->update(array('authorId'=>self::$user['id']));//更改文章到当前管理名下
+			$res2=Db::name('pages')->where(array('authorId'=>$id))->update(array('authorId'=>self::$user['id']));//更改单页到当前管理名下
+			$res2=Db::name('attachment')->where(array('authorId'=>$id))->update(array('authorId'=>self::$user['id']));//更改附件到当前管理名下
+			$res2=Db::name('comment')->where(array('authorId'=>$id))->update(array('authorId'=>self::$user['id']));//更改评论到当前管理名下
 			Cache::update();
 			Hook::doHook('api_member_dele',array($id));
 			$this->response($id,200,'删除成功！');

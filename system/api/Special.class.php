@@ -27,7 +27,7 @@ class Special extends Base{
 		if(!empty($key) && !empty($value)){
 			$data=arraySequence($data,$key[0],$value);
 		}
-		$this->response($data);
+		$this->response(array_values($data));
 	}
 	
 	public function getData(){
@@ -94,7 +94,7 @@ class Special extends Base{
 		$this->checkTemplate($data['temp_list'],'列表');
 		if(!empty($specialId)){
 			unset($data['createTime']);
-			$res=Db::name('special')->where('id='.$specialId)->update($data);
+			$res=Db::name('special')->where(array('id'=>$specialId))->update($data);
 		}else{
 			$specialId=Db::name('special')->insert($data);
 		}
@@ -112,8 +112,8 @@ class Special extends Base{
 		if(empty($id)){
 			$this->response('',401,'无效参数！');
 		}
-		$res=Db::name('special')->where('id='.$id)->dele();
-		$res=Db::name('logs')->where('specialId='.$id)->update(array('specialId'=>0));
+		$res=Db::name('special')->where(array('id'=>$id))->dele();
+		$res=Db::name('logs')->where(array('specialId'=>$id))->update(array('specialId'=>0));
 		Cache::update('special');
 		Hook::doHook('api_special_dele',array($id));
 		$this->response($id,200,'操作成功！');

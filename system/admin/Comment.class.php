@@ -85,7 +85,7 @@ class Comment extends Base{
 		$nickname=!empty(input('nickname')) ? strip_tags(input('nickname')) : '';
 		$email=!empty(input('email')) ? strip_tags(input('email')) : '';
 		$home=!empty(input('home')) ? strip_tags(input('home')) : '';
-		$content=!empty(input('content')) ? strip_tags(input('content')) : '';
+		$content=!empty(input('content')) ? trim(input('content')) : '';
 		if(empty($id)){
 			return json(array('code'=>-1,'msg'=>'ID数据错误'));
 		}

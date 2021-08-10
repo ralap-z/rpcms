@@ -16,14 +16,14 @@ class Logs extends Base{
 	
 	public function __construct(){
 		parent::__construct();
-		$this->limit=!empty(Config::get('webConfig.pagesize')) ? Config::get('webConfig.pagesize') : 10;
+		$limit=(int)input('limit');
+		$this->limit=!empty($limit) ? $limit : (!empty(Config::get('webConfig.pagesize')) ? Config::get('webConfig.pagesize') : 10);
 		$this->tagesData=Cache::read('tages');
 		$this->cateData=Cache::read('category');
 		$this->config=Cache::read('option');
 	}
 	
 	public function getList(){
-		$this->chechAuth(true);
 		$cateId=(string)input('cate');//支持多分类，如：1,2,3
 		$authorId=(int)input('author');
 		$date=input('date');//支持202102和20210325
@@ -36,9 +36,7 @@ class Logs extends Base{
 		if(!empty($cateId)){
 			$where['a.cateId']=array('in',$cateId);
 		}
-		if(self::$user['role'] != 'admin'){
-			$where['a.authorId']=self::$user['id'];
-		}elseif(!empty($authorId)){
+		if(!empty($authorId)){
 			$where['a.authorId']=$authorId;
 		}
 		if(!empty($date)){
@@ -72,6 +70,7 @@ class Logs extends Base{
 			$list[$k]['cateUrl'] = Url::cate($v['cateId']);
 			$list[$k]['cateLogNum'] = isset($this->cateData[$v['cateId']]) ? $this->cateData[$v['cateId']]['logNum'] : 0;
 			$list[$k]['tagesData'] = $this->getTages($v['tages']);
+			$list[$k]['images'] = $this->thumb($v['content']);
 		}
 		Hook::doHook('api_logs_list',array(&$list));
 		$page=array('count'=>$count,'pageAll'=>ceil($count / $this->limit),'limit'=>$this->limit,'pageNow'=>$page);
@@ -80,7 +79,8 @@ class Logs extends Base{
 	
 	public function getData(){
 		$id=(int)input('id');
-		$data=Db::name('logs')->where('id='.$id)->find();
+		$password=input('password');
+		$data=Db::name('logs')->where(array('id'=>$id))->find();
 		if(empty($data) || $data['status'] != 0){
 			$this->response('',404,'文章不存在或未发布！');
 		}
@@ -104,6 +104,13 @@ class Logs extends Base{
 		$data['author']=$user[$data['authorId']]['nickname'];
 		$data['authorUrl']=Url::other('author',$data['authorId']);
 		$data['extend'] =json_decode($data['extend'],true);
+		if(!empty($data['password']) && !$this->checkPassword($password,$data['password'])){
+			$data['isShow']=false;
+			$data['content']='';
+		}else{
+			$data['isShow']=true;
+			$data['content']=$this->pregReplaceImg($data['content'],(new \rp\App)->baseUrl);
+		}
 		Hook::doHook('api_logs_detail',array(&$data));
 		unset($data['extend']);
 		unset($data['password']);
@@ -112,7 +119,7 @@ class Logs extends Base{
 	
 	public function praise(){
 		$id=(int)input('id');
-		$data=Db::name('logs')->where('id='.$id)->field('status,upnum')->find();
+		$data=Db::name('logs')->where(array('id'=>$id))->field('status,upnum')->find();
 		if(empty($data) || $data['status'] != 0){
 			$this->response('',404,'文章不存在或未发布！');
 		}
@@ -120,7 +127,7 @@ class Logs extends Base{
 		if(!empty($lastTime)){
 			$this->response('',401,'你已点过赞了！');
 		}
-		$res2=Db::name('logs')->where('id='.$id)->setInc('upnum');
+		$res2=Db::name('logs')->where(array('id'=>$id))->setInc('upnum');
 		if($res2){
 			cookie('me_praise_'.$id,$id,365*24*60*60);
 			$this->response(array('num'=>$res['upnum'] + 1,'result'=>'点赞成功，感谢您的支持！'),200);
@@ -157,7 +164,7 @@ class Logs extends Base{
 			$param['authorId']=self::$user['id'];
 		}
 		if(!empty($logid) && self::$user['role'] != 'admin'){
-			$data=Db::name('logs')->where('id='.$logid)->field('authorId')->find();
+			$data=Db::name('logs')->where(array('id'=>$logid))->field('authorId')->find();
 			(empty($data) || $data['authorId'] != self::$user['id']) && $this->response('',401,'无权限操作！');
 		}
 		$data=array();
@@ -198,7 +205,7 @@ class Logs extends Base{
 			if(!empty($checkAlias) && $checkAlias['id'] != $logid){
 				$this->response('',401,'别名重复，请更换别名！');
 			}
-			$res=Db::name('logs')->where('id='.$logid)->update($data);
+			$res=Db::name('logs')->where(array('id'=>$logid))->update($data);
 		}else{
 			if(!empty($checkAlias)){
 				$this->response('',401,'别名重复，请更换别名！');
@@ -206,7 +213,7 @@ class Logs extends Base{
 			$logid=Db::name('logs')->insert($data);
 		}
 		if(!empty($data['specialId'])){
-			Db::name('special')->where('id='.$data['specialId'])->update(array('updateTime'=>date('Y-m-d H:i:s')));
+			Db::name('special')->where(array('id'=>$data['specialId']))->update(array('updateTime'=>date('Y-m-d H:i:s')));
 		}
 		if($param['type'] != 2){
 			$this->updateCache();

@@ -116,8 +116,16 @@ class App{
 	
 	private function isInstall(){
 		if(!file_exists(CMSPATH .'/data/install.lock')){
+			$rootPath=str_replace(DIRECTORY_SEPARATOR, '/', input('SERVER.DOCUMENT_ROOT'));
+			$runPath=str_replace(DIRECTORY_SEPARATOR, '/', CMSPATH);
+			if($rootPath != $runPath){
+				$appPath=str_replace($rootPath.'/','',$runPath);
+				$this->appPath='/'.$appPath;
+				$this->baseUrl.=$this->appPath;
+				\rp\Config::set('app_default_path',$appPath);
+			}
 			if($this->route['module'] != 'install'){
-				redirect('/install/index');
+				redirect($this->appPath.'/install/index');
 			}
 		}else{
 			$option=Cache::read('option');

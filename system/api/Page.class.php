@@ -14,17 +14,25 @@ class Page extends Base{
 	
 	public function getData(){
 		$id=(int)input('id');
+		$password=input('password');
 		$pages=Cache::read('pages');
 		if(!isset($pages[$id])){
 			$this->response('',404,'页面不存在！');
 		}
 		$data=$pages[$id];
 		$user=Cache::read('user');
-		$content=Db::name('pages')->field('content')->where('id='.$id)->find();
+		$content=Db::name('pages')->field('content')->where(array('id'=>$id))->find();
 		$data['content']=$content['content'];
 		$data['author']=$user[$data['authorId']]['nickname'];
 		$data['authorUrl']=Url::other('author',$data['authorId']);
 		$data['extend'] =json_decode($data['extend'],true);
+		if(!empty($data['password']) && !$this->checkPassword($password,$data['password'])){
+			$data['isShow']=false;
+			$data['content']='';
+		}else{
+			$data['isShow']=true;
+			$data['content']=$this->pregReplaceImg($data['content'],(new \rp\App)->baseUrl);
+		}
 		Hook::doHook('api_page_detail',array(&$data));
 		unset($data['extend']);
 		unset($data['password']);
@@ -55,7 +63,7 @@ class Page extends Base{
 			$param['authorId']=self::$user['id'];
 		}
 		if(!empty($pageId) && self::$user['role'] != 'admin'){
-			$data=Db::name('pages')->where('id='.$pageId)->field('authorId')->find();
+			$data=Db::name('pages')->where(array('id'=>$pageId))->field('authorId')->find();
 			(empty($data) || $data['authorId'] != self::$user['id']) && $this->response('',401,'无权限操作！');
 		}
 		$data=array();
@@ -89,7 +97,7 @@ class Page extends Base{
 				$res=Db::name('nav')->where(array('types'=>3,'typeId'=>$pageId))->update(array('navname'=>$data['title']));
 				Cache::update('nav');
 			}
-			$res=Db::name('pages')->where('id='.$pageId)->update($data);
+			$res=Db::name('pages')->where(array('id'=>$pageId))->update($data);
 		}else{
 			if(!empty($data['alias']) && array_search($data['alias'],$pagesAlias)){
 				$this->response('',401,'别名重复，请更换别名！');

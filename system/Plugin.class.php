@@ -32,7 +32,7 @@ class Plugin{
 		$this->Db=Db::instance();
 		$this->Db_prefix=$options['prefix'];
 		$this->pluginName=$this->getPlugin();
-		$this->pluginPath='/plugin/'.$this->pluginName;
+		$this->pluginPath=$App->appPath.'/plugin/'.$this->pluginName;
 		if($this->App->route['module'] != 'admin'){
 			$indexBase=new \rp\index\base();
 		}

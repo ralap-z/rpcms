@@ -27,7 +27,7 @@ class Tag extends Base{
 		if(!empty($key) && !empty($value)){
 			$data=arraySequence($data,$key[0],$value);
 		}
-		$this->response($data);
+		$this->response(array_values($data));
 	}
 	
 	/*单个标签内容*/
@@ -88,7 +88,7 @@ class Tag extends Base{
 		}
 		$this->checkTemplate($data['template']);
 		if(!empty($tageId)){
-			$res=Db::name('tages')->where('id='.$tageId)->update($data);
+			$res=Db::name('tages')->where(array('id'=>$tageId))->update($data);
 		}else{
 			$tageId=Db::name('tages')->insert($data);
 		}
@@ -106,7 +106,7 @@ class Tag extends Base{
 		if(empty($id)){
 			$this->response('',401,'无效参数！');
 		}
-		$res=Db::name('tages')->where('id='.$id)->dele();
+		$res=Db::name('tages')->where(array('id'=>$id))->dele();
 		if($res){
 			$options = \rp\Config::get('db');
 			$logTagesSQL='UPDATE '.$options['prefix'].'logs set tages=TRIM(BOTH "," FROM replace(concat(",",tages,","), ",'.$id.'", "")) where find_in_set('.$id.',tages)';

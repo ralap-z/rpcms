@@ -2,6 +2,7 @@
 namespace rp\api;
 
 use rp\Config;
+use rp\Hook;
 use rp\Db;
 
 class Base{
@@ -22,6 +23,7 @@ class Base{
 		$this->checkStatus();
 		$this->checkthrottle($this->webConfig['api_max_req'],60);
 		$this->getUser();
+		Hook::doHook('api_begin');
 	}
 	
 	protected function checkStatus(){
@@ -132,11 +134,37 @@ class Base{
 		return !empty($extend) ? addslashes(json_encode($extend)) : '';
 	}
 	
-	
 	protected function setToken($user){
 		$appkey=Config::get('app_key');
 		$hash=hash_hmac('sha256', $this->webConfig['api_token_key'].'-'.$user['id'].'-'.$appkey, $user['password']);
 		return base64_encode(_encrypt($user['username']).'|'.$hash);
+	}
+	
+	protected function thumb($data,$len=0){
+		preg_match_all("|<img[^>]+src=\"([^>\"]+)\"?[^>]*>|is", $data, $img);
+		$thumb=array();
+		if(isset($img[1]) && !empty($img[1])){
+			$max=!empty($len) ? min(count($img[1]),$len) : count($img[1]);
+			for($i=0;$i<$max;$i++){
+				$imgs=$img[1][$i];
+				$newimg=dirname($imgs). '/thum-' .basename($imgs);
+				$thumb[]=file_exists(CMSPATH .'/'. $newimg) ? $newimg : $imgs;
+			}
+		}
+		return $thumb;
+	}
+	protected function pregReplaceImg($content,$prefix){
+		$content = preg_replace_callback('/(<[img|IMG].*?src=[\'\"])([\s\S]*?)([\'\"])[\s\S]*?/i', function($match)use($prefix){
+			if(strstr($match[2], 'http://') == false && strstr($match[2], 'https://') == false){
+				return $match[1].$prefix.$match[2].$match[3];
+			}else{
+				return $match[1].$match[2].$match[3];
+			}
+		} , $content);
+		return $content;
+	}
+	protected function checkPassword($postpwd,$password){
+		return $postpwd == $password;
 	}
 	
 	private function verifyToken($user, $token){

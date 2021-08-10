@@ -71,6 +71,7 @@ class Comment extends base{
 		if(!empty($lastTime) && ($newTime-$lastTime) < Config::get('webConfig.commentInterval')){
 			return $this->msg('速度太快了，休息一下吧',-1);
 		}
+		$param['username']=isset($param['username']) ? strip_tags($param['username']) : '';
 		$user=self::$user;
 		if(isset($user['id']) && !empty($user['id'])){
 			$param['username']=$user['nickname'];

@@ -50,9 +50,9 @@ class Index extends Base{
 	}
 	
 	public function updatePsw(){
-		$nickname=input('post.nickname');
-		$password=input('post.password');
-		$password2=input('post.password2');
+		$nickname=strip_tags(input('post.nickname'));
+		$password=strip_tags(input('post.password'));
+		$password2=strip_tags(input('post.password2'));
 		if(empty($nickname)){
 			return json(array('code'=>-1,'msg'=>'昵称不可为空'));
 		}

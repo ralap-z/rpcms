@@ -70,7 +70,7 @@ class CommentMod{
 				$list[$k]['nickname'] = strip_tags($v['nickname']);
 				$list[$k]['email'] = htmlspecialchars($v['email']);
 				$list[$k]['home'] = htmlspecialchars($v['home']);
-				$list[$k]['content'] = strip_tags($v['content']);
+				$list[$k]['content'] = htmlspecialchars($v['content']);
 				!isset($list[$k]['children']) && $list[$k]['children']=array();
 				$v['topId'] != 0 && isset($list[$v['topId']]) && $list[$v['topId']]['children'][]=$v['id'];
 			}

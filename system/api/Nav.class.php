@@ -11,7 +11,9 @@ class Nav extends Base{
 	}
 	
 	public function getList(){
-		$this->response(Cache::read('nav'));
+		$data=Cache::read('nav');
+		$data=arraySequence($data,'sort','SORT_ASC');
+		$this->response($data);
 	}
 	
 	

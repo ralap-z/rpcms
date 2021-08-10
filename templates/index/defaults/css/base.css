@@ -12,15 +12,14 @@ a:hove { text-decoration: none; color: #000; }
 .f_r{ float: right }
 .win{width: 1100px;}
 
-#flmsg{float:left;position:fixed;left:50%;z-index:99999;top:23%;min-width:15%;max-width:80%;}
-.fl_dev{position:relative;left:-50%;background:rgba(0,0,0,0.6);color:#fff;border-radius:5px;}
-.fl_msgbox{padding:018px;text-align:center;word-break:break-all;white-space:normal;}
-.fl_msgbox.fl_conntent{padding:10px0;}
-.fl_msgbox.fl_title{padding-top:10px;}
-.fl_msgbox.fl_aftertitle{font-size:12px;color:#c7c7c7;}
-.flbtns{height: 30px;line-height: 30px;background: rgb(74, 74, 74);border-radius: 0 0 5px 5px;overflow: hidden;}
-.flbtns .fl_btn{width: 100%; text-align: center; cursor: pointer;}
-.flbtns .fl_btn:hover{background: #0fbbad;}
+.me_msg{float: left;position: fixed;left: 50%;z-index: 99999;top: 23%;min-width: 15%;max-width: 80%;transform: translateX(-50%);background: rgba(0,0,0,0.6);color: #fff;border-radius: 5px;overflow: hidden;}
+.me_msgbox{padding:0 10px;text-align:center;word-break:break-all;white-space:normal;}
+.me_msgbox .me_conntent{padding:10px 0;}
+.me_msgbox .me_title{padding-top:10px;}
+.me_msgbox .me_aftertitle{font-size:12px;color:#c7c7c7;}
+.me_btns{height: 30px;line-height: 30px;background: rgb(74, 74, 74);display: -webkit-box;display: -moz-box;display: -webkit-flex;display: -moz-flex;display: -ms-flexbox;display: flex;}
+.me_btns .me_btn{width: 100%; text-align: center; cursor: pointer;}
+.me_btns .me_btn:hover{background: #0fbbad;}
 
 .pages{text-align: right;padding: 1rem 0 0.5rem;}
 .pages span{padding: 0.3rem 0.65rem;background: #0077dd;color: #fff;border: 1px solid #0077dd;}

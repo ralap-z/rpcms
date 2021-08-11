@@ -99,7 +99,7 @@ class App{
 		\rp\Plugin::ResetAllHook();
 		
 		$tempName=Cache::read('template');
-		$nameF='template\\index\\'.strtolower($tempName['name']).'\\Hook';
+		$nameF='templates\\index\\'.strtolower($tempName['name']).'\\Hook';
 		if(file_exists(TMPPATH . '/index/'. $tempName['name'] .'/Hook.class.php') && class_exists($nameF)){
 			$temp=new $nameF;
 			if(method_exists($temp,'addHook')){

@@ -564,6 +564,8 @@ UE.I18N['en'] = {
         'static':{
             lang_city:"City",
             lang_address:"Address",
+			lang_width:"Width",
+			lang_height:"Height",
             city:{value:"Beijing"},
             lang_search:"Search",
             lang_dynamicmap:"Dynamic map"

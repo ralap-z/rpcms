@@ -568,6 +568,8 @@ UE.I18N['zh-cn'] = {
         'static':{
             lang_city:"城市",
             lang_address:"地址",
+			lang_width:"宽",
+			lang_height:"高",
             city:{value:"北京"},
             lang_search:"搜索",
             lang_dynamicmap:"插入动态地图"

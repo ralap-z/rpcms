@@ -9,6 +9,8 @@
     <!--引用百度地图API-->
     <style type="text/css">
         html, body {
+			width:100%;
+			height:100%;
             margin: 0;
             padding: 0;
             overflow: hidden;
@@ -19,7 +21,7 @@
 
 <body onload="initMap();">
 <!--百度地图容器-->
-<div style="width:697px;height:550px;border:#ccc solid 1px;" id="dituContent"></div>
+<div style="width:100%;height:100%;border:#ccc solid 1px;" id="dituContent"></div>
 </body>
 <script type="text/javascript">
     function getParam(name) {
@@ -28,8 +30,6 @@
     var map, marker;
     var centerParam = getParam('center');
     var zoomParam = getParam('zoom');
-    var widthParam = getParam('width');
-    var heightParam = getParam('height');
     var markersParam = getParam('markers');
     var markerStylesParam = getParam('markerStyles');
 
@@ -39,9 +39,6 @@
         if (!window.BMap) {
             return;
         }
-        var dituContent = document.getElementById('dituContent');
-        dituContent.style.width = widthParam + 'px';
-        dituContent.style.height = heightParam + 'px';
 
         createMap();//创建地图
         setMapEvent();//设置地图事件

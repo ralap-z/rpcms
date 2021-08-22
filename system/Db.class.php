@@ -127,15 +127,17 @@ class Db{
 				if((false === strpos($k, '(') || 0 !== strpos($k, '(')) && (strpos($k, '&') || strpos($k, '|'))){
 					$k='('.$k.')';
 				}
-				$kn=explode('#',str_replace(array('&','|','(',')'),array('#','#','',''),$k));
+				$oldV=$kn=explode('#',str_replace(array('&','|','(',')'),array('#','#','',''),$k));
 				$kn = array_map(function($item){return '/\b'.trim($item).'\b/';}, $kn);
 				$k=str_replace(array('&','|'),array(' and ',' or '),$k);
+				$oldKn = array_map(function($item){return '/{key}/';}, $kn);
 				if(is_array($v)){
 					$v=count($v) == count($v,1) ? $this->parseItem($v) : array_map(array($this,'buildValue'), $v);
 				}else{
 					$v=$this->parseValue($v);
 				}
-				$whereStr[]=preg_replace($kn,$v,$k);
+				$res=preg_replace($kn,$v,$k,1);
+				$whereStr[]=preg_replace($oldKn,$oldV,$res,1);
 			}
 			$this->where=array_merge($this->where,$whereStr);
 		}else{
@@ -159,29 +161,24 @@ class Db{
 				case 'not in':
 				case 'exists':
 				case 'not exists':
-					return '$0 '.$value[0].'('.$value[1].')';
+					return '{key} '.$value[0].'('.$value[1].')';
 					break;
 				case 'between':
 				case 'not between':
-					return '($0 '.$value[0].' \''.$this->escapeString($value[1]).'\' and \''.$this->escapeString($value[2]).'\')';
+					return '({key} '.$value[0].' \''.$this->escapeString($value[1]).'\' and \''.$this->escapeString($value[2]).'\')';
 					break;
 				case 'exp':
-					return "($0 regexp '".$this->escapeString($value[1])."')";
+					return "({key} regexp '".$this->escapeString($value[1])."')";
 					break;
 				case 'find_in_set':
-					return "find_in_set('".$this->escapeString($value[1])."',$0)";
+					return "find_in_set('".$this->escapeString($value[1])."',{key})";
 					break;
 				case 'like':
 				case 'not like':
-					if(is_array($value[1])){
-						$str=join("' ".(isset($value[2]) ? $value[2] : 'or')." $0 ".$value[0]." '",$value[1]);
-					}else{
-						$str=$this->escapeString($value[1]);
-					}
-					return "$0 ".$value[0]." '".$str."'";
+					return "{key} ".$value[0]." '".$this->escapeString($value[1])."'";
 					break;
 				default:
-					return count($value) > 1 ? "$0 ".$value[0]." '".$this->escapeString($value[1])."'" : "$0 = '".$this->escapeString($value[0])."'";
+					return count($value) > 1 ? "{key} ".$value[0]." '".$this->escapeString($value[1])."'" : "{key} = '".$this->escapeString($value[0])."'";
 			}
 		}else{
 			$value = array_map(array($this,'parseValue'), $value);
@@ -190,7 +187,7 @@ class Db{
 	}
 
 	private function parseValue($value){
-		return '$0 '.(in_array(strtolower($value),array('null','not null')) ? 'is '.$value : "= '".$this->escapeString($value)."'");
+		return '{key} '.(in_array(strtolower($value),array('null','not null')) ? 'is '.$value : "= '".$this->escapeString($value)."'");
 	}
 	
 	
@@ -315,7 +312,7 @@ class Db{
 		return $res;
 	}
 
-	public function insert($data=array()){
+	public function insert($data=array(),$modifier=''){
 		if(count($data) == count($data, 1)){
 			$datakey=$data;
 			$dataval=array($data);
@@ -332,19 +329,19 @@ class Db{
 		}
 		$key="(`".join("`,`",$key_arr)."`)";
 		$vals=join(",",$val_arr).";";
-		$sql="insert into ".self::$table.$key." values".$vals;
+		$sql="insert ".$modifier." into ".self::$table.$key." values".$vals;
 		$this->execute($sql);
 		$this->_reset_sql();
 		return !empty($this->insert_id()) ? $this->insert_id() : $this->affected_rows();
 	}
 	
-	public function update($data=array()){
+	public function update($data=array(),$modifier=''){
 		$strs=array();
 		foreach($data as $k=>$v){
 			$strs[]=$v === NULL  ? "`".$k."` = NULL" : "`".$k."` ='".$this->escapeString($v)."'";
 		}
 		$updata=join(" , ",$strs);
-		$sql="update ".self::$table." SET ".$updata.$this->buildWhere();
+		$sql="update ".$modifier." ".self::$table." SET ".$updata.$this->buildWhere();
 		$this->_reset_sql();
 		return $this->execute($sql);
 	}

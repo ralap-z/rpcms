@@ -9,9 +9,9 @@
         .content{width:530px; height: 350px;margin: 10px auto;}
         .content table{width: 100%}
         .content table td{vertical-align: middle;}
-        #city,#address{height:21px;background: #FFF;border:1px solid #d7d7d7; line-height: 21px;}
-        #city{width:60px}
+        #address{height:21px;background: #FFF;border:1px solid #d7d7d7; line-height: 21px;}
         #address{width:130px}
+		#width,#height{width: 40px;}
         #is_dynamic_label span{vertical-align:middle;margin: 3px 0px 3px 3px;}
         #is_dynamic_label input{vertical-align:middle;margin: 3px 3px 3px 50px;}
     </style>
@@ -20,11 +20,13 @@
 <div class="content">
     <table>
         <tr>
-            <td><var id="lang_city"></var>:</td>
-            <td><input id="city" type="text" /></td>
             <td><var id="lang_address"></var>:</td>
             <td><input id="address" type="text" value="" /></td>
             <td><a href="javascript:doSearch()" class="button"><var id="lang_search"></var></a></td>
+			<td><var id="lang_width"></var>:</td>
+            <td><input id="width" type="text" value="" /></td>
+			<td><var id="lang_height"></var>:</td>
+            <td><input id="height" type="text" value="" /></td>
             <td><label id="is_dynamic_label" for="is_dynamic"><input id="is_dynamic" type="checkbox" name="is_dynamic" /><span><var id="lang_dynamicmap"></var></span></label></td>
         </tr>
     </table>
@@ -36,11 +38,7 @@
     map.enableScrollWheelZoom();
     map.enableContinuousZoom();
     function doSearch(){
-        if (!document.getElementById('city').value) {
-            alert(lang.cityMsg);
-            return;
-        }
-        var search = new BMap.LocalSearch(document.getElementById('city').value, {
+        var search = new BMap.LocalSearch("北京", {
             onSearchComplete: function (results){
                 if (results && results.getNumPois()) {
                     var points = [];
@@ -59,7 +57,7 @@
                 }
             }
         });
-        search.search(document.getElementById('address').value || document.getElementById('city').value);
+        search.search(document.getElementById('address').value);
     }
     //获得参数
     function getPars(str,par){
@@ -106,25 +104,25 @@
     dialog.onok = function (){
         var center = map.getCenter();
         var zoom = map.zoomLevel;
-        var size = map.getSize();
-        var mapWidth = size.width;
-        var mapHeight = size.height;
         var point = marker.getPoint();
-
+		var mapWidth=document.getElementById('width').value || '100%';
+		var mapHeight=document.getElementById('height').value || '100%';
         if($G('is_dynamic').checked) {
+			styleStr="width:"+mapWidth+";height:"+mapHeight;
             var URL = editor.options.UEDITOR_HOME_URL,
+				URL =URL.replace(window.location.origin, ""),
                 url = [URL + (/\/$/.test(URL) ? '':'/') + "dialogs/map/show.html" +
                     '#center=' + center.lng + ',' + center.lat,
                     '&zoom=' + zoom,
-                    '&width=' + mapWidth,
-                    '&height=' + mapHeight,
                     '&markers=' + point.lng + ',' + point.lat,
                     '&markerStyles=' + 'l,A'].join('');
-            editor.execCommand('inserthtml', '<iframe class="ueditor_baidumap" src="' + url + '"' + (styleStr ? ' style="' + styleStr + '"' :'') + ' frameborder="0" width="' + (mapWidth+4) + '" height="' + (mapHeight+4) + '"></iframe>');
+            editor.execCommand('inserthtml', '<iframe class="ueditor_baidumap" src="' + url + '"' + (styleStr ? ' style="' + styleStr + '"' :'') + ' frameborder="0"></iframe>');
         } else {
-            var url = "http://api.map.baidu.com/staticimage?center=" + center.lng + ',' + center.lat +
-                    "&zoom=" + zoom + "&width=" + size.width + '&height=' + size.height + "&markers=" + point.lng + ',' + point.lat;
-            editor.execCommand('inserthtml', '<img width="'+ size.width +'"height="'+ size.height +'" src="' + url + '"' + (styleStr ? ' style="' + styleStr + '"' :'') + '/>');
+			mapWidth=parseInt(mapWidth);
+			mapHeight=parseInt(mapHeight);
+			styleStr="width:"+mapWidth+"px;height:"+mapHeight+"px";
+            var url = "http://api.map.baidu.com/staticimage?center=" + center.lng + ',' + center.lat +"&zoom=" + zoom + "&width=" + mapWidth + '&height=' + mapHeight + "&markers=" + point.lng + ',' + point.lat;
+            editor.execCommand('inserthtml', '<img src="' + url + '"' + (styleStr ? ' style="' + styleStr + '"' :'') + '/>');
         }
     };
     document.getElementById("address").focus();

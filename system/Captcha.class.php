@@ -116,7 +116,4 @@ class Captcha{
         $str = substr(md5($str), 8, 10);
         return md5($key . $str);
     }
-	
-	
 }
-//setcookie('captcha_' . crc32($this->guid . $id), md5($this->guid . date("Ymdh") . $_vc->GetCode()), null, $this->cookiespath);

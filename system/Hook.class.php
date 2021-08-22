@@ -88,29 +88,6 @@ class Hook{
 		return $res;
 	}
 	
-	
-	/**
-     * 获取对象类型的参数值
-     * @access protected
-     * @param  string   $className  类名
-     * @param  array    $vars       参数
-     * @return mixed
-     */
-    protected static function getObjectParam($className, &$vars){
-        $array = $vars;
-        $value = array_shift($array);
-
-        if ($value instanceof $className) {
-            $result = $value;
-            array_shift($vars);
-        } else {
-            $result = $this->make($className);
-        }
-
-        return $result;
-    }
-	
-	
 	public static function getHook($hook=null){
 		return !empty($hook) ? (isset(self::$hookData[$hook]) ? self::$hookData[$hook] : null) : self::$hookData;
 	}

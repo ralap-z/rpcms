@@ -49,6 +49,7 @@ class Pages extends base{
 		Hook::doHook('index_logs_detail',array(&$data));
 		$template=!empty($pages[$pageId]['template']) ? $pages[$pageId]['template'] : 'page';
 		$CommentData=(new Comment())->getListByPages($pageId);
+		Hook::doHook('index_comment',array(&$CommentData));
 		$this->setKeywords($pages[$pageId]['seo_key']);
 		$this->setDescription($pages[$pageId]['seo_desc']);
 		$this->assign('listType','page');

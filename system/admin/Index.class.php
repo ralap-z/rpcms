@@ -104,6 +104,7 @@ class Index extends Base{
 		switch($type){
 			case 'all':
 				Cache::update();
+				$this->App->resetHook();
 				break;
 			case 'cms':
 				Cache::update(array('option','total','links','template','waptemplate'));
@@ -128,6 +129,9 @@ class Index extends Base{
 				break;
 			case 'special':
 				Cache::update('special');
+				break;
+			case 'hook':
+				$this->App->resetHook();
 				break;
 			case 'temp':
 				$cashFiles=CMSPATH .'/data/cache/index';

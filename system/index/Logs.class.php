@@ -135,6 +135,7 @@ class Logs extends base{
 			$template='detail';
 		}
 		$CommentData=(new Comment())->getListByLogs($data['id']);
+		Hook::doHook('index_comment',array(&$CommentData));
 		$res=Db::name('logs')->where('id='.$data['id'])->setInc('views');
 		$this->setKeywords($data['keywords']);
 		$this->setDescription($data['excerpt']);

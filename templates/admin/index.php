@@ -21,6 +21,7 @@
 			<li><button type="button" class="rp_btn" data-type="tages">更新标签</button></li>
 			<li><button type="button" class="rp_btn" data-type="pages">更新单页</button></li>
 			<li><button type="button" class="rp_btn" data-type="special">更新专题</button></li>
+			<li><button type="button" class="rp_btn" data-type="hook">重载钩子</button></li>
 			<li><button type="button" class="rp_btn" data-type="temp">清除模板缓存</button></li>
 			<li><button type="button" class="rp_btn" data-type="plugin">清除插件缓存</button></li>
 		</ul>
@@ -35,7 +36,7 @@
 	</div>
 	<script>
 		function getAdminMsg(){
-			$.getJSON("http://www.rpcms.cn/upgrade/message?v={RP.RPCMS_VERSION}", function(res){
+			$.getJSON("//www.rpcms.cn/upgrade/message?v={RP.RPCMS_VERSION}", function(res){
 				$(".adminMsg_list").html("");
 				$.each(res.data, function(i, item){
 					$(".adminMsg_list").append('<li>'+(item.type == 'img' ? '<a href="'+item.url+'" target="_blank"><img src="'+item.title+'"/></a>' : '<a href="'+item.url+'" target="_blank" class="'+(item.class == 1 ? 'c' : '')+'">'+item.title+'</a>')+'</li>');
@@ -62,15 +63,15 @@
 							"data":{"file":c},
 							"dataType":"json",
 							"beforeSend":function(){
-								$.Msg("准备更新"+c);
+								$.loading("准备更新"+c,1);
 							},
 							"success":function(res){
 								exNum++;
-								$.Msg(res.msg);
+								$.loading(res.msg,2,"color:"+(res.code == 200 ? "#10ff62" : "#ff7420"));
 								exNum >= allFile && setTimeout(function(){window.location.reload()},2200);
 							},
 							"error":function(){
-								$.Msg("更新"+c+"失败，服务连接失败<br>");
+								$.loading("更新"+c+"失败，服务连接失败<br>",2);
 							}
 						});	
 					},a*1000);

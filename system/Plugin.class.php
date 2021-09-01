@@ -23,6 +23,7 @@ class Plugin{
 	public $webConfig;
 	public $pluginName;
 	public $pluginPath;
+	public $tempUrl;
 	protected static $instance;
 	public function __construct(){
 		global $App;
@@ -35,6 +36,7 @@ class Plugin{
 		$this->pluginPath=$App->appPath.'/plugin/'.$this->pluginName;
 		if($this->App->route['module'] != 'admin'){
 			$indexBase=new \rp\index\base();
+			$this->tempUrl=$indexBase->tempUrl;
 		}
 	}
 	
@@ -89,7 +91,7 @@ class Plugin{
 			}
 		}
 		$res=Db::name('plugin')->where("ppath='".$plugin."' and status = 0")->find();
-		$config=!empty($res) ? $res['config'] : '';
+		$config=(!empty($res) && !empty($res['config'])) ? $res['config'] : '{}';
 		return json_decode($config,true);
 	}
 	

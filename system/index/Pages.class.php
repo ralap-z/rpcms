@@ -15,17 +15,16 @@ class Pages extends base{
 	}
 	
 	public function index(){
-		if(!isset($this->params[1]) || empty($this->params[1])){
+		if(!isset($this->params['id']) || empty($this->params['id'])){
 			redirect($this->App->baseUrl);
 		}
-		$param=explode('_',$this->params[1]);
-		$page=isset($param[1]) ? intval($param[1]) : 1;
+		$page=isset($this->params['page']) ? intval($this->params['page']) : 1;
 		$pages=Cache::read('pages');
-		if(is_numeric($param[0])){
-			$pageId=intval($param[0]);
+		if(is_numeric($this->params['id'])){
+			$pageId=intval($this->params['id']);
 		}else{
 			$pages2=array_column($pages,NULL,'alias');
-			$pageId=isset($pages2[$param[0]]) ? $pages2[$param[0]]['id'] : '';
+			$pageId=isset($pages2[$this->params['id']]) ? $pages2[$this->params['id']]['id'] : '';
 		}
 		if(empty($pageId) || !isset($pages[$pageId])){
 			rpMsg('当前页面不存在！');

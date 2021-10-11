@@ -12,17 +12,16 @@ class Author extends base{
 	}
 	
 	public function index(){
-		if(!isset($this->params[1]) || empty($this->params[1])){
+		if(!isset($this->params['id']) || empty($this->params['id'])){
 			redirect($this->App->baseUrl);
 		}
-		$data=explode('_',$this->params[1]);
-		$page=isset($data[1]) ? intval($data[1]) : 1;
+		$page=isset($this->params['page']) ? intval($this->params['page']) : 1;
 		$user=Cache::read('user');
-		if(is_numeric($data[0])){
-			$userId=intval($data[0]);
+		if(is_numeric($this->params['id'])){
+			$userId=intval($this->params['id']);
 		}else{
 			$user2=array_column($user,NULL,'nickname');
-			$userId=isset($user2[$data[0]]) ? $user2[$data[0]]['id'] : '';
+			$userId=isset($user2[$this->params['id']]) ? $user2[$this->params['id']]['id'] : '';
 		}
 		if(empty($userId) || !isset($user[$userId])){
 			rpMsg('当前作者不存在！');

@@ -9,6 +9,7 @@
 		<li><label>标签数量</label>{$totalData['tages']}</li>
 		<li><label>评论数量</label>{$totalData['comment']}</li>
 	</ul>
+	<p style="margin-top: 1rem;color: #f00;">提示：前端URL的分页参数默认使用 _ 分割，别名中请勿使用下划线。若别名需使用下划线，请更改路由规则！</p>
 	<div class="cacheUpdate">
 		<div class="title">缓存更新</div>
 		<ul class="contents flex">
@@ -49,8 +50,8 @@
 				var a=$(this).data("type");
 				a && $.ajaxpost("{:url('index/cacheUpdate')}",{'type':a},function(res){
 					$.Msg(res.msg);
-				})
-			})
+				});
+			}),
 			$(document).on("click",".upgradeFiles",function(){
 				var allFile=$(".ids:checked").length,exNum=0;
 				$.each($(".ids:checked"),function(a,b){
@@ -75,8 +76,8 @@
 							}
 						});	
 					},a*1000);
-				})
-			})
+				});
+			}),
 			$(".checkUpgrade").click(function(){
 				$(".cmsUpdate .contents").html('');
 				$.ajaxpost("{:url('upgrade/check')}",{},function(res){
@@ -84,14 +85,14 @@
 						var upgradeHtml='<table class="me_table" style="width: 98%;margin: 0 auto;"><colgroup><col width="5%"><col width="35%"><col width="10%"><col width="20%"><col></colgroup><thead><tr><th>选择</th><th>文件</th><th>方式</th><th>时间</th></tr></thead><tbody class="rowList">';
 						$.each(res.data,function(a,b){
 							upgradeHtml+='<tr><td><input type="checkbox" name="upFiles[]" value="'+b.name+'" class="ids"></td><td>'+b.name+'</td><td>'+b.type+'</td><td>'+b.time+'</td></tr> ';
-						})
+						});
 						upgradeHtml+='</tbody></table><div class="rp_row" style="margin-top: 1rem;margin-left: 1%;"><span class="inblock allCheck">全选</span><button type="button" class="rp_btn upgradeFiles">更新选择项</button></div><script>$(".allCheck").toggleClick(function(){$(".ids").prop("checked", true);},function(){$(".ids").prop("checked", false);});<\/script>';
 						$(".cmsUpdate .contents").html(upgradeHtml);
 					}else{
 						$.Msg(res.msg);
 					}
-				})
-			})
-		})
+				});
+			});
+		});
 	</script>
 {include:/footer}

@@ -147,9 +147,8 @@ $(document).ready(function(){
 			url+=(url.indexOf('?') !== -1 ? "&" : "?")+"order="+order;
 		}
 		window.location.href=url;
-	})
-})
-
+	});
+});
 function logOper(type){
 	var a=getChecked('ids'),
 		b='#oper_'+type;
@@ -161,7 +160,7 @@ function logOper(type){
 	$.ajaxpost("{:url('logs/oper')}",{"type":type, "value":$(b).val(), "ids":a},function(res){
 		$.Msg(res.msg);
 		res.code == 200 && setTimeout(function(){window.location.reload()},2200);
-	})
+	});
 }
 </script>
 {include:/footer}

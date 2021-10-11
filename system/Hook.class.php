@@ -32,6 +32,7 @@ class Hook{
 		if(isset(self::$hookData[$hook])){
 			$key=array_search($actionFun,self::$hookData[$hook]);
 			if($key !== false) unset(self::$hookData[$hook][$key]);
+			if(empty(self::$hookData[$hook])) unset(self::$hookData[$hook]);
 		}
 		return true;
 	}

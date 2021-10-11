@@ -11,12 +11,13 @@ class Index extends Base{
 	}
 	
 	public function index(){
+		$total=Cache::read('total');
 		$totalData=array(
-			'logs'=>Db::name('logs')->where('status = 0')->count(),
-			'page'=>Db::name('pages')->where('status = 0')->count(),
-			'cate'=>Db::name('category')->count(),
-			'tages'=>Db::name('tages')->count(),
-			'comment'=>Db::name('comment')->where('status = 0')->count(),
+			'logs'=>$total['logNum'],
+			'page'=>$total['pageNum'],
+			'cate'=>count(Cache::read('category')),
+			'tages'=>count(Cache::read('tages')),
+			'comment'=>$total['commentNum'],
 		);
 		View::assign('totalData',$totalData);
 		return View::display('/index');

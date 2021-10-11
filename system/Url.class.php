@@ -78,17 +78,63 @@ class Url{
 		return new self;
 	}
 	
-	public static function setUrl($str='index'){
+	public static function setUrl($url='index', $data=array()){
 		global $App;
-		$domainRules = Config::get('domain_root_rules');
 		$module=$App->getUrlModule();
-		$url=$App->baseUrl . (0 !== strpos($str, '/') ? '/'.$module.'/'.$str : $str) .'.'. $App->pageExt;
-		if(!empty($domainRules) && isset($domainRules[$App->subDomain])){
-			$domainRulesPattern=$domainRules[$App->subDomain];
-			$domainPath = array_values(array_filter(explode('/', $domainRulesPattern)));
-			if(!empty($domainPath)){
-				$url=str_replace(trim($domainRulesPattern,'/').'/','',$url);
+		$url=$modulePath=0 !== strpos($url, '/') ? '/'.$module.'/'.$url : $url;
+		$modulePath=$modulePath == '/' ? $modulePath.'index/' : $modulePath;
+		$rules=Route::getRules();
+		$ruleGroup=[];
+		if(!empty($rules)){
+			$ruleGroup=array_column($rules, NULL, 'model');
+		}
+		$isRule=false;
+		if(isset($ruleGroup[$url])){
+			$patternUrl=$ruleGroup[$url]['patternUrl'];
+			$param=$ruleGroup[$url]['param'];
+			foreach($param as $k => $v){
+				$keyVal='';
+				if(isset($data[$v[1]]) && $data[$v[1]] !== '' && $data[$v[1]] !== NULL){
+					$keyVal=$v[2].$data[$v[1]];
+					unset($data[$v[1]]);
+				}
+				$patternUrl=str_replace(['<'.$v[1].'>','<'.$v[1].'?>'], $keyVal.'#', $patternUrl);
 			}
+			$patternUrl=explode('#',rtrim($patternUrl,'#'));
+			if(in_array('',$patternUrl)){
+				foreach(array_keys($patternUrl,'') as $pk=>$pv){
+					$patternUrl[$pv]=$param[$pv][2];
+				}
+			}
+			$url='/'.rtrim(join('',$patternUrl),'/');
+			$isRule=true;
+		}
+		$domainRules = Config::get('domain_root_rules');
+		$rootDomain = Config::get('domain_root');
+		$httpHost=$App::server('HTTP_X_REAL_HOST') ? $App::server('HTTP_X_REAL_HOST') : $App::server('HTTP_HOST');
+		if(empty($rootDomain)){
+			$rootDomain=$httpHost;
+			foreach($domainRules as $dk=>$dv){
+				if(0 === stripos($httpHost, $dk)){
+					$rootDomain=substr($httpHost, strlen($dk)+1);
+					break;
+				}
+			}
+		}
+		foreach($domainRules as $dk=>$dv){
+			if(1 === stripos($modulePath, $dv)){
+				$rootDomain=$dk.'.'.$rootDomain;
+				$url=!$isRule ? str_replace('/'.$dv, '' ,$url) : $url;
+				break;
+			}
+		}
+		$isAbs=$httpHost == $rootDomain ? false : true;
+		$pageExt = in_array($url, ['/', '']) ? '' : '.'.$App->pageExt;
+		$url=($isAbs ? $App::server('REQUEST_SCHEME').'://'.$rootDomain : '') . $App->appPath .$url.$pageExt;
+		$data=array_filter($data);
+		if(!empty($data)){
+			$data=http_build_query($data);
+			$url.='?'.$data;
 		}
 		return $url;
 	}
@@ -100,72 +146,51 @@ class Url{
 	
 	/*文章URL*/
 	public static function logs($logId, $page=null){
-		global $App;
-		$logUrl = $App->baseUrl.'/post/';
 		if(Config::get('webConfig.logAlias')){
 			$res=Db::name('logs')->where(array('id'=>$logId))->field('alias')->find();
-			$logUrl.= !empty($res['alias']) ? $res['alias'] : $logId;
-		}else{
-			$logUrl.= $logId;
+			$logId= !empty($res['alias']) ? $res['alias'] : $logId;
 		}
-		$logUrl.= !empty($page) ? '_'.$page : '';
-		$logUrl.= '.'.$App->pageExt;
-		return $logUrl;
+		return self::setUrl('/index/logs/detail',['id'=>$logId, 'page'=>$page]);
 	}
 	
 	/*分类URL*/
 	public static function cate($cateId, $page=null){
-		global $App;
 		$cate=Cache::read('category');
 		if(!isset($cate[$cateId])){
-			return $App->baseUrl;
+			return '';
 		}
-		$cateUrl = $App->baseUrl.'/category/';
-		$cateUrl.= (Config::get('webConfig.cateAlias') && !empty($cate[$cateId]['alias'])) ? $cate[$cateId]['alias'] : $cateId;
-		$cateUrl.= !empty($page) ? '_'.$page : '';
-		$cateUrl.= '.'.$App->pageExt;
-		return $cateUrl;
+		$cateId= (Config::get('webConfig.cateAlias') && !empty($cate[$cateId]['alias'])) ? $cate[$cateId]['alias'] : $cateId;
+		return self::setUrl('/index/category/index',['id'=>$cateId, 'page'=>$page]);
 	}
 	
 	/*专题URL*/
 	public static function special($specialId, $page=null){
-		global $App;
 		$special=Cache::read('special');
 		if(!isset($special[$specialId])){
-			return $App->baseUrl;
+			return '';
 		}
-		$specialUrl = $App->baseUrl.'/special/';
-		$specialUrl.= (Config::get('webConfig.specialAlias') && !empty($special[$specialId]['alias'])) ? $special[$specialId]['alias'] : $specialId;
-		$specialUrl.= !empty($page) ? '_'.$page : '';
-		$specialUrl.= '.'.$App->pageExt;
-		return $specialUrl;
+		$specialId= (Config::get('webConfig.specialAlias') && !empty($special[$specialId]['alias'])) ? $special[$specialId]['alias'] : $specialId;
+		return self::setUrl('/index/special/index',['id'=>$specialId, 'page'=>$page]);
 	}
 	
 	/*单页URL*/
 	public static function page($pageId){
-		global $App;
 		$pages=Cache::read('pages');
 		if(!isset($pages[$pageId])){
-			return $App->baseUrl;
+			return '';
 		}
-		$pageUrl = $App->baseUrl.'/html/';
-		$pageUrl.= (Config::get('webConfig.pageAlias') && !empty($pages[$pageId]['alias'])) ? $pages[$pageId]['alias'] : $pageId;
-		$pageUrl.='.'.$App->pageExt;
-		return $pageUrl;
+		$pageId= (Config::get('webConfig.pageAlias') && !empty($pages[$pageId]['alias'])) ? $pages[$pageId]['alias'] : $pageId;
+		return self::setUrl('/index/pages/index',['id'=>$pageId]);
 	}
 	
 	/*标签URL*/
 	public static function tag($tagId, $page = null){
-		global $App;
 		$tages=Cache::read('tages');
 		if(!isset($tages[$tagId])){
-			return $App->baseUrl;
+			return '';
 		}
-		$tagUrl = $App->baseUrl.'/tag/';
-		$tagUrl.= (Config::get('webConfig.tagAlias') && !empty($tages[$tagId]['alias'])) ? $tages[$tagId]['alias'] : urlencode($tages[$tagId]['tagName']);
-		$tagUrl.= !empty($page) ? '_'.$page : '';
-		$tagUrl.= '.'.$App->pageExt;
-        return $tagUrl;
+		$tagId= (Config::get('webConfig.tagAlias') && !empty($tages[$tagId]['alias'])) ? $tages[$tagId]['alias'] : $tagId;
+		return self::setUrl('/index/tags/index',['id'=>$tagId, 'page'=>$page]);
 	}
 	
 	/*导航URL*/
@@ -186,42 +211,33 @@ class Url{
                 $url = (strpos($url, 'http') === 0 ? '' : $App->baseUrl) . $url;
                 break;
 		}
-        return $isPath ? str_replace($App->baseUrl,$App->appPath,$url) : $url;
+        return $isPath ? str_replace($App->baseUrl, $App->appPath, $url) : $url;
 	}
 	
 	/*插件URL*/
 	public static function plugin($name, $action=array(), $page=NULL){
-		global $App;
-		$pluginUrl = $App->baseUrl.'/plugin/'.strtolower($name);
-		$pluginUrl.= !empty($action) ? '/'.join('/',$action) : '';
-		$pluginUrl.= !empty($page) ? '_'.$page : '';
-		$pluginUrl.= '.'.$App->pageExt;
-        return $pluginUrl;
+		$name=strtolower($name);
+		$controller=!empty($action[0]) ? $action[0] : 'index';
+		$action=!empty($action[1]) ? $action[1] : 'index';
+		return self::setUrl('/index/plugin/run',['plugin'=>$name, 'controller'=>$controller, 'action'=>$action, 'page'=>$page]);
 	}
 	
 	/*其他URL*/
 	public static function other($name, $data=NULL, $page=NULL){
 		global $App;
-		$url = $App->baseUrl.'/';
 		switch(strtolower($name)){
 			case 'index':
-				$url.='index';
-				break;
+				return self::setUrl('/index/logs/index',['page'=>$page]);
 			case 'author':
-				$url.='author/'.$data;
-				break;
+				return self::setUrl('/index/author/index', ['id'=>$data, 'page'=>$page]);
 			case 'date':
-				$url.='date/'.$data;
-				break;
+				return self::setUrl('/index/logs/dates', ['date'=>$data, 'page'=>$page]);
 			case 'captcha':
-				$url.='captcha'.(!empty($data) ? '/'.$data : '');
-				break;
+				return self::setUrl('/index/base/captcha', ['type'=>$data]);
 			case 'comment':
-				$url.=ltrim($App::server('REDIRECT_URL'),'/').(!empty($page) ? '?comment-page='.$page : '').$data;
-				return $url;
-				break;
+				return ltrim($App::server('REDIRECT_URL'),'/').(!empty($page) ? '?comment-page='.$page : '').$data;
 			case 'search':
-				return $url.='search/?q='.$data.(!empty($page) ? '&page='.$page : '');
+				return self::setUrl('/index/logs/search', ['q'=>$data, 'page'=>$page]);
 			case 'logs':
 				return self::logs($data,$page);
 			case 'cate':
@@ -233,8 +249,5 @@ class Url{
 			case 'tages':
 				return self::tag($data,$page);
 		}
-		$url.=!empty($page) ? '_'.$page : '';
-		$url.='.'.$App->pageExt;
-        return $url;
 	}
 }

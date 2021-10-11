@@ -40,7 +40,7 @@
 				var param={
 					'username':$.trim($('.username').val()),
 					'password':$.trim($('.password').val()),
-				}
+				};
 				if(!param.username || !param.password){
 					$.Msg('请填写所有信息');return !1;
 				}
@@ -50,9 +50,9 @@
 					}else{
 						$.Msg(res.msg);
 					}
-				})
-			})
-		})
+				});
+			});
+		});
 	</script>
 </body>
 </html>

@@ -127,28 +127,26 @@ $(document).ready(function(){
 		$.ajaxpost(url,param,function(res){
 			$.Msg(res.msg);
 			res.code == 200 && setTimeout(function(){window.location.reload()},2200);
-		})
-	})
-	
+		});
+	}),
 	$(".upSort").click(function(){
 		var param=[];
 		$(".sortInput").each(function(a,b){
-			param.push({'id':$(b).parents('tr').data('id'),'value':$.trim($(b).val())})
-		})
+			param.push({'id':$(b).parents('tr').data('id'),'value':$.trim($(b).val())});
+		});
 		$.ajaxpost("{:url('category/upSort')}",{'data':param},function(res){
 			$.Msg(res.msg);
 			res.code == 200 && setTimeout(function(){window.location.reload()},2200);
-		})
-	})
+		});
+	}),
 	$(".delete").click(function(){
 		var id=$(this).parents('tr').data('id');
 		if(!id || !confirm('你确定要删除该分类吗？')){return !1;}
 		$.ajaxpost("{:url('category/dele')}",{'id':id},function(res){
 			$.Msg(res.msg);
 			res.code == 200 && setTimeout(function(){window.location.reload()},2200);
-		})
-	})
-	
+		});
+	}),
 	$(".update").click(function(){
 		var id=$(this).parents('tr').data('id'),
 			box=$(".me_model_cate");
@@ -161,9 +159,9 @@ $(document).ready(function(){
 			}else{
 				$.Msg(res.msg);
 			}
-		})
-	})
-})
+		});
+	});
+});
 function reaset(){
 	var box=$(".me_model_cate");
 	box.data('postType','add').data('updateId','');

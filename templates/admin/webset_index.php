@@ -61,6 +61,7 @@
 					<span class="text" style="width: auto;background: transparent;">x</span>
 					<input type="number" name="attImgHeight" value="{$option['attImgHeight']|default=''}" placeholder="缩略图高度">
 				</div>
+				<div class="me_input"><label>验证码类型</label><select name="captha_style"><option value="1">字符型</option><option value="2">计算型</option></select></div>
 				<div class="me_input"><label>发布更新缓存</label><input type="checkbox" name="isPostUpCache" value="1" {if isset($option['isPostUpCache']) && $option['isPostUpCache'] == 1}checked{/if}><p class="tips" style="line-height: 2.4rem;">关闭后不会自动更新，需手动更新缓存（标签、分类、专题、统计、文章归档）</p></div>
 			</div>
 			<div id="tab4" class="tab">
@@ -104,7 +105,7 @@ $(document).ready(function(){
 			$.Msg(res.msg);
 			res.code == 200 && setTimeout(function(){window.location.reload()},2200);
 		});
-	})
-})
+	});
+});
 </script>
 {include:/footer}

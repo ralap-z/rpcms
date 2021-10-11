@@ -76,16 +76,16 @@ $(document).ready(function(){
 		$.ajaxpost("{:url('plugin/upStatus')}",{'id':a,'status':(b == 1 ? 1 : -1)},function(res){
 			$.Msg(res.msg);
 			res.code == 200 && setTimeout(function(){window.location.reload()},2200);
-		})
-	})
+		});
+	}),
 	$(".delete").click(function(){
 		var id=$(this).parents('tr').data('id');
 		if(!id || !confirm('你确定要删除该插件吗？')){return !1;}
 		$.ajaxpost("{:url('plugin/dele')}",{'id':id},function(res){
 			$.Msg(res.msg);
 			res.code == 200 && setTimeout(function(){window.location.reload()},2200);
-		})
-	})
-})
+		});
+	});
+});
 </script>
 {include:/footer}

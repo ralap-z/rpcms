@@ -128,8 +128,8 @@ $(document).ready(function(){
 		$.ajaxpost("{:url('user/upStatus')}",{'id':a,'status':(b == 0 ? -1 : 0)},function(res){
 			$.Msg(res.msg);
 			res.code == 200 && setTimeout(function(){window.location.reload()},2200);
-		})
-	})
+		});
+	}),
 	$(".sendPost_useradd").click(function(){
 		var type=$(".me_model_user").data('postType') || 'add',
 			updateId=$(".me_model_user").data('updateId') || '',
@@ -155,8 +155,8 @@ $(document).ready(function(){
 		$.ajaxpost(url,param,function(res){
 			$.Msg(res.msg);
 			res.code == 200 && setTimeout(function(){window.location.reload()},2200);
-		})
-	})
+		});
+	}),
 	$(".update").click(function(){
 		var id=$(this).parents('tr').data('id'),
 			box=$(".me_model_user");
@@ -170,17 +170,17 @@ $(document).ready(function(){
 			}else{
 				$.Msg(res.msg);
 			}
-		})
-	})
+		});
+	}),
 	$(".delete").click(function(){
 		var id=$(this).parents('tr').data('id');
 		if(!id || !confirm('你确定要删除该用户吗？')){return !1;}
 		$.ajaxpost("{:url('user/dele')}",{'id':id},function(res){
 			$.Msg(res.msg);
 			res.code == 200 && setTimeout(function(){window.location.reload()},2200);
-		})
-	})
-})
+		});
+	});
+});
 function logOper(type){
 	var a=getChecked('ids'),
 		b='#oper_'+type;
@@ -191,7 +191,7 @@ function logOper(type){
 	$.ajaxpost("{:url('user/oper')}",{"type":type, "value":$(b).val(), "ids":a},function(res){
 		$.Msg(res.msg);
 		res.code == 200 && setTimeout(function(){window.location.reload()},2200);
-	})
+	});
 }
 function reaset(){
 	var box=$(".me_model_user");

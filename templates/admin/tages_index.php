@@ -52,7 +52,7 @@
 	<div class="contentes">
 		<form class="me_form addTages" action="" onSubmit="return false">
 			<div class="me_input me_input_line"><label>名称</label><input type="text" class="tagName" value=""></div>
-			<div class="me_input me_input_line"><label>别名</label><input type="text" class="alias" value="" placeholder="大小写英文、数字、短横线组成；请勿和标签重名"></div>
+			<div class="me_input me_input_line"><label>别名</label><input type="text" class="alias" value="" placeholder="英文、数字、-和_；请勿和标签重名"></div>
 			<div class="me_input me_input_line"><label>模板</label><input type="text" class="template" value=""></div>
 			<div class="me_input"><label>SEO描述</label><textarea class="seo_desc" style="width: calc(100% - 4.5rem);"></textarea></div>
 			<div class="rp_row">
@@ -84,8 +84,8 @@ $(document).ready(function(){
 		$.ajaxpost(url,param,function(res){
 			$.Msg(res.msg);
 			res.code == 200 && setTimeout(function(){window.location.reload()},2200);
-		})
-	})
+		});
+	}),
 	$(".update").click(function(){
 		var id=$(this).parents('tr').data('id'),
 			box=$(".me_model_tages");
@@ -97,17 +97,17 @@ $(document).ready(function(){
 			}else{
 				$.Msg(res.msg);
 			}
-		})
-	})
+		});
+	}),
 	$(".delete").click(function(){
 		var id=$(this).parents('tr').data('id');
 		if(!id || !confirm('你确定要删除所选标签吗？')){return !1;}
 		$.ajaxpost("{:url('tages/dele')}",{'id':id},function(res){
 			$.Msg(res.msg);
 			res.code == 200 && setTimeout(function(){window.location.reload()},2200);
-		})
-	})
-})
+		});
+	});
+});
 function reaset(){
 	var box=$(".me_model_tages");
 	box.data('postType','add').data('updateId','');

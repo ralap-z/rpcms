@@ -12,17 +12,16 @@ class Special extends base{
 	}
 	
 	public function index(){
-		if(!isset($this->params[1]) || empty($this->params[1])){
+		if(!isset($this->params['id']) || empty($this->params['id'])){
 			redirect($this->App->baseUrl);
 		}
-		$data=explode('_',$this->params[1]);
-		$page=isset($data[1]) ? intval($data[1]) : 1;
+		$page=isset($this->params['page']) ? intval($this->params['page']) : 1;
 		$special=Cache::read('special');
-		if(is_numeric($data[0])){
-			$specialId=intval($data[0]);
+		if(is_numeric($this->params['id'])){
+			$specialId=intval($this->params['id']);
 		}else{
 			$special2=array_column($special,NULL,'alias');
-			$specialId=isset($special2[$data[0]]) ? $special2[$data[0]]['id'] : '';
+			$specialId=isset($special2[$this->params['id']]) ? $special2[$this->params['id']]['id'] : '';
 		}
 		if(empty($specialId) || !isset($special[$specialId])){
 			rpMsg('当前专题不存在！');

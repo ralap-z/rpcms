@@ -1,8 +1,5 @@
 <?php if (!defined('CMSPATH')){exit('error!');}?>
 {include:/header}
-<style>
-
-</style>
 <div class="subMenu">
 	{hook:admin_pages_submenu_hook}
 </div>
@@ -63,8 +60,7 @@ $(document).ready(function(){
 	},function(){
 		$(".ids").prop("checked", false);
 	});
-})
-
+});
 function logOper(type){
 	var a=getChecked('ids');
 	if(!a){
@@ -74,7 +70,7 @@ function logOper(type){
 	$.ajaxpost("{:url('pages/dele')}",{"ids":a},function(res){
 		$.Msg(res.msg);
 		res.code == 200 && setTimeout(function(){window.location.reload()},2200);
-	})
+	});
 }
 </script>
 {include:/footer}

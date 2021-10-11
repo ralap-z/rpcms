@@ -12,20 +12,19 @@ class Tags extends base{
 	}
 	
 	public function index(){
-		if(!isset($this->params[1]) || empty($this->params[1])){
+		if(!isset($this->params['id']) || empty($this->params['id'])){
 			redirect($this->App->baseUrl);
 		}
-		$data=explode('_',$this->params[1]);
-		$page=isset($data[1]) ? intval($data[1]) : 1;
+		$page=isset($this->params['page']) ? intval($this->params['page']) : 1;
 		$tages=Cache::read('tages');
 		$tages2=array_column($tages,NULL,'alias');
 		$tages3=array_column($tages,NULL,'tagName');
-		if(is_numeric($data[0])){
-			$tagId=intval($data[0]);
-		}elseif(isset($tages2[$data[0]])){
-			$tagId=$tages2[$data[0]]['id'];
-		}elseif(isset($tages3[$data[0]])){
-			$tagId=$tages3[$data[0]]['id'];
+		if(is_numeric($this->params['id'])){
+			$tagId=intval($this->params['id']);
+		}elseif(isset($tages2[$this->params['id']])){
+			$tagId=$tages2[$this->params['id']]['id'];
+		}elseif(isset($tages3[$this->params['id']])){
+			$tagId=$tages3[$this->params['id']]['id'];
 		}else{
 			$tagId='';
 		}

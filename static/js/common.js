@@ -18,7 +18,7 @@ function getChecked(dom){
     return re.join(',');
 }
 function isalias(a){
-    var reg1=/^[A-Za-z0-9\-]*$/;
+	var reg1=/^[A-Za-z0-9\-\_]*$/;
     if(!reg1.test(a)){
         return 1;
     }else{

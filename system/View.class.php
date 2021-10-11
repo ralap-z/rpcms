@@ -170,9 +170,13 @@ class View{
 		$view=self::instance();
 		$view->includeFile[$tempDir] = filemtime($tempDir);
 		$content=$view->CompileFile(@file_get_contents($tempDir));
-		$content = "<?php if (!defined('CMSPATH')) exit(); /*" . serialize($view->includeFile) . "*/ ?>" . "\n" . $content;
+		$content = "<?php if(!defined('CMSPATH')) exit();/*" . serialize($view->includeFile) . "*/?>" . "\n" . $this->compress_html($content);
 		@file_put_contents($cashFiles, $content);
 		$view->includeFile = array();
+	}
+	
+	private function compress_html($string){
+		return trim(preg_replace(array("/> *([^ ]*) *</","//","'/\*[^*]*\*/'","/\r\n/","/\n/","/\t/",'/>[ ]+</'),array(">\\1<",'','','','','','><'),$string));
 	}
 	
 	private function CompileFile($content){

@@ -13,7 +13,7 @@ class Rss extends base{
 	}
 	
 	public function index(){
-		$type=isset($this->params[1]) ? trim(strip_tags($this->params[1]),'/') : 'baidu';
+		$type=isset($this->params['type']) ? trim(strip_tags($this->params['type']),'/') : 'baidu';
 		switch($type){
 			
 			case 'baidu':

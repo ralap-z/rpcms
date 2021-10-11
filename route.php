@@ -9,66 +9,62 @@
 // | Author: ralap <www.rpcms.cn>
 // +----------------------------------------------------------------------
 
-return array(
+return [
 	array(
-		'model'=>'index/logs/index',
-		'pattern'=>'|^index(_(\d+))?/?$|',
+		'model'=>'/index/logs/index',
+		'pattern'=>'index<page#_?>',
 	),
 	array(
-		'model'=>'index/logs/detail',
-		'pattern'=>'|^post/(\w+)(_(\d+))?/?$|',
+		'model'=>'/index/logs/detail',
+		'pattern'=>'post/<id><page#_?>',
 	),
 	array(
-		'model'=>'index/logs/search',
-		'pattern'=>'|^search?/?$|',
+		'model'=>'/index/logs/search',
+		'pattern'=>'search',
 	),
 	array(
-		'model'=>'index/rss/index',
-		'pattern'=>'|^sitemap(/\w+)?/?$|',
+		'model'=>'/index/rss/index',
+		'pattern'=>'sitemap<type#\?>',
 	),
 	array(
-		'model'=>'index/author/index',
-		'pattern'=>'|^author/(\w+)(_(\d+))?/?$|',
+		'model'=>'/index/author/index',
+		'pattern'=>'author/<id><page#_?>',
 	),
 	array(
-		'model'=>'index/category/index',
-		'pattern'=>'|^category/(\w+)(_(\d+))?/?$|',
+		'model'=>'/index/category/index',
+		'pattern'=>'category/<id><page#_?>',
 	),
 	array(
-		'model'=>'index/special/index',
-		'pattern'=>'|^special/(\w+)(_(\d+))?/?$|',
+		'model'=>'/index/special/index',
+		'pattern'=>'special/<id><page#_?>',
 	),
 	array(
-		'model'=>'index/pages/index',
-		'pattern'=>'|^html/(\w+)(_(\d+))?/?$|',
+		'model'=>'/index/pages/index',
+		'pattern'=>'html/<id>',
 	),
 	array(
-		'model'=>'index/tags/index',
-		'pattern'=>'|^tag/(.*)(_(\d+))?/?$|',
+		'model'=>'/index/tags/index',
+		'pattern'=>'tag/<id><page#_?>',
 	),
 	array(
-		'model'=>'index/logs/dates',
-		'pattern'=>'|^date/(\d{6,8})(_(\d+))?/?$|',
+		'model'=>'/index/logs/dates',
+		'pattern'=>'date/<date><page#_?>',
+		'replace'=>['date'=>'\d{6,8}'],
 	),
 	array(
-		'model'=>'index/comment/add',
-		'pattern'=>'|^comment/(addcom)?/?$|',
+		'model'=>'/index/comment/add',
+		'pattern'=>'comment/addcom',
 	),
 	array(
-		'model'=>'index/plugin/run',
-		'pattern'=>'|^plugin/(\w+)(/\w+)(/\w+)?/?$|',
+		'model'=>'/index/plugin/run',
+		'pattern'=>'plugin/<plugin><controller#\?><action#\?>',
 	),
 	array(
-		'model'=>'index/base/captcha',
-		'pattern'=>'|^captcha(/\w+)?/?$|',
+		'model'=>'/index/base/captcha',
+		'pattern'=>'captcha<type#\?>',
 	),
 	array(
-		'model'=>'index/logs/praise',
-		'pattern'=>'|^praise(/\w+)?/?$|',
-	),
-	array(
-		'model'=>'index/logs/index',
-		'pattern'=>'|^/?([\?&].*)?$|',
-	),
-	
-);
+		'model'=>'/index/logs/praise',
+		'pattern'=>'praise',
+	)
+];

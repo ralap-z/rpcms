@@ -79,11 +79,11 @@ $(document).ready(function(){
 			'error':function(){
 				$.Msg('请求服务器失败');
 			}
-		})
-	})
+		});
+	});
 	pageId && selectAttr(attrReload);
 	$(".sendPost").click(sendPostFrom);
-})
+});
 function sendPostFrom(){
 	var a=$('.me_form').serializeArray(),
 		param={'pageId':pageId};

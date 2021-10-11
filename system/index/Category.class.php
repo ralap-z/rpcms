@@ -12,17 +12,16 @@ class Category extends base{
 	}
 	
 	public function index(){
-		if(!isset($this->params[1]) || empty($this->params[1])){
+		if(!isset($this->params['id']) || empty($this->params['id'])){
 			redirect($this->App->baseUrl);
 		}
-		$data=explode('_',$this->params[1]);
-		$page=isset($data[1]) ? intval($data[1]) : 1;
+		$page=isset($this->params['page']) ? intval($this->params['page']) : 1;
 		$category=Cache::read('category');
-		if(is_numeric($data[0])){
-			$cateId=intval($data[0]);
+		if(is_numeric($this->params['id'])){
+			$cateId=intval($this->params['id']);
 		}else{
 			$category2=array_column($category,NULL,'alias');
-			$cateId=isset($category2[$data[0]]) ? $category2[$data[0]]['id'] : '';
+			$cateId=isset($category2[$this->params['id']]) ? $category2[$this->params['id']]['id'] : '';
 		}
 		if(empty($cateId) || !isset($category[$cateId])){
 			rpMsg('当前栏目不存在！');
@@ -31,7 +30,9 @@ class Category extends base{
 		$children[]=intval($cateId);
 		$LogsMod=new LogsMod();
 		$logData=$LogsMod->page($page)->order($this->getLogOrder(array('a.isTop'=>'desc')))->cate($children)->select();
-		$logData['count']=$category[$cateId]['logNum'];
+		foreach($children as $ck=>$cv){
+			$logData['count']+=$category[$cv]['logNum'];
+		}
 		$title=$category[$cateId]['cate_name'];
 		$pageHtml=pageInationHome($logData['count'],$logData['limit'],$logData['page'],'cate',$cateId);
 		$template=!empty($category[$cateId]['temp_list']) ? $category[$cateId]['temp_list'] : 'list';

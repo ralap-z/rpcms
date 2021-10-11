@@ -137,23 +137,23 @@ $(document).ready(function(){
 			$.Msg("地址不能为空");return !1;
 		}
 		sendPost("{:url('nav/addDiy')}",param);
-	})
+	}),
 	$(".sendPost_cate").click(function(){
 		var ids=[];
 		$(".me_cate_ids").each(function(a,b){
 			$(b).is(":checked") && ids.push($(b).val());
-		})
+		});
 		var param={'topId':$.trim($(".diy_cateTopId").val()),'ids':ids.join(',')};
 		ids.length > 0 && sendPost("{:url('nav/addCate')}",param);
-	})
+	}),
 	$(".sendPost_page").click(function(){
 		var ids=[];
 		$(".page_ids").each(function(a,b){
 			$(b).is(":checked") && ids.push($(b).val());
-		})
+		});
 		var param={'topId':$.trim($(".diy_pageTopId").val()),'ids':ids.join(',')};
 		ids.length > 0 && sendPost("{:url('nav/addPage')}",param);
-	})
+	}),
 	$(".upStatus").click(function(){
 		var _this=$(this),
 			a=_this.parents('tr').data('id'),
@@ -161,32 +161,32 @@ $(document).ready(function(){
 		$.ajaxpost("{:url('nav/upStatus')}",{'id':a,'status':(b == 0 ? 1 : 0)},function(res){
 			$.Msg(res.msg);
 			res.code == 200 && setTimeout(function(){window.location.reload()},2200);
-		})
-	})
+		});
+	}),
 	$(".upSort").click(function(){
 		var param=[];
 		$(".sortInput").each(function(a,b){
 			param.push({'id':$(b).parents('tr').data('id'),'value':$.trim($(b).val())})
-		})
+		});
 		$.ajaxpost("{:url('nav/upSort')}",{'data':param},function(res){
 			$.Msg(res.msg);
 			res.code == 200 && setTimeout(function(){window.location.reload()},2200);
-		})
-	})
+		});
+	}),
 	$(".delete").click(function(){
 		var id=$(this).parents('tr').data('id');
 		if(!id || !confirm('你确定要删除所选单页吗？')){return !1;}
 		$.ajaxpost("{:url('nav/dele')}",{'id':id},function(res){
 			$.Msg(res.msg);
 			res.code == 200 && setTimeout(function(){window.location.reload()},2200);
-		})
-	})
-})
+		});
+	});
+});
 function sendPost(url,param){
 	$.ajaxpost(url,param,function(res){
 		$.Msg(res.msg);
 		res.code == 200 && setTimeout(function(){window.location.reload()},2200);
-	})
+	});
 }
 </script>
 {include:/footer}

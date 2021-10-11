@@ -116,7 +116,7 @@ $(document).ready(function(){
 			var data=res.data;
 			$(".replayId").val(a),$(".nickname").text(data.nickname),$(".createTime").text(data.createTime),$(".commentContent").text(data.content),$(".commentTips").text(data.status == 1 ? "该评论未审核，提交回复将自动审核" : "");
 		}));
-	})
+	}),
 	$(".sendPost_replay").click(function(){
 		var param={
 			"id":$(".replayId").val(),
@@ -131,8 +131,8 @@ $(document).ready(function(){
 		$.ajaxpost("{:url('comment/replay')}",param,function(res){
 			$.Msg(res.msg);
 			res.code == 200 && setTimeout(function(){window.location.reload()},2200);
-		})
-	})
+		});
+	}),
 	$(".sendPost_upate").click(function(){
 		var param={
 			"id":$(".up_id").val(),
@@ -153,25 +153,24 @@ $(document).ready(function(){
 		$.ajaxpost("{:url('comment/doUpdate')}",param,function(res){
 			$.Msg(res.msg);
 			res.code == 200 && setTimeout(function(){window.location.reload()},2200);
-		})
-	})
+		});
+	}),
 	$(".update").click(function(){
 		var id=$(this).parents("tr").data("id");
 		id && ($(".veil").show(),$(".me_model_update").show(),$.ajaxpost("{:url('comment/getInfo')}",{"id":id},function(res){
 			var data=res.data;
 			$(".up_id").val(id),$(".up_nickname").val(data.nickname),$(".up_email").val(data.email),$(".up_home").val(data.home),$(".up_content").val(data.content);
 		}));
-	})
+	}),
 	$(".delete").click(function(){
 		var id=$(this).parents("tr").data("id");
 		if(!id || !confirm('你确定要删除该评论吗？')){return !1;}
 		$.ajaxpost("{:url('comment/oper')}",{"type":"dele", "ids":id},function(res){
 			$.Msg(res.msg);
 			res.code == 200 && setTimeout(function(){window.location.reload()},2200);
-		})
-	})
-})
-
+		});
+	});
+});
 function logOper(type){
 	var a=getChecked('ids');
 	if(!a){
@@ -181,7 +180,7 @@ function logOper(type){
 	$.ajaxpost("{:url('comment/oper')}",{"type":type, "ids":a},function(res){
 		$.Msg(res.msg);
 		res.code == 200 && setTimeout(function(){window.location.reload()},2200);
-	})
+	});
 }
 </script>
 {include:/footer}

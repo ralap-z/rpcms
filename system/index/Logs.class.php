@@ -19,7 +19,7 @@ class Logs extends base{
 	
 	public function index(){
 		$total=Cache::read('total');
-		$page=isset($this->params[2]) ? intval($this->params[2]) : 1;
+		$page=isset($this->params['page']) ? intval($this->params['page']) : 1;
 		$logData=$this->LogsMod->page($page)->order(array('a.upateTime'=>'desc','a.id'=>'desc'))->select();
 		$logData['count']=!empty($total) ? $total['logNum'] : 0;
 		$pageHtml=pageInationHome($logData['count'],$logData['limit'],$logData['page'],'index');
@@ -32,8 +32,8 @@ class Logs extends base{
 	}
 	
 	public function dates(){
-		$page=isset($this->params[3]) ? intval($this->params[3]) : 1;
-		$dateStr=isset($this->params[1]) ? strip_tags(strDeep($this->params[1])) : '';	
+		$page=isset($this->params['page']) ? intval($this->params['page']) : 1;
+		$dateStr=isset($this->params['date']) ? strip_tags(strDeep($this->params['date'])) : '';
 		if(empty($dateStr)){
 			rpMsg('当前栏目不存在！');
 		}
@@ -62,13 +62,13 @@ class Logs extends base{
 	}
 	
 	public function search(){
-		if(Hook::hasHook('index_search')){
-			return Hook::doHook('index_search',array(),true)[0];
-		}
-		$key=input('q');
-		$page=intval(input('page')) ? intval(input('page')) : 1;
+		$key=isset($this->params['q']) ? $this->params['q'] : input('q');
+		$page=isset($this->params['page']) ? intval($this->params['page']) : (intval(input('page')) ? intval(input('page')) : 1);
 		if(empty($key)){
 			redirect($this->App->baseUrl);
+		}
+		if(Hook::hasHook('index_search')){
+			return Hook::doHook('index_search',array($key,$page),true)[0];
 		}
 		$logData=$this->LogsMod->title($key)->page($page)->select();
 		$logData['count']=$this->LogsMod->getCount();
@@ -85,7 +85,7 @@ class Logs extends base{
 	}
 	
 	public function detail(){
-		$dateStr=isset($this->params[1]) ? strip_tags(strDeep($this->params[1])) : '';
+		$dateStr=isset($this->params['id']) ? strip_tags(strDeep($this->params['id'])) : '';
 		if(is_numeric($dateStr)){
 			$where=array('id'=>intval($dateStr));
 		}else{

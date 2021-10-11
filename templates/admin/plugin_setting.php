@@ -12,6 +12,6 @@
 <script>
 $(document).ready(function(){
 	$(".menu_tree").find(".menu_item[data-type='plugin']").addClass('active');
-})
+});
 </script>
 {include:/footer}

@@ -33,6 +33,10 @@ class App{
 		$this->diyAdmin=Config::get('diy_admin');
 	}
 	
+	public function __destruct(){
+		\rp\Db::close();
+	}
+	
 	public function run(){
 		register_shutdown_function('Debug_Shutdown_Handler');
 		set_error_handler('Debug_Error_Handler');
@@ -211,7 +215,6 @@ class App{
 			if(!empty($domainPath)){
 				$domainPath=array_merge($domainPath, array_filter(explode('/', strtolower($this->path()))));
 				$this->route=$this->parseModule($domainPath);
-				return true;
 			}
 		}
 		$pluginRouteArr=\rp\Hook::doHook('cms_index_begin');
@@ -223,7 +226,7 @@ class App{
 		}
 		if(file_exists(CMSPATH . '/route.php')){
 			$rules=include CMSPATH . '/route.php';
-			$rules=array_merge($pluginRoute,$rules);
+			$rules=array_merge($rules,$pluginRoute);
 			Route::rules($rules);
 			Route::subDomain($this->subDomain);
 		}
@@ -258,7 +261,7 @@ class App{
 			$this->path = str_replace(Config::get('app_default_path'), '', $this->path);
 			$this->path = strip_tags(trim($this->path, '/'));
 		}
-		return $this->path;
+		return !empty($this->path) ? $this->path : 'index';
 	}
 	
 	/**

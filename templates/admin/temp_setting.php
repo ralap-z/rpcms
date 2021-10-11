@@ -4,6 +4,6 @@
 <script>
 $(document).ready(function(){
 	$(".menu_tree").find(".menu_item[data-type='temp']").addClass('active');
-})
+});
 </script>
 {include:/footer}

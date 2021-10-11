@@ -84,7 +84,7 @@ $(document).ready(function(){
 		}else{
 			$(".imgUpload").append('<img src="'+(window.URL.createObjectURL(a))+'"/>');
 		}
-	})
+	}),
 	$(".sendPost_special").click(function(){
 		var param={
 			'title':$.trim($(".special_title").val()),
@@ -128,18 +128,16 @@ $(document).ready(function(){
 			'error':function(){
 				$.Msg('服务端响应错误');
 			}
-		})
-	})
-	
+		});
+	}),
 	$(".delete").click(function(){
 		var id=$(this).parents('tr').data('id');
 		if(!id || !confirm('你确定要删除该专题吗？')){return !1;}
 		$.ajaxpost("{:url('special/dele')}",{'id':id},function(res){
 			$.Msg(res.msg);
 			res.code == 200 && setTimeout(function(){window.location.reload()},2200);
-		})
-	})
-	
+		});
+	}),
 	$(".update").click(function(){
 		var id=$(this).parents('tr').data('id'),
 			box=$(".me_model_special");
@@ -152,9 +150,9 @@ $(document).ready(function(){
 			}else{
 				$.Msg(res.msg);
 			}
-		})
-	})
-})
+		});
+	});
+});
 function reaset(){
 	var box=$(".me_model_special");
 	box.data('postType','add').data('updateId','');

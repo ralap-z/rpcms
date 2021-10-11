@@ -26,8 +26,8 @@
 				var a=$(this).data("step"),
 					b="getStep"+a;
 				a && window[b] && window[b]();
-			})
-		})
+			});
+		});
 		function getStep1(){
 			$.ajax({
 				url:"{:url('index/step1')}",
@@ -41,7 +41,7 @@
 				error:function(){
 					alert("数据获取失败");
 				}
-			})
+			});
 		}
 		function getStep2(){
 			$.ajax({
@@ -59,7 +59,7 @@
 				error:function(){
 					alert("数据获取失败");
 				}
-			})
+			});
 		}
 		function getStep3(){
 			var a=$(".content").find(".step2_item font").length;
@@ -133,7 +133,7 @@
 				error:function(){
 					alert("数据获取失败");
 				}
-			})
+			});
 		}
 	</script>
 </body>

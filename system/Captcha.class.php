@@ -19,28 +19,59 @@ class Captcha{
 	private $code='';
 	private $width;
 	private $height;
+	private $types;
 	private $expire=60;
 	
 	public function __construct(){
 		$this->width=Config::get('captha_style_width');
 		$this->height=Config::get('captha_style_height');
+		$this->types=Config::get('webConfig.captha_style');
+		if(empty($this->types)){
+			$this->types=1;
+		}
 	}
 	
 	public function outImg($id=''){
-		$this->createCode();
-		$image = imagecreate($this->width,$this->height);
-		$bg = imagecolorallocate($image, mt_rand(200, 255), mt_rand(200, 255), mt_rand(200, 255));
+		$image=imagecreate($this->width,$this->height);
+		$bg=imagecolorallocate($image, mt_rand(200, 255), mt_rand(200, 255), mt_rand(200, 255));
 		imagefill($image, 0, 0, $bg);
-		$square = $this->width * $this->height;
-		$effects = mt_rand($square / 1000, $square / 500);
-		for ($i = 0; $i < $effects; $i++){
-			$this->drawLine($image, $this->width, $this->height);
-		}
-		for($i = 0; $i < strlen($this->code); $i++){
-			$x = $i * 13 + mt_rand(0, 4);
-			$y = mt_rand(0, 3);
-			$color = imagecolorallocate($image, mt_rand(1, 100), mt_rand(1, 100), mt_rand(1, 100));
-			imagechar($image, 5, $x + 10, $y + 3, $this->code[$i], $color);
+		if($this->types == 1){
+			$this->createCode();
+			$square=$this->width * $this->height;
+			$effects=mt_rand($square / 1000, $square / 500);
+			for($i = 0; $i < $effects; $i++){
+				$this->drawLine($image, $this->width, $this->height);
+			}
+			for($i = 0; $i < strlen($this->code); $i++){
+				$x = $i * 13 + mt_rand(0, 4);
+				$y = mt_rand(0, 3);
+				$color = imagecolorallocate($image, mt_rand(1, 100), mt_rand(1, 100), mt_rand(1, 100));
+				imagechar($image, 5, $x + 10, $y + 3, $this->code[$i], $color);
+			}
+		}else{
+			$codeStr=[rand(1,9),'','','=','?'];
+			$codeStr[2]=rand(0,$codeStr[0]);
+			switch(rand(1,3)){
+				case 1:
+					$codeStr[1]='+';
+					$this->code = $codeStr[0] + $codeStr[2];
+					break;
+				case 2:
+					$codeStr[1]='-';
+					$this->code = $codeStr[0] - $codeStr[2];
+					break;
+				case 3:
+					$codeStr[1]='x';
+					$this->code = $codeStr[0] * $codeStr[2];
+					break;
+			}
+			$codeNX=0;
+			for($i = 0; $i < 5; $i++){
+				$x = $i * 13 + mt_rand(0, 4);
+				$y = mt_rand(0, 3);
+				$color = imagecolorallocate($image, mt_rand(1, 100), mt_rand(1, 100), mt_rand(1, 100));
+				imagechar($image, 5, $x + 10, $y + 3, $codeStr[$i], $color);
+			}
 		}
 		$this->postEffect($image);
 		$key=$this->authcode($this->seKey);
@@ -52,6 +83,9 @@ class Captcha{
 	}
 	
 	public function check($code, $id = ''){
+		if(Hook::hasHook('Captcha_check')){
+			return Hook::doHook('Captcha_check',array($code, $id),true)[0];
+		}
 		$key = $this->authcode($this->seKey) . $id;
         $secode = session($key);		
         if (empty($code) || empty($secode)) {

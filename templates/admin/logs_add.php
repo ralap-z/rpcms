@@ -49,7 +49,7 @@
 		</select></div>
 		<div class="me_input"><label>作者</label><select name="authorId">{$authorHtml}</select></div>
 		<div class="me_input"><label>专题</label><select name="specialId">{$specialHtml}</select></div>
-		<div class="me_input"><label>别名</label><input type="text" name="alias" value="{$logData['alias']|default=''}" placeholder="仅大小写字母数字和-"></div>
+		<div class="me_input"><label>别名</label><input type="text" name="alias" value="{$logData['alias']|default=''}" placeholder="仅字母、数字、-和_"></div>
 		<div class="me_input"><label>密码</label><input type="text" name="password" value="{$logData['password']|default=''}"></div>
 		<div class="me_input"><label>模板</label><input type="text" name="template" placeholder="指定模板请输入模板名称" value="{$logData['template']|default=''}"></div>
 		<div class="me_input"><label>时间</label><input type="text" name="createTime" value="{$logData['createTime']|default=date('Y-m-d H:i:s')}"></div>
@@ -89,11 +89,11 @@ $(document).ready(function(){
 		$(".taglist").find("a").length <= 0 && $.ajaxpost('{:url("tages/getall")}',param,function(res){
 			$(".taglist").html(res.data);
 			$(".taglist").tagTo("#tagesName");
-		})
-	})
+		});
+	}),
 	$("#excerptBtn").click(function(){
 		$("#excerpt").slideToggle("fast");
-	})
+	}),
 	$(".uploadBtn").click(function(){
 		var formData = new FormData(),
 			file=$('.attrFile')[0].files[0];
@@ -129,13 +129,12 @@ $(document).ready(function(){
 			'error':function(){
 				$.Msg('请求服务器失败');
 			}
-		})
-	})
-	
+		});
+	}),
 	$(".sendPost").click(sendPostFrom);
 	logtype == 2 && setTimeout("sendPostFrom()", 60000);
 	logid && selectAttr(attrReload);
-})
+});
 function sendPostFrom(){
 	if(ispost) return !1;
 	ispost=true;
@@ -180,7 +179,6 @@ function sendPostFrom(){
 		}
 	},"json");
 }
-
 function arrRemove(arr, rm) {
 	for(var i = 0, n = 0; i < arr.length; ++i){
 		if(arr[i] != rm) {
@@ -205,7 +203,7 @@ $.fn.tagTo = function(target, seperator, tclass) {
 				arr.push(text),$(this).addClass(tclass);
 			}
 			arr=arr.filter(function(s){return s && s;});
-			target.val(arr.join(seperator))
+			target.val(arr.join(seperator));
             return false;
         });
     }

@@ -65,7 +65,7 @@ class Base{
 	}
 	
 	public function captcha(){
-		$id=isset($this->param[1]) ? trim(strip_tags($this->param[1]),'/') : '';
+		$id=isset($this->param['type']) ? trim(strip_tags($this->param['type']),'/') : '';
 		(new \rp\Captcha())->outImg($id);
 	}
 	

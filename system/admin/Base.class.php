@@ -38,8 +38,8 @@ class Base{
 	
 	protected function checkAlias($alias=''){
 		if(!empty($alias)){
-			if(!preg_match('/^(?!\d+$)[A-Za-z0-9\-]+$/u',$alias)){
-				return json(array('code'=>-1, 'msg'=>'别名错误，应由字母、数字、短横线组成'));
+			if(!preg_match('/^(?!\d+$)[A-Za-z0-9\-\_]+$/u',$alias)){
+				return json(array('code'=>-1, 'msg'=>'别名错误，应由字母、数字、下划线、短横线组成'));
 			}
 			if(in_array($alias,$this->me_alias)){
 				return json(array('code'=>-1, 'msg'=>'别名重复，请更换别名'));

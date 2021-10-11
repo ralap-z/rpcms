@@ -91,18 +91,18 @@ $(document).ready(function(){
 		$.ajaxpost("{:url('links/dopost')}",param,function(res){
 			$.Msg(res.msg);
 			res.code == 200 && setTimeout(function(){window.location.reload()},2200);
-		})
-	})
+		});
+	}),
 	$(".upSort").click(function(){
 		var param=[];
 		$(".sortInput").each(function(a,b){
 			param.push({'id':$(b).parents('tr').data('id'),'value':$.trim($(b).val())})
-		})
+		});
 		$.ajaxpost("{:url('links/upSort')}",{'data':param},function(res){
 			$.Msg(res.msg);
 			res.code == 200 && setTimeout(function(){window.location.reload()},2200);
-		})
-	})
+		});
+	}),
 	$(".upStatus").click(function(){
 		var _this=$(this),
 			a=_this.parents('tr').data('id'),
@@ -117,8 +117,8 @@ $(document).ready(function(){
 		$.ajaxpost("{:url('links/upStatus')}",{'id':a,'status':status},function(res){
 			$.Msg(res.msg);
 			res.code == 200 && setTimeout(function(){window.location.reload()},2200);
-		})
-	})
+		});
+	}),
 	$(".update").click(function(){
 		var id=$(this).parents('tr').data('id'),
 			box=$(".me_model_links");
@@ -131,18 +131,17 @@ $(document).ready(function(){
 			}else{
 				$.Msg(res.msg);
 			}
-		})
-	})
-
+		});
+	}),
 	$(".delete").click(function(){
 		var id=$(this).parents('tr').data('id');
 		if(!id || !confirm('你确定要删除该友链吗？')){return !1;}
 		$.ajaxpost("{:url('links/dele')}",{'id':id},function(res){
 			$.Msg(res.msg);
 			res.code == 200 && setTimeout(function(){window.location.reload()},2200);
-		})
-	})
-})
+		});
+	});
+});
 function reaset(){
 	var box=$(".me_model_links");
 	box.data('updateId','');

@@ -56,16 +56,16 @@ $(document).ready(function(){
 		$.ajaxpost("{:url('temp/upTemp')}",{'value':a},function(res){
 			$.Msg(res.msg);
 			res.code == 200 && setTimeout(function(){window.location.reload()},2200);
-		})
-	})
+		});
+	}),
 	$(".delete").click(function(){
 		var a=$(this).parents('.temp_item').data('value');
 		if(!a || !confirm('你确定要删除该模板吗？')){return !1;}
 		$.ajaxpost("{:url('temp/dele')}",{'value':a},function(res){
 			$.Msg(res.msg);
 			res.code == 200 && setTimeout(function(){window.location.reload()},2200);
-		})
-	})
-})
+		});
+	});
+});
 </script>
 {include:/footer}

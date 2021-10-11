@@ -11,18 +11,18 @@ class Plugin extends base{
 	}
 	
 	public function run(){
-		if(!isset($this->params[1]) || empty($this->params[1])){
+		if(!isset($this->params['plugin']) || empty($this->params['plugin'])){
 			redirect($this->App->baseUrl);
 		}
-		if((!is_string($this->params[1]) || !preg_match("/^[\w\-\_]+$/", $this->params[1])) || 
-			(isset($this->params[2]) && (!is_string($this->params[2]) || !preg_match("/^[\w\-\_\/]+$/", $this->params[2]))) ||
-			(isset($this->params[3]) && (!is_string($this->params[3]) || !preg_match("/^[\w\-\_\/]+$/", $this->params[3])))
+		if((!is_string($this->params['plugin']) || !preg_match("/^[\w\-\_]+$/", $this->params['plugin'])) || 
+			(isset($this->params['controller']) && (!is_string($this->params['controller']) || !preg_match("/^[\w\-\_\/]+$/", $this->params['controller']))) ||
+			(isset($this->params['action']) && (!is_string($this->params['action']) || !preg_match("/^[\w\-\_\/]+$/", $this->params['action'])))
 		){
 			rpMsg('非法链接');
 		}
-		$pluginName=trim(strip_tags(strDeep($this->params[1])));
-		$controller=isset($this->params[2]) ? trim(strip_tags(strDeep($this->params[2])),'/') : 'index';
-		$action=isset($this->params[3]) ? trim(strip_tags(strDeep($this->params[3])),'/') : 'index';
+		$pluginName=trim(strip_tags(strDeep($this->params['plugin'])));
+		$controller=isset($this->params['controller']) ? trim(strip_tags(strDeep($this->params['controller'])),'/') : 'index';
+		$action=isset($this->params['action']) ? trim(strip_tags(strDeep($this->params['action'])),'/') : 'index';
 		$plugin=PLUGINPATH .'/'.$pluginName;
 		if(!is_dir($plugin)){
 			rpMsg('插件不存在');

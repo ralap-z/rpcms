@@ -83,7 +83,7 @@ function input($name, $default=''){
 function session($name,$value=''){
 	if($value !== ''){
 		$_SESSION[$name]=$value;
-		if($value == null) unset($_SESSION[$name]);
+		if($value === null) unset($_SESSION[$name]);
 		return true;
 	}
 	return isset($_SESSION[$name]) ? strDeep($_SESSION[$name]) : '';
@@ -192,8 +192,8 @@ function redirect($url,$code=302){
 	rp\Url::setCode($code)->redirect($url);
 }
 
-function url($url){
-	return rp\Url::setUrl($url);
+function url($url, $data=[]){
+	return rp\Url::setUrl($url, $data);
 }
 
 function urlOther($type,$url,$page=NULL){
@@ -363,6 +363,29 @@ function formatDate($time,$level=7,$format='Y-m-d H:i:s'){
 	return date($format,$time);
 }
 
+/*数字格式化*/
+function formatNumber($num){
+	if($num >= 10000){
+		return round($num / 10000,2).'w+';
+	}elseif($num >= 1000){
+		return round($num / 1000,2).'k+';
+	}else{
+		return $num;
+	}
+}
+
+/*存储单位格式化*/
+function formatByte($num){
+	if($num >= 1073741824){
+		return round($num / 1073741824, 2) . 'G+';
+	}elseif($num >= 1048576){
+		return round($num / 1048576, 2) . 'M+';
+	}elseif($num >= 1024){
+		return round($num / 1024, 2) . 'K+';
+	}else{
+		return $num . 'B';
+	}
+}
 
 /*标签关键字替换*/
 function content2keyword($content,$limit=1){

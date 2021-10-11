@@ -51,8 +51,8 @@ $(document).ready(function(){
 		$.ajaxpost("{:url('nav/doUpdate')}",param,function(res){
 			$.Msg(res.msg);
 			res.code == 200 && setTimeout(function(){window.location.href="{:url('nav/index')}"},2200);
-		})
-	})
-})
+		});
+	});
+});
 </script>
 {include:/footer}

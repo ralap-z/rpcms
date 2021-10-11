@@ -176,7 +176,19 @@ class View{
 	}
 	
 	private function compress_html($string){
-		return trim(preg_replace(array("/> *([^ ]*) *</","//","'/\*[^*]*\*/'","/\r\n/","/\n/","/\t/",'/>[ ]+</'),array(">\\1<",'','','','','','><'),$string));
+		preg_match_all('/<pre(\s[^>]*)?>.*<\/pre>|<code(\s[^>]*)?>.*<\/code>/Uis', $string, $matches);
+		if(is_array($matches[0])){
+			foreach($matches[0] as $key=>$val ){
+				$string=str_replace($val, '{*=*=*=*'.$key.'*=*=*=*}', $string);
+			}
+		}
+		$string=trim(preg_replace(array("/> *([^ ]*) *</","//","'/\*[^*]*\*/'","/\r\n/","/\n/","/\t/",'/>[ ]+</'),array(">\\1<",'','','','','','><'),$string));
+		if(is_array($matches[0])){
+			foreach($matches[0] as $key=>$val){
+				$string=str_replace('{*=*=*=*'.$key.'*=*=*=*}', $val, $string);
+			}
+		}
+		return $string;
 	}
 	
 	private function CompileFile($content){

@@ -53,7 +53,7 @@ class Rss extends base{
 					</url>';
 		foreach($this->getLogs() as $v){
 			echo '<url>
-				<loc>'.Url::logs($v['id']).'</loc>
+				<loc>'.$this->App->baseUrl.Url::logs($v['id']).'</loc>
 				<lastmod>'.(!empty($v['upateTime']) ? $v['upateTime'] : $v['createTime']).'</lastmod>
 				<changefreq>weekly</changefreq>
 				<priority>0.6</priority>
@@ -61,7 +61,7 @@ class Rss extends base{
 		}
 		foreach($this->getPages() as $v){
 			echo '<url>
-				<loc>'.Url::page($v['id']).'</loc>
+				<loc>'.$this->App->baseUrl.Url::page($v['id']).'</loc>
 				<lastmod>'.$v['createTime'].'</lastmod>
 				<changefreq>weekly</changefreq>
 				<priority>0.6</priority>
@@ -69,7 +69,7 @@ class Rss extends base{
 		}
 		foreach($this->getCates() as $v){
 			echo '<url>
-				<loc>'.Url::cate($v['id']).'</loc>
+				<loc>'.$this->App->baseUrl.Url::cate($v['id']).'</loc>
 				<changefreq>weekly</changefreq>
 				<priority>0.4</priority>
 			</url>';

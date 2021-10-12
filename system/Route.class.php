@@ -78,7 +78,7 @@ class Route{
 		$urlparam=[];
 		foreach($ruleArr as $rk=>&$rv){
 			$urlparamStr=[];
-			if(false !== strpos($rv, '<') && preg_match_all('/([A-Za-z0-9]+)?<(\w+([\?\#\@\~\.\,\\\|_-]?)+)>/', $rv, $matches)){
+			if(false !== strpos($rv, '<') && preg_match_all('/([A-Za-z0-9\@\~\.\,\\\|_-]+)?<(\w+([\?\#\@\~\.\,\\\|_-]?)+)>/', $rv, $matches)){
 				$replace=[];
 				foreach($matches[2] as $mk=>$mv){
 					$nameKey++;

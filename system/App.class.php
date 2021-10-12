@@ -217,7 +217,7 @@ class App{
 				$this->route=$this->parseModule($domainPath);
 			}
 		}
-		$pluginRouteArr=\rp\Hook::doHook('cms_index_begin');
+		$pluginRouteArr=array_filter(\rp\Hook::doHook('cms_index_begin'));
 		$pluginRoute=array();
 		if(!empty($pluginRouteArr)){
 			foreach($pluginRouteArr as $v){

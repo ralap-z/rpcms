@@ -129,8 +129,8 @@ class Logs extends base{
 		Hook::doHook('index_logs_detail',array(&$data));
 		if(!empty($data['template'])){
 			$template=$data['template'];
-		}elseif(!empty($category[$data['cateId']]['temp_logs'])){
-			$template=$category[$data['cateId']]['temp_logs'];
+		}elseif($cateTemp=$this->getTemp($data['cateId'], $category)){
+			$template=$cateTemp;
 		}else{
 			$template='detail';
 		}
@@ -166,5 +166,15 @@ class Logs extends base{
 			return json(array('code'=>200,'msg'=>'点赞成功，感谢您的支持！', 'data'=>$res['upnum'] + 1));
 		}
 		return json(array('code'=>-1,'msg'=>'点赞失败，请稍后重试'));
+	}
+	
+	private function getTemp($cateId, $categoryData){
+		if(!empty($categoryData[$cateId]['temp_logs'])){
+			return $categoryData[$cateId]['temp_logs'];
+		}
+		if(!empty($categoryData[$cateId]['topId'])){
+			return $this->getTemp($categoryData[$cateId]['topId'], $categoryData);
+		}
+		return '';
 	}
 }

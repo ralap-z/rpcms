@@ -5,10 +5,14 @@ use rp\Cache;
 use rp\index\LogsMod;
 
 class Category extends base{
+	
 	private $params;
+	private static $category;
+	
 	public function __construct($params){
 		parent::__construct();
 		$this->params=$params;
+		self::$category=Cache::read('category');
 	}
 	
 	public function index(){
@@ -16,28 +20,27 @@ class Category extends base{
 			redirect($this->App->baseUrl);
 		}
 		$page=isset($this->params['page']) ? intval($this->params['page']) : 1;
-		$category=Cache::read('category');
 		if(is_numeric($this->params['id'])){
 			$cateId=intval($this->params['id']);
 		}else{
-			$category2=array_column($category,NULL,'alias');
+			$category2=array_column(self::$category,NULL,'alias');
 			$cateId=isset($category2[$this->params['id']]) ? $category2[$this->params['id']]['id'] : '';
 		}
-		if(empty($cateId) || !isset($category[$cateId])){
+		if(empty($cateId) || !isset(self::$category[$cateId])){
 			rpMsg('当前栏目不存在！');
 		}
-		$children=isset($category[$cateId]) ? $category[$cateId]['children'] : array();
+		$children=isset(self::$category[$cateId]) ? self::$category[$cateId]['children'] : array();
 		$children[]=intval($cateId);
 		$LogsMod=new LogsMod();
 		$logData=$LogsMod->page($page)->order($this->getLogOrder(array('a.isTop'=>'desc')))->cate($children)->select();
 		foreach($children as $ck=>$cv){
-			$logData['count']+=$category[$cv]['logNum'];
+			$logData['count']+=self::$category[$cv]['logNum'];
 		}
-		$title=$category[$cateId]['cate_name'];
+		$title=self::$category[$cateId]['cate_name'];
 		$pageHtml=pageInationHome($logData['count'],$logData['limit'],$logData['page'],'cate',$cateId);
-		$template=!empty($category[$cateId]['temp_list']) ? $category[$cateId]['temp_list'] : 'list';
-		$this->setKeywords($category[$cateId]['seo_key']);
-		$this->setDescription($category[$cateId]['seo_desc']);
+		$template=$this->getTemp($cateId);
+		$this->setKeywords(self::$category[$cateId]['seo_key']);
+		$this->setDescription(self::$category[$cateId]['seo_desc']);
 		$this->assign('title',$title.'-'.$this->webConfig['webName']);
 		$this->assign('listId',$cateId);
 		$this->assign('listType','cate');
@@ -45,5 +48,15 @@ class Category extends base{
 		$this->assign('logList',$logData['list']);
 		$this->assign('pageHtml',$pageHtml);
 		return $this->display('/'.$template);
+	}
+	
+	private function getTemp($cateId){
+		if(!empty(self::$category[$cateId]['temp_list'])){
+			return self::$category[$cateId]['temp_list'];
+		}
+		if(!empty(self::$category[$cateId]['topId'])){
+			return $this->getTemp(self::$category[$cateId]['topId']);
+		}
+		return 'list';
 	}
 }

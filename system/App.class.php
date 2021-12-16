@@ -148,8 +148,17 @@ class App{
 	} 
 	
 	public function isAjax(){
-		$value  = self::server('HTTP_X_REQUESTED_WITH');
-		return 'xmlhttprequest' == strtolower($value) ? true : false;
+		$value=self::server('HTTP_X_REQUESTED_WITH');
+		$accept=self::server('HTTP_ACCEPT');
+		$result='xmlhttprequest' == strtolower($value) ? true : false;
+		if(!$result && (
+			false !== stripos($accept, 'application/json, text/javascript') || 
+			false !== stripos($accept, 'application/json, text/plain') || 
+			false !== stripos($accept, 'text/javascript, application/javascript')
+		)){
+			$result=true;
+		}
+		return $result;
 	}
 	
 	/**

@@ -124,7 +124,7 @@ function strDeep($value){
 		$value=array_map('strDeep', $value);
 	}else{
 		$value=stripslashes(trim($value));
-		if(!function_exists('get_magic_quotes_gpc') || !get_magic_quotes_gpc()){
+		if(version_compare(PHP_VERSION, '7.4', '>=') || !function_exists('get_magic_quotes_gpc') || !get_magic_quotes_gpc()){
 			$value=addslashes($value);
 		}
 	}
@@ -192,8 +192,8 @@ function redirect($url,$code=302){
 	rp\Url::setCode($code)->redirect($url);
 }
 
-function url($url, $data=[]){
-	return rp\Url::setUrl($url, $data);
+function url($url, $data=[], $isDomain=false){
+	return rp\Url::setUrl($url, $data, $isDomain);
 }
 
 function urlOther($type,$url,$page=NULL){
@@ -387,6 +387,51 @@ function formatByte($num){
 	}
 }
 
+/*
+*字符串数据隐藏
+*@param type 类型
+*@param str 字符串
+*@param replace 替换内容
+*/
+function hideStr($type, $str, $replace='*'){
+	switch($type){
+		case 'phone1':
+			$str=substr_replace($str,str_repeat($replace,4), 3, 4);
+			break;
+		case 'phone2':
+			$str=substr_replace($str,str_repeat($replace,8), 3);
+			break;
+		case 'email':
+			$emailArr=explode("@",$str);
+			$prevfix=mb_strlen($emailArr[0]) < 3 ? '' : mb_substr($str, 0, 3);
+			$str=preg_replace('/([\d\w+_-]{0,100})@/', str_repeat($replace,3).'@', $str, -1);
+			$str=$prevfix.$str;
+			break;
+		case 'name':
+			$len=mb_strlen($str);
+			$surnames=array('欧阳','太史','端木','上官','司马','东方','独孤','南宫','万俟','闻人','夏侯','诸葛','尉迟','公羊','赫连','澹台','皇甫','宗政','濮阳','公冶','太叔','申屠','公孙','慕容','仲孙','钟离','长孙','宇文','城池','司徒','鲜于','司空','汝嫣','闾丘','子车','亓官','司寇','巫马','公西','颛孙','壤驷','公良','漆雕','乐正','宰父','谷梁','拓跋','夹谷','轩辕','令狐','段干','百里','呼延','东郭','南门','羊舌','微生','公户','公玉','公仪','梁丘','公仲','公上','公门','公山','公坚','左丘','公伯','西门','公祖','第五','公乘','贯丘','公皙','南荣','东里','东宫','仲长','子书','子桑','即墨','达奚','褚师'); 
+			$pretwo=mb_substr($str, 0, 2);
+			if(in_array($pretwo, $surnames)){
+				$str=$pretwo.$replace;
+			}else{
+				$str=mb_substr($str, 0, 1).$replace;
+			}
+			break;
+		default:
+			$len=mb_strlen($str);
+			if($len == 1){
+				$str=$replace;
+			}elseif($len == 2){
+				$str=mb_substr($str, 0, 1).$replace;
+			}elseif($len == 3){
+				$str=mb_substr($str, 0, 1).str_repeat($replace,3).mb_substr($str, -1);
+			}else{
+				$str=mb_substr($str, 0, 2).str_repeat($replace,3).mb_substr($str, -2);
+			}
+	}
+	return $str;
+}
+
 /*标签关键字替换*/
 function content2keyword($content,$limit=1){
 	$tages =rp\Cache::read('tages');
@@ -496,27 +541,36 @@ function arrayIdFilter($data = "") {
 /*
 *过滤指定HTML标签
 *@param content 过滤的内容
-*@param arr 过滤的标签
+*@param tages 过滤的标签
+*@param retainContent 是否保留内容
 */
-function clear_html($content,$arr){
-	$preg=array(
-		"script"=>array("@<script(.*?)</script>@is","/javascript/si","/vbscript/si","/ on([a-z]+)=\"([^\"]*)\"/si"),
-		"iframe"=>"@<iframe(.*?)</iframe>@is",
-		"style"=>"@<style(.*?)</style>@is",
-		"all"=>"@<(.*?)>@is",
-	);
-	foreach($arr as $k=>$v){
-		if(!empty($preg[$v])){
-			if(is_array($preg[$v])){
-				foreach($preg[$v] as $kk=>$vv){
-					$content = preg_replace($preg[$v][$kk], "", $content);
-				}
-			}else{
-				$content = preg_replace($preg[$v], "", $content);
-			}
-		}
-		return $content;
+function clear_html($content, $tages, $retainContent=false){
+	$preg=[];
+	if($tages == 'all'){
+		return strip_tags($content);
 	}
+	$retain=$retainContent ? '[^>]*>' : '';
+	$replace=$retainContent ? '$1' : '';
+	foreach($tages as $tag){
+		$preg[]='@<'.$tag.$retain.'(.*?)</'.$tag.'>@is';
+	}
+	$content = preg_replace($preg, $replace, $content);
+	$preg=[];
+	if(in_array('img', $tages)){
+		$content = preg_replace('@<img(.*?)>@is', '', $content);
+	}
+	if(in_array('script', $tages)){
+		$preg[]='/javascript:((?!;)(?!void\(0\)).)+/si';
+		$preg[]='/vbscript:/si';
+		$preg[]='/ on([a-z]+)=\"([^\"]*)\"/si';
+		$replace=[
+			'javascript:',
+			'javascript:;',
+			'',
+		];
+		$content = preg_replace($preg, $replace, $content);
+	}
+	return $content;
 }
 
 function uploadFiles($file,$logId=0,$pageId=0){

@@ -78,7 +78,7 @@ class Url{
 		return new self;
 	}
 	
-	public static function setUrl($url='index', $data=array()){
+	public static function setUrl($url='index', $data=array(), $isDomain=false){
 		global $App;
 		$module=$App->getUrlModule();
 		$url=$modulePath=0 !== strpos($url, '/') ? '/'.$module.'/'.$url : $url;
@@ -129,8 +129,13 @@ class Url{
 			}
 		}
 		$isAbs=$httpHost == $rootDomain ? false : true;
+		$domain='';
+		if($isDomain || $isAbs){
+			$domain=is_string($isDomain) ? $isDomain.'.'.$rootDomain : $rootDomain;
+			$domain=$App::server('REQUEST_SCHEME').'://'.$domain;
+		}
 		$pageExt = in_array($url, ['/', '']) ? '' : '.'.$App->pageExt;
-		$url=($isAbs ? $App::server('REQUEST_SCHEME').'://'.$rootDomain : '') . $App->appPath .$url.$pageExt;
+		$url=$domain.$App->appPath.$url.$pageExt;
 		$data=array_filter($data);
 		if(!empty($data)){
 			$data=http_build_query($data);

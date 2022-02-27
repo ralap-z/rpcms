@@ -58,6 +58,7 @@ return [
 	array(
 		'model'=>'/index/plugin/run',
 		'pattern'=>'plugin/<plugin><controller#\?><action#\?>',
+		'replace'=>['plugin'=>'[A-Za-z0-9-_]+'],
 	),
 	array(
 		'model'=>'/index/base/captcha',

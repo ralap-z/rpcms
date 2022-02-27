@@ -199,6 +199,10 @@ class Db{
 	}
 	
 	public function order($order,$by="desc"){
+		if($order === null){
+			$this->order=" order by NULL";
+			return $this;
+		}
 		$by=strtolower($by);
 		$by=$by == 'asc' ? 'asc' : 'desc';
 		if(is_array($order)){
@@ -234,7 +238,7 @@ class Db{
 	}
 	
 	public function count($key="*"){
-		$sql="select count(".$key.") as me_count from ".self::$table.$this->join.$this->buildWhere().$this->group.$this->order;
+		$sql="select count(".$key.") as me_count from ".self::$table.$this->join.$this->buildWhere().$this->group;
 		$this->results=$this->execute($sql);
 		$res=$this->result();
 		$this->_reset_sql();
@@ -242,7 +246,7 @@ class Db{
 	}
 	
 	public function sum($field){
-		$sql="select sum(".$field.") as me_sum from ".self::$table.$this->join.$this->buildWhere().$this->group.$this->order;
+		$sql="select sum(".$field.") as me_sum from ".self::$table.$this->join.$this->buildWhere().$this->group;
 		$this->results=$this->execute($sql);
 		$res=$this->result();
 		$this->_reset_sql();
@@ -393,7 +397,7 @@ class Db{
 	}
 	
 	protected function execute($sql){
-		$res=self::$_mysqli->query($sql);
+		$res=self::$_mysqli->query($sql, MYSQLI_USE_RESULT);
 		if(!$res){$this->error(self::$_mysqli->error_list,$sql);}
 		return $res;
 	}

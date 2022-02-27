@@ -71,29 +71,28 @@ class Base{
 	
 	public function getLogOrder($orderAdd=array()){
 		$order=array();
-		if(in_array('id',$this->webConfig['logOrder'])){
-			$order['a.id']='desc';
+		switch($this->webConfig['logOrder']){
+			case 'updateTime':
+				$order['a.upateTime']='desc';
+				break;
+			case 'weight':
+				$logWeight=explode(PHP_EOL,$this->webConfig['logWeight']);
+				$logWeight=array_map(function($v){
+					list($sk, $sv)=explode('=',(!empty($v) ? $v : '='));
+					return array($sk=>$sv);
+				},$logWeight);
+				$logWeight=array_reduce($logWeight, 'array_merge', array());
+				$orderStr=array();
+				$orderStr[]=isset($logWeight['views']) ? 'a.views*'.$logWeight['views'] : '';
+				$orderStr[]=isset($logWeight['comnum']) ? 'a.comnum*'.$logWeight['comnum'] : '';
+				$orderStr[]=isset($logWeight['upnum']) ? 'a.upnum*'.$logWeight['upnum'] : '';
+				$orderStr=array_filter($orderStr);
+				if(!empty($orderStr)){
+					$order['('.join('+',$orderStr).')']='desc';
+				}
+			break;
 		}
-		if(in_array('updateTime',$this->webConfig['logOrder'])){
-			$order['a.upateTime']='desc';
-		}
-		if(in_array('weight',$this->webConfig['logOrder'])){
-			$logWeight=explode(PHP_EOL,$this->webConfig['logWeight']);
-			$logWeight=array_map(function($v){
-				list($sk, $sv)=explode('=',(!empty($v) ? $v : '='));
-				return array($sk=>$sv);
-			},$logWeight);
-			$logWeight=array_reduce($logWeight, 'array_merge', array());
-			$orderStr=array();
-			$orderStr[]=isset($logWeight['views']) ? 'a.views*'.$logWeight['views'] : '';
-			$orderStr[]=isset($logWeight['comnum']) ? 'a.comnum*'.$logWeight['comnum'] : '';
-			$orderStr[]=isset($logWeight['upnum']) ? 'a.upnum*'.$logWeight['upnum'] : '';
-			$orderStr=array_filter($orderStr);
-			if(!empty($orderStr)){
-				$order['('.join('+',$orderStr).')']='desc';
-			}
-		}
-		$order=array_merge($orderAdd,array_reverse($order));
+		$order=array_merge($orderAdd, $order);
 		Hook::doHook('index_logs_order',array(&$order));
 		return $order;
 	}

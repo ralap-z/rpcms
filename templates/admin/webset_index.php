@@ -30,10 +30,9 @@
 				<div class="me_input big"><label>附件大小(MB)</label><input type="text" name="fileSize" value="{$option['fileSize']|default=''}"></div>
 				<div class="me_input big">
 					<label>排序方式</label>
-					<div class="me_input me_input_line"><label>创建时间</label><input type="checkbox" name="logOrder[0]" value="id" {if isset($option['logOrder']) && in_array('id',$option['logOrder'])}checked{/if}></div>
-					<div class="me_input me_input_line"><label>修改时间</label><input type="checkbox" name="logOrder[1]" value="updateTime" {if isset($option['logOrder']) && in_array('updateTime',$option['logOrder'])}checked{/if}></div>
-					<div class="me_input me_input_line"><label>智能权重</label><input type="checkbox" name="logOrder[2]" value="weight" {if isset($option['logOrder']) && in_array('weight',$option['logOrder'])}checked{/if}></div>
-					<p class="tips">除首页外的其他列表排序。排序顺序：智能权重>修改时间>创建时间</p>
+					<div class="me_input me_input_line"><label>创建时间</label><input type="radio" name="logOrder" value="id" {if isset($option['logOrder']) && $option['logOrder'] == 'id'}checked{/if}></div>
+					<div class="me_input me_input_line"><label>修改时间</label><input type="radio" name="logOrder" value="updateTime" {if isset($option['logOrder']) && $option['logOrder'] == 'updateTime'}checked{/if}></div>
+					<div class="me_input me_input_line"><label>智能权重</label><input type="radio" name="logOrder" value="weight" {if isset($option['logOrder']) && $option['logOrder'] == 'weight'}checked{/if}></div>
 				</div>
 				<div class="me_input big"><label>权重配比</label><textarea name="logWeight">{$option['logWeight']|default=''}</textarea><p class="tips">仅“智能权重”项勾选时生效，支持变量：views,comnum,upnum，格式：变量=权重数，一行一个</p></div>
 				<div class="me_input me_input_line"><label>启用分类别名</label><input type="checkbox" name="cateAlias" value="1" {if isset($option['cateAlias']) && $option['cateAlias'] == 1}checked{/if}></div>
@@ -96,7 +95,7 @@ $(document).ready(function(){
 				'commentCheck':0,
 				'commentCN':0,
 				'commentVcode':0,
-				'logOrder[0]':'id',
+				'logOrder':'id',
 			};
 		$.each(a, function(d,e){
 			param[e.name] = e.value;

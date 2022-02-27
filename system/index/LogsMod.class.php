@@ -106,20 +106,32 @@ class LogsMod{
 	
 	public function select(){
 		$sonSql=Db::name('logs')->alias('a')->where($this->whereArr)->where($this->whereStr)->field('a.id')->limit(($this->page-1)*$this->limit.','.$this->limit)->order($this->order)->getSql();
-		$list=Db::name('logs')->alias('a')->join(array(
-			array('('.$sonSql.') as l','a.id=l.id','inner'),
-			array('category as b force index(PRIMARY)','a.cateId=b.id','left'),
-			array('user as c force index(PRIMARY)','a.authorId=c.id','left'),
-		))->field('a.id,a.title,a.authorId,a.cateId,a.excerpt,a.keywords,a.content,a.tages,a.isTop,a.views,a.comnum,a.upnum,a.upateTime,a.createTime,a.extend,a.status,b.cate_name as cateName,c.nickname as author,c.email as authorEmail')->select();
-		foreach($list as $k=>$v){
-			$list[$k]['extend'] =json_decode($v['extend'],true);
-			$list[$k]['url'] = Url::logs($v['id']);
-			$list[$k]['cateUrl'] = Url::cate($v['cateId']);
-			$list[$k]['cateLogNum'] = isset($this->cateData[$v['cateId']]) ? $this->cateData[$v['cateId']]['logNum'] : 0;
-			$list[$k]['tagesData'] = $this->getTages($v['tages']);
-		}
+		$list=$this->getData($sonSql);
 		Hook::doHook('index_logs_list',array(&$list));
 		return array('count'=>0,'limit'=>$this->limit,'page'=>$this->page,'list'=>$list);
+	}
+	
+	public function getData($ids){
+		if(empty($ids)) return [];
+		$join=array(
+			array('category as b force index(PRIMARY)','a.cateId=b.id','left'),
+			array('user as c force index(PRIMARY)','a.authorId=c.id','left'),
+		);
+		$where=[];
+		if(is_array($ids)){
+			$where['a.id']=['in',join(',',$ids)];
+		}else{
+			$join[]=array('('.$ids.') as l','a.id=l.id','inner');
+		}
+		$data=Db::name('logs')->alias('a')->join($join)->where($where)->field('a.id,a.title,a.authorId,a.cateId,a.excerpt,a.keywords,a.content,a.tages,a.isTop,a.views,a.comnum,a.upnum,a.upateTime,a.createTime,a.extend,a.status,b.cate_name as cateName,c.nickname as author,c.email as authorEmail')->select();
+		foreach($data as $k=>$v){
+			$data[$k]['extend'] =json_decode($v['extend'],true);
+			$data[$k]['url'] = Url::logs($v['id']);
+			$data[$k]['cateUrl'] = Url::cate($v['cateId']);
+			$data[$k]['cateLogNum'] = isset($this->cateData[$v['cateId']]) ? $this->cateData[$v['cateId']]['logNum'] : 0;
+			$data[$k]['tagesData'] = $this->getTages($v['tages']);
+		}
+		return $data;
 	}
 	
 	public function getCount(){
@@ -174,5 +186,9 @@ class LogsMod{
 		$this->whereArr['a.id']=array('<>',intval($logData['id']));
 		$data=$this->select();
 		return $data['list'];
+	}
+	
+	public function __get($name=null){
+		return isset($this->$name) ? $this->$name : '';
 	}
 }

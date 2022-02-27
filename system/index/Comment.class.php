@@ -76,7 +76,7 @@ class Comment extends base{
 		if(isset($user['id']) && !empty($user['id'])){
 			$param['username']=$user['nickname'];
 			$param['email']=$user['email'];
-			$param['home']=Url::other('author',$user['id']);
+			$param['home']=url('/index/author/index',['id'=>$user['id']], true);
 			$param['userId']=$user['id'];
 		}
 		if(empty($param['username'])){

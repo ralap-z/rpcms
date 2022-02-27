@@ -240,7 +240,7 @@ class Url{
 			case 'captcha':
 				return self::setUrl('/index/base/captcha', ['type'=>$data]);
 			case 'comment':
-				return ltrim($App::server('REDIRECT_URL'),'/').(!empty($page) ? '?comment-page='.$page : '').$data;
+				return self::now().(!empty($page) ? '?comment-page='.$page : '').$data;
 			case 'search':
 				return self::setUrl('/index/logs/search', ['q'=>$data, 'page'=>$page]);
 			case 'logs':
@@ -254,5 +254,21 @@ class Url{
 			case 'tages':
 				return self::tag($data,$page);
 		}
+	}
+	
+	/*获取当前URL*/
+	public static function now($isDomain=false, $isQuery=false){
+		global $App;
+		if($App::server('HTTP_X_REWRITE_URL')){
+			$url=$App::server('HTTP_X_REWRITE_URL');
+		}else if($App::server('REQUEST_URI')){
+			$url=$App::server('REQUEST_URI');
+		}else if($App::server('ORIG_PATH_INFO')){
+			$url=$App::server('ORIG_PATH_INFO') . (!empty($App::server('QUERY_STRING')) ? '?'.$App::server('QUERY_STRING') : '');
+		}else{
+            $url='';
+        }
+		$url=$isQuery ? $url : explode('?', $url)[0];
+		return $isDomain ? $App::server('REQUEST_SCHEME').'://'.$App::server('HTTP_HOST').$url : $url;
 	}
 }

@@ -83,12 +83,19 @@ class Upgrade extends Base{
 		$sql = explode(';', $sql);
 		$options = \rp\Config::get('db');
 		$db=Db::instance();
-		foreach ($sql as $v){
-			if(!empty(trim($v))){
-                $db->query(str_replace('%pre%',$options['prefix'],$v));
-            }
-        }
-		return true;
+		$db::transaction();
+		try{
+			foreach ($sql as $v){
+				if(!empty(trim($v))){
+					$db->query(str_replace('%pre%',$options['prefix'],$v));
+				}
+			}
+			$db::commit();
+			return true;
+		}catch(\Exception $e){
+			$db::rollback();
+			return false;
+		}
 	}
 	
 }

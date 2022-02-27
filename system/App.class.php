@@ -270,7 +270,7 @@ class App{
 			$this->path = str_replace(Config::get('app_default_path'), '', $this->path);
 			$this->path = strip_tags(trim($this->path, '/'));
 		}
-		return !empty($this->path) ? $this->path : 'index';
+		return !empty($this->path) ? $this->path : Config::get('default_module');
 	}
 	
 	/**

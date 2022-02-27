@@ -140,7 +140,8 @@ function checkForm($type,$val){
 		'email'=>'/^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/i',
 		'phone'=>'/^1[3,4,5,6,7,8]\d{9}$/i',
 		'telephone'=>'/^0(([1,2]\d)|([3-9]\d{2}))-\d{7,8}$/i',
-		'en'=>'/^[a-z][A-Z]$/i',
+		'en'=>'/^[a-zA-Z]+$/i',
+		'400phone'=>'/^400((-| )?\d{3,4}){2}$/i',
 	);
 	if(isset($pattern[$type]) && !preg_match($pattern[$type], $val)){
 		return false;
@@ -328,7 +329,7 @@ function GetFilePermsOct($file){
 
 /*截取指定长度字符*/
 function getContentByLength($content, $strlen = 180){
-	$content = preg_replace('/\s/u','',strip_tags($content));
+	$content = preg_replace('/(\s|&nbsp;)/u','',strip_tags($content));
 	return subString($content, 0, $strlen);
 }
 

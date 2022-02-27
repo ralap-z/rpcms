@@ -5,8 +5,8 @@ CREATE TABLE IF NOT EXISTS `%pre%attachment` (
   `filepath` varchar(255) NOT NULL,
   `filetype` varchar(40) NOT NULL,
   `token` varchar(255) NULL DEFAULT '' COMMENT '关联码',
-  `logId` int(10) DEFAULT NULL,
-  `pageId` int(10) DEFAULT NULL COMMENT '单页ID',
+  `logId` int(10) NULL DEFAULT '0',
+  `pageId` int(10) NULL DEFAULT '0' COMMENT '单页ID',
   `authorId` int(10) NOT NULL,
   `createTime` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -36,15 +36,15 @@ CREATE TABLE IF NOT EXISTS `%pre%category` (
 
 CREATE TABLE IF NOT EXISTS `%pre%comment` (
   `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
-  `logId` int(10) DEFAULT NULL COMMENT '文章ID',
-  `pageId` int(10) DEFAULT NULL COMMENT '单页ID',
+  `logId` int(10) NULL DEFAULT '0' COMMENT '文章ID',
+  `pageId` int(10) NULL DEFAULT '0' COMMENT '单页ID',
   `topId` int(10) DEFAULT '0',
   `authorId` int(10) DEFAULT '0',
   `userId` int(10) DEFAULT '0',
   `levels` tinyint(1) DEFAULT '1' COMMENT '层级',
   `nickname` varchar(100) NOT NULL,
   `email` varchar(100) DEFAULT '',
-  `home` varchar(255) DEFAULT NULL,
+  `home` varchar(255) NULL DEFAULT '',
   `content` text NOT NULL,
   `ip` varchar(15) NOT NULL,
   `agent` text NOT NULL,
@@ -90,7 +90,7 @@ CREATE TABLE IF NOT EXISTS `%pre%logs` (
   `keywords` VARCHAR(255) NULL DEFAULT '' COMMENT '关键词',
   `password` varchar(255) DEFAULT '' COMMENT '访问密码',
   `content` longtext NOT NULL,
-  `tages` varchar(255) DEFAULT NULL,
+  `tages` varchar(255) NULL DEFAULT '',
   `isTop` tinyint(1) DEFAULT '0' COMMENT '是否置顶 0否 1是',
   `isRemark` tinyint(1) DEFAULT '0' COMMENT '是否评论 0否 1是',
   `views` int(10) DEFAULT '0' COMMENT '浏览量',
@@ -105,11 +105,16 @@ CREATE TABLE IF NOT EXISTS `%pre%logs` (
   UNIQUE KEY `id` (`id`),
   UNIQUE KEY `alias` (`alias`) USING BTREE,
   KEY `comnum` (`comnum`),
-  KEY `isTop` (`isTop`),
-  KEY `rpcms_index` (`status`,`cateId`,`specialId`,`authorId`,`title`,`alias`,`tages`,`createTime`,`isTop`,`views`,`upnum`,`upateTime`) USING BTREE,
   KEY `upateTime` (`upateTime`),
-  KEY `views` (`views`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='文章列表';
+  KEY `views` (`views`),
+  KEY `title` (`title`),
+  KEY `authorId` (`authorId`),
+  KEY `cateId` (`cateId`),
+  KEY `specialId` (`specialId`),
+  KEY `tages` (`tages`),
+  KEY `upnum` (`upnum`),
+  KEY `isTop` (`status`,`isTop`,`upateTime`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='文章列表';
 
 CREATE TABLE IF NOT EXISTS `%pre%nav` (
   `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -186,7 +191,7 @@ CREATE TABLE IF NOT EXISTS `%pre%user` (
   PRIMARY KEY (`id`),
   KEY `username` (`username`),
   KEY `role` (`role`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='用户表';
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='用户表';
 
 CREATE TABLE IF NOT EXISTS `%pre%special` (
   `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,

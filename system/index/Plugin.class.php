@@ -35,11 +35,6 @@ class Plugin extends base{
 			rpMsg('插件控制器不存在');
 		}
 		$pluginObj='plugin\\'.strtolower($pluginName).'\\'.ucfirst($controller);
-		$pluginClass=new $pluginObj;
-		if(method_exists($pluginClass,$action)){
-			return $pluginClass->$action();
-		}else{
-			rpMsg('运行插件action错误，请检查');
-		}
+		return $this->App->invokeClass($pluginObj, $action);
 	}
 }

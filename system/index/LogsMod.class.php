@@ -13,12 +13,14 @@ class LogsMod{
 	private $order=array('a.id'=>'desc');
 	private $page=1;
 	private $limit;
+	private $pageMax;
 	private $tagesData;
 	private $cateData;
 	
 	
 	public function __construct(){
 		$this->limit=!empty(Config::get('webConfig.pagesize')) ? Config::get('webConfig.pagesize') : 10;
+		$this->pageMax=Config::get('webConfig.pageMax');
 		$this->tagesData=Cache::read('tages');
 		$this->cateData=Cache::read('category');
 		$this->order=(new \rp\index\Base())->getLogOrder();
@@ -68,6 +70,9 @@ class LogsMod{
 	}
 	
 	public function page($page){
+		if(!empty($this->pageMax)){
+			$page=min($page,$this->pageMax);
+		}
 		$this->page=$page;
 		return $this;
 	}
@@ -178,6 +183,7 @@ class LogsMod{
 	public function related($logData=array(),$type='cate',$limit=10){
 		$this->whereArr=array('a.status'=>0);
 		$this->whereStr='';
+		$this->limit=$limit;
 		if($type == 'tages' && !empty($logData['tages'])){
 			$this->whereArr['a.tages']=array('in',join(',',arrayIdFilter(array_column($logData['tages'],'id'))));
 		}else{

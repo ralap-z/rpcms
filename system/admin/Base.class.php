@@ -8,7 +8,7 @@ use rp\Cache;
 class Base{
 	protected $user;
 	protected $me_alias=array('index','post','search','author','category','html','tag','date','plugin','page','special');
-	protected $me_tmpName=array('common','setting','password','index','list','page','search','detail','default','hook','special');
+	protected $me_tmpName=array('common','setting','password','index','list','page','search','detail','default','hook','special','block');
 	protected $App;
 	protected $isAjax=false;
 	

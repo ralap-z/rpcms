@@ -66,14 +66,22 @@ class App{
 			\rp\Config::set(include_once CMSPATH .'/'.$this->route['module'].'_config.php');
 			\rp\Db::close();
 		}
-		$controller = new $controllerName($this->params);
-		$action=$this->route['action'];
-		if(!method_exists($controller,$action)){
-			rpMsg($action.' action is not find');
-		}
-		$htmlData=$controller->$action();
+		$htmlData=$this->invokeClass($controllerName, $this->route['action']);
 		echo is_array($htmlData) ? rpMsg('请求错误') : $htmlData;
 		exit;
+	}
+	
+	public function invokeClass($class, $action){
+		$class=new \ReflectionClass($class);
+		$object=$class->newInstanceArgs([$this->params]);
+		if(!is_callable([$object, $action])){
+			rpMsg($action.' action is not find');
+		}
+		$reflect=new \ReflectionMethod($object, $action);
+		if(!empty($reflect->getParameters())){
+			rpMsg($action.' action is not find');
+		}
+		return $reflect->invokeArgs($object, []);
 	}
 	
 	public function runHook(){

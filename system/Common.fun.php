@@ -249,9 +249,13 @@ function pageInation($count, $perlogs, $page, $url='', $anchor = '') {
 }
 
 /*前台分页函数*/
-function pageInationHome($count, $perlogs, $page, $mode='index', $data=NULL) {
+function pageInationHome($count, $perlogs, $page, $mode='index', $data=NULL){
 	global $App;
+	$pageMax=rp\Config::get('webConfig.pageMax');
 	$pnums=@ceil($count / $perlogs);
+	if(!empty($pageMax)){
+		$pnums=min($pnums,$pageMax);
+	}
 	$page=@min($pnums,$page);
 	$prepg=$page-1;
 	$nextpg=($page==$pnums ? 0 : $page+1);

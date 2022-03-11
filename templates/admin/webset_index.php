@@ -26,6 +26,7 @@
 				<div class="me_input me_input_line"><label>网站关闭</label><input type="checkbox" name="webStatus" value="1" {if isset($option['webStatus']) && $option['webStatus'] == 1}checked{/if}></div>
 				<div class="me_input big"><label>闭站说明</label><textarea name="closeText">{$option['closeText']|default=''}</textarea></div>
 				<div class="me_input big"><label>前台分页大小</label><input type="number" name="pagesize" value="{$option['pagesize']|default=''}"></div>
+				<div class="me_input big"><label>前台最大分页</label><input type="number" name="pageMax" value="{$option['pageMax']|default=''}"><p class="tips">为空或0，则不限制</p></div>
 				<div class="me_input big"><label>附件类型</label><input type="text" name="fileTypes" value="{$option['fileTypes']|default=''}"></div>
 				<div class="me_input big"><label>附件大小(MB)</label><input type="text" name="fileSize" value="{$option['fileSize']|default=''}"></div>
 				<div class="me_input big">

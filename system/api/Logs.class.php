@@ -33,6 +33,10 @@ class Logs extends Base{
 		$where=array('a.status'=>0);
 		$wherestr=array();
 		$cateId=arrayIdFilter($cateId);
+		$pageMax=Config::get('webConfig.pageMax');
+		if(!empty($pageMax)){
+			$page=min($page,$pageMax);
+		}
 		if(!empty($cateId)){
 			$where['a.cateId']=array('in',$cateId);
 		}

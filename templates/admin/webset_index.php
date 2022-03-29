@@ -15,6 +15,7 @@
 		<div class="tabs">
 			<div id="tab1" class="tab active">
 				<div class="me_input big"><label>网站名称</label><input type="text" name="webName" value="{$option['webName']|default=''}"></div>
+				<div class="me_input big"><label>SEO标题</label><input type="text" name="seoTitle" value="{$option['seoTitle']|default=''}"><p class="tips">seo标题优先使用此内容</p></div>
 				<div class="me_input big"><label>关键字</label><input type="text" name="keyword" value="{$option['keyword']|default=''}"><p class="tips">多个关键词用“,”隔开</p></div>
 				<div class="me_input big"><label>描述</label><textarea name="description">{$option['description']|default=''}</textarea></div>
 				<div class="me_input big"><label>ICP备案号</label><input type="text" name="icp" value="{$option['icp']|default=''}"></div>

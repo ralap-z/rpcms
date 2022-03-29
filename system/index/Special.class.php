@@ -29,11 +29,11 @@ class Special extends base{
 		$LogsMod=new LogsMod();
 		$logData=$LogsMod->page($page)->where(array('a.specialId'=>$specialId))->order($this->getLogOrder(array('a.isTop'=>'desc')))->select();
 		$logData['count']=$special[$specialId]['logNum'];
-		$title=$special[$specialId]['title'];
+		$title=!empty($special[$specialId]['seo_title']) ? $special[$specialId]['seo_title'] : $special[$specialId]['title'].'专题';
 		$pageHtml=pageInationHome($logData['count'],$logData['limit'],$logData['page'],'special',$specialId);
 		$template=!empty($special[$specialId]['temp_list']) ? $special[$specialId]['temp_list'] : 'special';
 		$this->setDescription($special[$specialId]['seo_desc']);
-		$this->assign('title',$title.'专题-'.$this->webConfig['webName']);
+		$this->assign('title',$title.'-'.$this->webConfig['webName']);
 		$this->assign('listId',$specialId);
 		$this->assign('listType','special');
 		$this->assign('special',$special[$specialId]);

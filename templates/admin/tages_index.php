@@ -54,6 +54,7 @@
 			<div class="me_input me_input_line"><label>名称</label><input type="text" class="tagName" value=""></div>
 			<div class="me_input me_input_line"><label>别名</label><input type="text" class="alias" value="" placeholder="英文、数字、-和_；请勿和标签重名"></div>
 			<div class="me_input me_input_line"><label>模板</label><input type="text" class="template" value=""></div>
+			<div class="me_input"><label>SEO标题</label><input type="text" class="seo_title" value="" style="width: calc(100% - 4.5rem);"></div>
 			<div class="me_input"><label>SEO描述</label><textarea class="seo_desc" style="width: calc(100% - 4.5rem);"></textarea></div>
 			<div class="rp_row">
 				<button type="sumbit" class="rp_btn success sendPost_tages">添加</button>
@@ -69,6 +70,7 @@ $(document).ready(function(){
 			'tagName':$.trim($(".tagName").val()),
 			'alias':$.trim($(".alias").val()),
 			'template':$.trim($(".template").val()),
+			'seo_title':$.trim($(".seo_title").val()),
 			'seo_desc':$.trim($(".seo_desc").val()),
 		};
 		if(!param.tagName){
@@ -93,7 +95,7 @@ $(document).ready(function(){
 		$.ajaxpost("{:url('tages/getinfo')}",{'id':id},function(res){
 			if(res.code == 200){
 				var data=res.data;
-				box.data('updateId',id),$(".tagName").val(data.tagName),$(".alias").val(data.alias),$(".template").val(data.template),$(".seo_desc").val(data.seo_desc);
+				box.data('updateId',id),$(".tagName").val(data.tagName),$(".alias").val(data.alias),$(".template").val(data.template),$(".seo_title").val(data.seo_title),$(".seo_desc").val(data.seo_desc);
 			}else{
 				$.Msg(res.msg);
 			}

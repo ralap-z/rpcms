@@ -12,7 +12,7 @@
 namespace rp;
 class Db{
 	protected static $instance;
-	private static $_mysqli;
+	private static $_mysqli=[];
 	private static $prefix;
 	private static $table;
 	private $field = '*';
@@ -24,63 +24,55 @@ class Db{
 	private $results = '';
 	
 	public function __construct(){
-		
+		$this->options=Config::get('db');
+		self::$prefix=$this->options["prefix"];
 	}
 	
-	public static function instance(){
-        if (is_null(self::$instance)) {
-            self::$instance = self::connect();
+	public static function instance($type=''){
+        if(is_null(self::$instance)){
+            self::$instance = new self();
         }
+		if(!empty($type) && empty(self::$_mysqli[$type])){
+			self::$_mysqli[$type]=self::$instance->connect();
+		}
         return self::$instance;
-    }
-	
-	public static function connect(){
-        if (empty(self::$_mysqli)){
-            $options = Config::get('db');
-			self::$_mysqli = mysqli_init();
-			self::$_mysqli->options(MYSQLI_OPT_CONNECT_TIMEOUT, 10);
-			if(!self::$_mysqli->real_connect($options["hostname"], $options["username"], $options["password"], $options['database'])){
-				die('Connect Error (' . self::$_mysqli->connect_errno . ') '. self::$_mysqli->connect_error());
-			}
-			self::$prefix=$options["prefix"];
-			self::$_mysqli->set_charset($options["charset"]);
-        }
-        return new \rp\Db();
     }
 	
 	public static function close(){
 		if(!empty(self::$_mysqli)){
-			self::$_mysqli->close();
+			foreach(self::$_mysqli as $_v){
+				$_v->close();
+			}
 			self::$_mysqli=NULL;
 			self::$instance=NULL;
 		}
 	}
 
 	public static function name($table){
-		$con=self::connect();
+		$con=self::instance();
 		self::$table=self::$prefix . $table;
 		return $con;
 	}
 	
 	public static function table($table){
-		$con=self::connect();
+		$con=self::instance();
 		self::$table=$table;
 		return $con;
 	}
 	
 	public static function transaction(){
-		$con=self::connect();
-		self::$_mysqli->begin_transaction();
+		$con=self::instance('w');
+		self::$_mysqli['w']->begin_transaction();
 	}
 	
 	public static function commit(){
-		$con=self::connect();
-		self::$_mysqli->commit();
+		$con=self::instance('w');
+		self::$_mysqli['w']->commit();
 	}
 	
 	public static function rollback(){
-		$con=self::connect();
-		self::$_mysqli->rollback();
+		$con=self::instance('w');
+		self::$_mysqli['w']->rollback();
 	}
 	
 	public function field($field='*'){
@@ -231,7 +223,7 @@ class Db{
 	public function find($type="assoc"){
 		$this->limit=' limit 1';
 		$sql="select ".$this->field." from ".self::$table.$this->join.$this->buildWhere().$this->group.$this->order.$this->limit;
-		$this->results=$this->execute($sql);
+		$this->results=$this->execute($sql, 'r');
 		$res=$this->result($type);
 		$this->_reset_sql();
 		return $res;
@@ -239,7 +231,7 @@ class Db{
 	
 	public function count($key="*"){
 		$sql="select count(".$key.") as me_count from ".self::$table.$this->join.$this->buildWhere().$this->group;
-		$this->results=$this->execute($sql);
+		$this->results=$this->execute($sql, 'g');
 		$res=$this->result();
 		$this->_reset_sql();
 		return $res["me_count"];
@@ -247,7 +239,7 @@ class Db{
 	
 	public function sum($field){
 		$sql="select sum(".$field.") as me_sum from ".self::$table.$this->join.$this->buildWhere().$this->group;
-		$this->results=$this->execute($sql);
+		$this->results=$this->execute($sql, 'g');
 		$res=$this->result();
 		$this->_reset_sql();
 		return $res["me_sum"];
@@ -255,18 +247,20 @@ class Db{
 	
 	public function select($type="assoc"){
 		$sql="select ".$this->field." from ".self::$table.$this->join.$this->buildWhere().$this->group.$this->order.$this->limit;
-		$this->results=$this->execute($sql);	
+		$this->results=$this->execute($sql, 'r');	
 		$res=$this->result($type,"all");
 		$this->_reset_sql();
 		return $res;
 	}
 	
 	public function getSql(){
-		return "select ".$this->field." from ".self::$table.$this->join.$this->buildWhere().$this->group.$this->order.$this->limit;
+		$sql="select ".$this->field." from ".self::$table.$this->join.$this->buildWhere().$this->group.$this->order.$this->limit;
+		$this->_reset_sql();
+		return $sql;
 	}
 	
 	public function query($sql){
-		$this->results=$this->execute($sql);
+		$this->results=$this->execute($sql, 'r');
 		$this->_reset_sql();
 		return $this;
 	}
@@ -336,7 +330,7 @@ class Db{
 		$key="(`".join("`,`",$key_arr)."`)";
 		$vals=join(",",$val_arr).";";
 		$sql="insert ".$modifier." into ".self::$table.$key." values".$vals;
-		$this->execute($sql);
+		$this->execute($sql, 'w');
 		$this->_reset_sql();
 		return !empty($this->insert_id()) ? $this->insert_id() : $this->affected_rows();
 	}
@@ -349,44 +343,54 @@ class Db{
 		$updata=join(" , ",$strs);
 		$sql="update ".$modifier." ".self::$table." SET ".$updata.$this->buildWhere();
 		$this->_reset_sql();
-		return $this->execute($sql);
+		return $this->execute($sql, 'w');
 	}
 	
 	public function setInc($field,$val=1){
 		$sql="update ".self::$table." SET `".$field."`=".$field."+".$val." ".$this->buildWhere();
 		$this->_reset_sql();
-		return $this->execute($sql);
+		return $this->execute($sql, 'w');
 	}
 	
 	public function setDec($field,$val=1){
 		$sql="update ".self::$table." SET `".$field."`=".$field."-".$val." ".$this->buildWhere();
 		$this->_reset_sql();
-		return $this->execute($sql);
+		return $this->execute($sql, 'w');
 	}
 	
 	public function dele(){
 		$sql="delete from ".self::$table.$this->buildWhere().$this->order.$this->limit;
 		$this->_reset_sql();
-		return $this->execute($sql);
+		return $this->execute($sql, 'w');
 	}
 	
 	public function insert_id(){
-		return self::$_mysqli->insert_id;
+		return self::$_mysqli['w']->insert_id;
 	}
 	
 	public function affected_rows(){
-		return self::$_mysqli->affected_rows;
+		return self::$_mysqli['w']->affected_rows;
 	}
 	
 	public function server_info(){
-		return self::$_mysqli->server_info;
+		return self::$_mysqli['r']->server_info;
 	}
 	
 	public function server_version(){
-		return self::$_mysqli->server_version;
+		return self::$_mysqli['r']->server_version;
 	}
 	
-	protected function _reset_sql(){
+	private function connect(){
+		$link = mysqli_init();
+		$link->options(MYSQLI_OPT_CONNECT_TIMEOUT, 10);
+		if(!$link->real_connect($this->options["hostname"], $this->options["username"], $this->options["password"], $this->options['database'])){
+			die('Connect Error (' . $link->connect_errno . ') '. $link->connect_error());
+		}
+		$link->set_charset($this->options["charset"]);
+		return $link;
+	}
+	
+	private function _reset_sql(){
 		self::$table='';
 		$this->field = '*';
 		$this->join = '';
@@ -396,15 +400,18 @@ class Db{
 		$this->group = '';
 	}
 	
-	protected function execute($sql){
-		$res=self::$_mysqli->query($sql, MYSQLI_USE_RESULT);
-		if(!$res){$this->error(self::$_mysqli->error_list,$sql);}
+	private function execute($sql, $type='r'){
+		if(empty(self::$_mysqli[$type])){
+			self::$_mysqli[$type]=$this->connect();
+		}
+		$res=self::$_mysqli[$type]->query($sql, MYSQLI_USE_RESULT);
+		if(!$res){$this->error(self::$_mysqli[$type]->error_list,$sql);}
 		return $res;
 	}
-	protected function escapeString($str){
+	private function escapeString($str){
         return addslashes(stripslashes($str));
     }
-	protected function error($msg,$sql=""){
+	private function error($msg,$sql=""){
 		global $App;
 		if(!Config::get('webConfig.isDevelop')){
 			echo $App->isAjax() ? json(array('code'=>-1,'msg'=>'SQL执行错误')) : rpMsg('SQL执行错误');exit;

@@ -113,7 +113,7 @@ class Route{
 			}
 			$urlparam[]=join('',$urlparamStr);
 		}
-		$rule['pattern']=join('/',$ruleArr);
+		$rule['pattern']=join('/',$ruleArr).(!empty($rule['ext']) ? '(\.('.$rule['ext'].'))' : '');
 		$rule['patternUrl']=rtrim(join('/',$urlparam),'/');
 		$rule['param']=$name;
 		$rule['domain']=$modelArr[0] == 'plugin' ? 'index' : $modelArr[1];

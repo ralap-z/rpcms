@@ -30,6 +30,7 @@ class Special extends Base{
 		$data['title']=!empty(input('title')) ? strip_tags(input('title')) : '';
 		$data['subTitle']=!empty(input('subTitle')) ? strip_tags(input('subTitle')) : '';
 		$data['alias']=!empty(input('alias')) ? strip_tags(input('alias')) : '';
+		$data['seo_title']=!empty(input('seo_title')) ? mb_substr(strip_tags(input('seo_title')), 0, 30) : '';
 		$data['seo_desc']=!empty(input('seo_desc')) ? strip_tags(input('seo_desc')) : '';
 		$data['temp_list']=!empty(input('temp_list')) ? strip_tags(input('temp_list')) : '';
 		$data['createTime']=date('Y-m-d H:i:s');
@@ -71,6 +72,7 @@ class Special extends Base{
 		$data['title']=!empty(input('title')) ? strip_tags(input('title')) : '';
 		$data['subTitle']=!empty(input('subTitle')) ? strip_tags(input('subTitle')) : '';
 		$data['alias']=!empty(input('alias')) ? strip_tags(input('alias')) : '';
+		$data['seo_title']=!empty(input('seo_title')) ? mb_substr(strip_tags(input('seo_title')), 0, 30) : '';
 		$data['seo_desc']=!empty(input('seo_desc')) ? strip_tags(input('seo_desc')) : '';
 		$data['temp_list']=!empty(input('temp_list')) ? strip_tags(input('temp_list')) : '';
 		if(!empty($headimg)){

@@ -9,7 +9,6 @@
 // | Author: ralap <www.rpcms.cn>
 // +----------------------------------------------------------------------
 error_reporting(0);
-session_start();
 date_default_timezone_set('PRC');
 
 defined('CMSPATH') or define('CMSPATH', dirname(__FILE__));

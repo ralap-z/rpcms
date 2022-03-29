@@ -39,6 +39,7 @@ class Tages extends Base{
 		$data=array();
 		$data['tagName']=!empty(input('tagName')) ? strip_tags(input('tagName')) : '';
 		$data['alias']=!empty(input('alias')) ? strip_tags(input('alias')) : '';
+		$data['seo_title']=!empty(input('seo_title')) ? mb_substr(strip_tags(input('seo_title')), 0, 30) : '';
 		$data['seo_desc']=!empty(input('seo_desc')) ? strip_tags(input('seo_desc')) : '';
 		$data['template']=!empty(input('template')) ? strip_tags(input('template')) : '';
 		if(empty($data['tagName'])){
@@ -68,6 +69,7 @@ class Tages extends Base{
 		$data=array();
 		$data['tagName']=!empty(input('tagName')) ? strip_tags(input('tagName')) : '';
 		$data['alias']=!empty(input('alias')) ? strip_tags(input('alias')) : '';
+		$data['seo_title']=!empty(input('seo_title')) ? mb_substr(strip_tags(input('seo_title')), 0, 30) : '';
 		$data['seo_desc']=!empty(input('seo_desc')) ? strip_tags(input('seo_desc')) : '';
 		$data['template']=!empty(input('template')) ? strip_tags(input('template')) : '';
 		if(empty($id)){

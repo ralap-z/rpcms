@@ -67,6 +67,7 @@
 				</div>
 			</div>
 			<div class="me_input me_input_line" style="vertical-align: top;"><label>列表模板</label><input type="text" class="temp_list" value=""></div>
+			<div class="me_input"><label>SEO标题</label><input type="text" class="seo_title" value="" style="width: calc(100% - 6rem);"></div>
 			<div class="me_input"><label>SEO描述</label><textarea class="seo_desc" style="width: calc(100% - 6rem);"></textarea></div>
 			<div class="rp_row">
 				<button type="sumbit" class="rp_btn success sendPost_special">添加</button>
@@ -90,6 +91,7 @@ $(document).ready(function(){
 			'title':$.trim($(".special_title").val()),
 			'alias':$.trim($(".special_alias").val()),
 			'subTitle':$.trim($(".special_subTitle").val()),
+			'seo_title':$.trim($(".seo_title").val()),
 			'seo_desc':$.trim($(".seo_desc").val()),
 			'temp_list':$.trim($(".temp_list").val()),
 		};
@@ -106,6 +108,7 @@ $(document).ready(function(){
 		formData.append("title", param.title);
 		formData.append("subTitle", param.subTitle);
 		formData.append("alias", param.alias);
+		formData.append("seo_title", param.seo_title);
 		formData.append("seo_desc", param.seo_desc);
 		formData.append("temp_list", param.temp_list);
 		formData.append("headimg", $(".headimgFile")[0].files[0]);
@@ -145,7 +148,7 @@ $(document).ready(function(){
 		$.ajaxpost("{:url('special/getinfo')}",{'id':id},function(res){
 			if(res.code == 200){
 				var data=res.data;
-				box.data('updateId',id),$(".special_title").val(data.title),$(".special_subTitle").val(data.subTitle),$(".special_alias").val(data.alias),$(".seo_desc").val(data.seo_desc),$(".temp_list").val(data.temp_list);
+				box.data('updateId',id),$(".special_title").val(data.title),$(".special_subTitle").val(data.subTitle),$(".special_alias").val(data.alias),$(".seo_title").val(data.seo_title),$(".seo_desc").val(data.seo_desc),$(".temp_list").val(data.temp_list);
 				data.headimg && ($(".imgUpload").find("img").remove(),$(".imgUpload").append('<img src="'+data.headimg+'"/>'));
 			}else{
 				$.Msg(res.msg);

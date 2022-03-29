@@ -90,6 +90,7 @@
 			</select></div>
 			<div class="me_input me_input_line"><label>列表模板</label><input type="text" class="temp_list" value=""></div>
 			<div class="me_input me_input_line"><label>内容模板</label><input type="text" class="temp_logs" value=""></div>
+			<div class="me_input"><label>SEO标题</label><input type="text" class="seo_title" value="" style="width: calc(100% - 6rem);"></div>
 			<div class="me_input"><label>SEO关键词</label><input type="text" class="seo_key" value="" style="width: calc(100% - 6rem);"></div>
 			<div class="me_input"><label>SEO描述</label><textarea class="seo_desc" style="width: calc(100% - 6rem);"></textarea></div>
 			<div class="me_input"><label>支持投稿</label><input type="checkbox" class="is_submit" value="1"></div>
@@ -108,6 +109,7 @@ $(document).ready(function(){
 			'cate_name':$.trim($(".cate_name").val()),
 			'alias':$.trim($(".cate_alias").val()),
 			'topId':$.trim($(".cate_topId").val()),
+			'seo_title':$.trim($(".seo_title").val()),
 			'seo_key':$.trim($(".seo_key").val()),
 			'seo_desc':$.trim($(".seo_desc").val()),
 			'temp_list':$.trim($(".temp_list").val()),
@@ -154,7 +156,7 @@ $(document).ready(function(){
 		$.ajaxpost("{:url('category/getinfo')}",{'id':id},function(res){
 			if(res.code == 200){
 				var data=res.data;
-				box.data('updateId',id),$(".cate_sort").val(data.sort),$(".cate_name").val(data.cate_name),$(".cate_alias").val(data.alias),$(".cate_topId").val(data.topId),$(".seo_key").val(data.seo_key),$(".seo_desc").val(data.seo_desc),$(".temp_list").val(data.temp_list),$(".temp_logs").val(data.temp_logs);
+				box.data('updateId',id),$(".cate_sort").val(data.sort),$(".cate_name").val(data.cate_name),$(".cate_alias").val(data.alias),$(".cate_topId").val(data.topId),$(".seo_title").val(data.seo_title),$(".seo_key").val(data.seo_key),$(".seo_desc").val(data.seo_desc),$(".temp_list").val(data.temp_list),$(".temp_logs").val(data.temp_logs);
 				data.is_submit == 1 ? $(".is_submit").prop("checked", true) : $(".is_submit").prop("checked", false);
 			}else{
 				$.Msg(res.msg);

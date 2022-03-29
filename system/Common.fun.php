@@ -67,7 +67,7 @@ function input($name, $default=''){
 			case 'REQUEST':$da=$_REQUEST;break;
 			case 'SERVER':$da=$_SERVER;break;
 			case 'COOKIE':$da=$_COOKIE;break;
-			case 'SESSION':$da=$_SESSION;break;
+			case 'SESSION':$da=session();break;
 		}
 		$na=$nameArr[1];
 	}else{
@@ -80,13 +80,20 @@ function input($name, $default=''){
 	return isset($da[$na]) ? $da[$na] : $default;
 }
 
-function session($name,$value=''){
+function session($name='',$value=''){
+	session_start();
 	if($value !== ''){
 		$_SESSION[$name]=$value;
 		if($value === null) unset($_SESSION[$name]);
+		session_write_close();
 		return true;
 	}
-	return isset($_SESSION[$name]) ? strDeep($_SESSION[$name]) : '';
+	$session=$_SESSION;
+	session_write_close();
+	if(empty($name)){
+		return $session;
+	}
+	return isset($session[$name]) ? strDeep($session[$name]) : '';
 }
 
 function cookie($name,$value='',$expire=0,$path='/'){

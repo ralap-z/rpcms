@@ -89,9 +89,11 @@ class Url{
 			$ruleGroup=array_column($rules, NULL, 'model');
 		}
 		$isRule=false;
+		$ext=$App->pageExt;
 		if(isset($ruleGroup[$url])){
 			$patternUrl=$ruleGroup[$url]['patternUrl'];
 			$param=$ruleGroup[$url]['param'];
+			$ext=isset($ruleGroup[$url]['ext']) ? explode('|',$ruleGroup[$url]['ext'])[0] : $App->pageExt;
 			foreach($param as $k => $v){
 				$keyVal='';
 				if(isset($data[$v[1]]) && $data[$v[1]] !== '' && $data[$v[1]] !== NULL){
@@ -109,6 +111,7 @@ class Url{
 			$url='/'.rtrim(join('',$patternUrl),'/');
 			$isRule=true;
 		}
+		unset($ruleGroup);
 		$domainRules = Config::get('domain_root_rules');
 		$rootDomain = Config::get('domain_root');
 		$httpHost=$App::server('HTTP_X_REAL_HOST') ? $App::server('HTTP_X_REAL_HOST') : $App::server('HTTP_HOST');
@@ -134,7 +137,7 @@ class Url{
 			$domain=is_string($isDomain) ? $isDomain.'.'.$rootDomain : $rootDomain;
 			$domain=$App::server('REQUEST_SCHEME').'://'.$domain;
 		}
-		$pageExt = in_array($url, ['/', '']) ? '' : '.'.$App->pageExt;
+		$pageExt = in_array($url, ['/', '']) ? '' : '.'.$ext;
 		$url=$domain.$App->appPath.$url.$pageExt;
 		$data=array_filter($data);
 		if(!empty($data)){

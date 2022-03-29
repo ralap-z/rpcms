@@ -30,6 +30,7 @@ class Category extends Base{
 		$data['cate_name']=!empty(input('cate_name')) ? strip_tags(input('cate_name')) : '';
 		$data['alias']=!empty(input('alias')) ? strip_tags(input('alias')) : '';
 		$data['topId']=intval(input('topId')) ? intval(input('topId')) : 0;
+		$data['seo_title']=!empty(input('seo_title')) ? mb_substr(strip_tags(input('seo_title')), 0, 30) : '';
 		$data['seo_key']=!empty(input('seo_key')) ? strip_tags(input('seo_key')) : '';
 		$data['seo_desc']=!empty(input('seo_desc')) ? strip_tags(input('seo_desc')) : '';
 		$data['temp_list']=!empty(input('temp_list')) ? strip_tags(input('temp_list')) : '';
@@ -85,6 +86,7 @@ class Category extends Base{
 		$data['sort']=intval(input('sort')) ? intval(input('sort')) : 0;
 		$data['cate_name']=!empty(input('cate_name')) ? strip_tags(input('cate_name')) : '';
 		$data['alias']=!empty(input('alias')) ? strip_tags(input('alias')) : '';
+		$data['seo_title']=!empty(input('seo_title')) ? mb_substr(strip_tags(input('seo_title')), 0, 30) : '';
 		$data['seo_key']=!empty(input('seo_key')) ? strip_tags(input('seo_key')) : '';
 		$data['seo_desc']=!empty(input('seo_desc')) ? strip_tags(input('seo_desc')) : '';
 		$data['temp_list']=!empty(input('temp_list')) ? strip_tags(input('temp_list')) : '';

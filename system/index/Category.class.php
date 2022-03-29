@@ -36,7 +36,7 @@ class Category extends base{
 		foreach($children as $ck=>$cv){
 			$logData['count']+=self::$category[$cv]['logNum'];
 		}
-		$title=self::$category[$cateId]['cate_name'];
+		$title=!empty(self::$category[$cateId]['seo_title']) ? self::$category[$cateId]['seo_title'] : self::$category[$cateId]['cate_name'];
 		$pageHtml=pageInationHome($logData['count'],$logData['limit'],$logData['page'],'cate',$cateId);
 		$template=$this->getTemp($cateId);
 		$this->setKeywords(self::$category[$cateId]['seo_key']);

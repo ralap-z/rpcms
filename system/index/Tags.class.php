@@ -34,7 +34,7 @@ class Tags extends base{
 		$LogsMod=new LogsMod();
 		$logData=$LogsMod->page($page)->order($this->getLogOrder(array('a.isTop'=>'desc')))->tages($tagId)->select();
 		$logData['count']=$tages[$tagId]['logNum'];
-		$title=$tages[$tagId]['tagName'];
+		$title=!empty($tages[$tagId]['seo_title']) ? $tages[$tagId]['seo_title'] : $tages[$tagId]['tagName'];
 		$pageHtml=pageInationHome($logData['count'],$logData['limit'],$logData['page'],'tag',$tagId);
 		$template=!empty($tages[$tagId]['template']) ? $tages[$tagId]['template'] : 'list';
 		$this->setKeywords($title);

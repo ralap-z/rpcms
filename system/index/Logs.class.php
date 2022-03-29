@@ -25,7 +25,7 @@ class Logs extends base{
 		$pageHtml=pageInationHome($logData['count'],$logData['limit'],$logData['page'],'index');
 		$this->setKeywords();
 		$this->setDescription();
-		$this->assign('title',$this->webConfig['webName']);
+		$this->assign('title',(!empty($this->webConfig['seoTitle']) ? $this->webConfig['seoTitle'] : $this->webConfig['webName']));
 		$this->assign('logList',$logData['list']);
 		$this->assign('pageHtml',$pageHtml);
 		return $this->display('/index');

@@ -25,6 +25,7 @@ return [
 	array(
 		'model'=>'/index/rss/index',
 		'pattern'=>'sitemap<type#\?>',
+		'ext'=>'xml|html'
 	),
 	array(
 		'model'=>'/index/author/index',

@@ -37,7 +37,7 @@
 	</div>
 	<script>
 		function getAdminMsg(){
-			$.getJSON("//www.rpcms.cn/upgrade/message?v={RP.RPCMS_VERSION}", function(res){
+			$.getJSON("//www.rpcms.cn/upgrade/message?v={RP.RPCMS_VERSION}&callback=?", function(res){
 				$(".adminMsg_list").html("");
 				$.each(res.data, function(i, item){
 					$(".adminMsg_list").append('<li>'+(item.type == 'img' ? '<a href="'+item.url+'" target="_blank"><img src="'+item.title+'"/></a>' : '<a href="'+item.url+'" target="_blank" class="'+(item.class == 1 ? 'c' : '')+'">'+item.title+'</a>')+'</li>');

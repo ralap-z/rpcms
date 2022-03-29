@@ -228,8 +228,8 @@ class View{
         $content=preg_replace('/\{\*([^\}]+)\*\}/', '{php}/*$1*/{/php}', $content);
     }
 	private function parse_incldue(&$content){
-		$content=preg_replace_callback('/\{include:([\/\$]?\w+)(\s+[^\}]+)?\}/', [$this, 'parse_incldue_do'], $content);
-		if(preg_match_all('/\{include:([\/\$]?\w+)(\s+[^\}]+)?\}/', $content, $matches) > 0){
+		$content=preg_replace_callback('/\{include:([\/\$]?[\w\/]+)(\s+[^\}]+)?\}/', [$this, 'parse_incldue_do'], $content);
+		if(preg_match_all('/\{include:([\/\$]?[\w\/]+)(\s+[^\}]+)?\}/', $content, $matches) > 0){
 			$this->parse_incldue($content);
 		}
     }

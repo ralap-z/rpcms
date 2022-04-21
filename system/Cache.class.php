@@ -58,7 +58,7 @@ class Cache{
 					return;
 				}
 				$dataArr=json_decode(substr($data, 27),true);
-				$data=!empty($dataArr) ? $dataArr : $data;
+				$data=$dataArr === null ? $data : $dataArr;
 				unset($dataArr);
 			}elseif(method_exists($cache, 'me_' . $name)){
 				$data=call_user_func(array($cache, 'me_' . $name));

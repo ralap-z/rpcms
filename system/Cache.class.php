@@ -31,25 +31,48 @@ class Cache{
         return self::$instance;
     }
 	
+	public static function set($cacheName, $cacheData, $expire=0){
+		$cache=self::instance();
+		return $cache->cacheWrite($cacheData, $cacheName, $expire);
+	}
+	
 	public static function read($name){
 		$cache=self::instance();
 		if(isset(self::$cacheData[$name])){
-			return self::$cacheData[$name];
-		}else{
-			$cachefile = CMSPATH . '/data/'.$name.'.php';
-			if(!is_file($cachefile) || filesize($cachefile) <= 0){
-				if (method_exists($cache, 'me_' . $name)){
-					call_user_func(array($cache, 'me_' . $name));
-				}
+			$data=self::$cacheData[$name];
+			if(0 != $data['expire'] && time() > $data['expire']){
+				@unlink($data['file']);
+				return;
 			}
-			if($fp = fopen($cachefile, 'r')){
-				$data = fread($fp, filesize($cachefile));
+			return $data['data'];
+		}else{
+			$cachefile=$cache->getCacheKey($name);
+			if(is_file($cachefile) && filesize($cachefile) > 0){
+				$fp=fopen($cachefile, 'r');
+				$data=fread($fp, filesize($cachefile));
 				fclose($fp);
 				clearstatcache();
-				$data=str_replace("<?php exit;//", '', $data);
-				self::$cacheData[$name] = json_decode($data,true);
-				return self::$cacheData[$name];
+				$expire=(int)substr($data, 13, 12);
+				if(0 != $expire && time() > $expire){
+					@unlink($cachefile);
+					return;
+				}
+				$dataArr=json_decode(substr($data, 27),true);
+				$data=!empty($dataArr) ? $dataArr : $data;
+				unset($dataArr);
+			}elseif(method_exists($cache, 'me_' . $name)){
+				$data=call_user_func(array($cache, 'me_' . $name));
+				$expire=0;
+			}else{
+				return;
 			}
+			self::$cacheData[$name]=[
+				'expire'=>$expire,
+				'file'=>$cachefile,
+				'data'=>$data
+			];
+			unset($data);
+			return self::$cacheData[$name]['data'];
 		}
     }
 	
@@ -83,7 +106,9 @@ class Cache{
 	/*系统配置缓存*/
 	private function me_option(){
 		$option=Db::name('config')->where('cname = "webconfig"')->field('cvalue')->find();
-        $this->cacheWrite($option['cvalue'], 'option');
+		$data=json_decode($option['cvalue'], true);
+        $this->cacheWrite($data, 'option');
+		return $data;
 	}
 	
 	/*用户缓存*/
@@ -95,7 +120,8 @@ class Cache{
 			array('(select userId,count(*) as commentPostNum FROM '.$this->prefix.'comment where status =0 group by userId) e','a.id=e.userId','left'),
 		))->where('a.status = 0')->field('a.id,a.username,a.nickname,a.role,a.status,IFNULL(b.logNum,0) as logNum,IFNULL(c.pageNum,0) as pageNum,IFNULL(d.commentNum,0) as commentNum,IFNULL(e.commentPostNum,0) as commentPostNum')->select();
 		$user=array_column($user,NULL,'id');
-		$this->cacheWrite(json_encode($user), 'user');
+		$this->cacheWrite($user, 'user');
+		return $user;
 	}
 	
 	/*导航缓存*/
@@ -111,7 +137,8 @@ class Cache{
 				$nav_cache[$v['topId']]['children'][] = $v;
 			}
 		}
-        $this->cacheWrite(json_encode($nav_cache), 'nav');
+        $this->cacheWrite($nav_cache, 'nav');
+		return $nav_cache;
     }
 	
 	/*统计缓存*/
@@ -175,7 +202,8 @@ class Cache{
 			$total['commentU'.$cv['authorId']]['commentOk']+=$cv['status'] == 0 ? $cv['commentNum'] : 0;
 			$total['commentU'.$cv['authorId']]['commentExa']+=$cv['status'] == 1 ? $cv['commentNum'] : 0;
 		}
-		$this->cacheWrite(json_encode($total), 'total');
+		$this->cacheWrite($total, 'total');
+		return $total;
 	}
 	
 	/*文章归档缓存*/
@@ -189,7 +217,8 @@ class Cache{
 				'logNum'=>$v['logNum'],
 			);
 		}
-		$this->cacheWrite(json_encode($logRecord), 'logRecord');
+		$this->cacheWrite($logRecord, 'logRecord');
+		return $logRecord;
 	}
 	
 	/*分类缓存*/
@@ -203,20 +232,23 @@ class Cache{
 				$cate_cache[$v['topId']]['children'][] = $v['id'];
 			}
 		}
-        $this->cacheWrite(json_encode($cate_cache), 'category');
+        $this->cacheWrite($cate_cache, 'category');
+		return $cate_cache;
     }
 	
 	/*专题缓存*/
 	private function me_special() {
 		$special=Db::name('special')->alias('a')->join('(select specialId,count(*) as logNum FROM '.$this->prefix.'logs where status =0 group by specialId) b','a.id=b.specialId','left')->field('a.*,IFNULL(b.logNum,0) as logNum')->select();
 		$special = array_column($special,NULL,'id');
-        $this->cacheWrite(json_encode($special), 'special');
+        $this->cacheWrite($special, 'special');
+		return $special;
     }
 	
 	/*友情链接缓存*/
 	private function me_links() {
 		$links=Db::name('links')->where('status =0')->field('sitename,sitedesc,siteurl')->order('sort','asc')->select();
-        $this->cacheWrite(json_encode($links), 'links');
+        $this->cacheWrite($links, 'links');
+		return $links;
     }
 	
 	/*tag标签缓存*/
@@ -228,14 +260,16 @@ class Cache{
 			$tages[$k]['logNum']=isset($allTag[$v['id']]) ? $allTag[$v['id']] : 0;
 		}
 		$tages=array_column($tages,NULL,'id');
-		$this->cacheWrite(json_encode($tages), 'tages');
+		$this->cacheWrite($tages, 'tages');
+		return $tages;
 	}
 	
 	/*单页主要信息缓存*/
 	private function me_pages(){
 		$pages=Db::name('pages')->where('status =0')->field('id,title,alias,seo_key,seo_desc,password,authorId,comnum,template,createTime,extend,isRemark')->select();
 		$pages=array_column($pages,NULL,'id');
-		$this->cacheWrite(json_encode($pages), 'pages');
+		$this->cacheWrite($pages, 'pages');
+		return $pages;
 	}
 
 	private function me_template(){
@@ -249,7 +283,8 @@ class Cache{
 		if($cfg=Db::name('config')->where('cname = "temp_'.$template['name'].'"')->field('cvalue')->find()){
 			$template['config']=json_decode($cfg['cvalue'],true);
 		}
-		$this->cacheWrite(json_encode($template), 'template');
+		$this->cacheWrite($template, 'template');
+		return $template;
 	}
 	
 	private function me_waptemplate(){
@@ -259,14 +294,35 @@ class Cache{
 		if($cfg=Db::name('config')->where('cname = "temp_'.$template['name'].'"')->field('cvalue')->find()){
 			$template['config']=json_decode($cfg['cvalue'],true);
 		}
-		$this->cacheWrite(json_encode($template), 'waptemplate');
+		$this->cacheWrite($template, 'waptemplate');
+		return $template;
 	}
 	
-    private function cacheWrite($cacheData, $cacheName){
-		$cachefile = CMSPATH . '/data/'.$cacheName.'.php';
-		$cacheData = "<?php exit;//" . $cacheData;
+    private function cacheWrite($cacheData, $cacheName, $expire=0){
+		$cachefile=$this->getCacheKey($cacheName);
+		$cacheDir=dirname($cachefile);
+		if(!is_dir($cacheDir)){
+			mkdir($cacheDir, 0755, true);
+		}
+		if(!empty($expire)){
+			$expire=$expire < 0 ? 0 : $expire;
+			$expire=time() + $expire;
+		}
+		$cacheData=json_encode($cacheData, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+		$cacheData="<?php exit;//".sprintf('%012d', $expire)."?>\n".$cacheData;
 		self::$cacheData[$cacheName]= null;
-		return @file_put_contents($cachefile,$cacheData);
+		$res=@file_put_contents($cachefile,$cacheData);
+		if($res){
+			clearstatcache();
+			return true;
+		}
+		return false;
     }
+	
+	private function getCacheKey($name){
+		$name=md5($name);
+		$name=substr($name, 0, 2). DIRECTORY_SEPARATOR .substr($name, 2);
+		return CMSPATH . '/data/cache/'.$name.'.php';
+	}
 	
 }

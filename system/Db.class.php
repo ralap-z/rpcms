@@ -122,7 +122,7 @@ class Db{
 					$k='('.$k.')';
 				}
 				$oldV=$kn=explode('#',str_replace(array('&','|','(',')'),array('#','#','',''),$k));
-				$kn = array_map(function($item){return '/\b'.trim($item).'\b/';}, $kn);
+				$kn = array_map(function($item){$item=trim($item);return false === strpos($item, '->') ? '/\b'.preg_quote($item).'\b/' : '/'.preg_quote($item).'/';}, $kn);
 				$k=str_replace(array('&','|'),array(' and ',' or '),$k);
 				$oldKn = array_map(function($item){return '/{key}/';}, $kn);
 				if(is_array($v)){

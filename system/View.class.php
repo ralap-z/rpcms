@@ -16,9 +16,10 @@ class View{
 	protected static $data=[];
 	private $includeFile=[];
 	private $pluginName='';
+	private $cacheDir;
 	
 	public function __construct(){
-		
+		$this->cacheDir=CMSPATH .'/data/temp/';
 	}
 	
 	public static function instance(){
@@ -44,7 +45,7 @@ class View{
             rpMsg($tempArr['temp']." template is not find");
         }
 		if(Config::get('tpl_cache')){
-			$cashFiles=CMSPATH .'/data/cache/'.$tempArr['temp'];
+			$cashFiles=$view->cacheDir.$tempArr['temp'];
 			$cashDir=dirname($cashFiles);
 			if(!file_exists($cashFiles) && !file_exists($cashDir)){
 				@mkdir($cashDir, 0755, true);
@@ -84,7 +85,7 @@ class View{
 		if(empty($temp)) return false;
 		$view=self::instance();
 		$tempArr=$view->setTempFile($temp);
-		$cashFiles=CMSPATH .'/data/cache/'.$tempArr['temp'];
+		$cashFiles=$view->cacheDir.$tempArr['temp'];
 		$cashDir=dirname($cashFiles);
 		if(!file_exists($cashFiles) && !file_exists($cashDir)){
 			@mkdir($cashDir, 0755, true);

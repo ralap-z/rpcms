@@ -18,12 +18,6 @@
 				</select>
 			</div>
 			<div class="me_input me_input_line">
-				<select name="authorId">
-					<option value="">所有作者</option>
-					{$authorHtml}
-				</select>
-			</div>
-			<div class="me_input me_input_line">
 				<select name="status">
 					<option value="9" {php}echo $s_status == 9 ? 'selected' : '';{/php}>所有状态</option>
 					<option value="0" {php}echo $s_status == 0 ? 'selected' : '';{/php}>公开</option>

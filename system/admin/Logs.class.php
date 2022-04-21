@@ -65,7 +65,6 @@ class Logs extends Base{
 		))->where($where)->field('a.id,a.title,a.comnum,a.upnum,a.views,a.isTop,a.createTime,a.status,b.cate_name,c.nickname')->order($orderBy)->limit(($page-1)*$limit.','.$limit)->select();
 		$pageHtml=pageInation($count,$limit,$page,'',join('&',$search));
 		View::assign('categoryHtml',me_createCateOption($cateId));
-		View::assign('authorHtml',me_createAuthorOption($authorId));
 		View::assign('tages',Cache::read('tages'));
 		View::assign('list',$res);
 		View::assign('s_status',$status);

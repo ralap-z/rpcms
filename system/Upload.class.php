@@ -74,7 +74,7 @@ class Upload{
 			'filesize'=>$this->fileSizes,
 			'filepath'=>$this->fullName,
 			'token'=>md5($this->fullName).rand(100,999),
-			'filetype'=>ltrim($this->fileTypes, "."),
+			'filetype'=>str_replace(['jpeg','docx','xlsx','pptx'], ['jpg','doc','xls','ppt'], ltrim($this->fileTypes, ".")),
 			'logId'=>$this->logId,
 			'pageId'=>$this->pageId,
 			'authorId'=>$this->authorId,

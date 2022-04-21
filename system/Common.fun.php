@@ -815,7 +815,7 @@ function Debug_Error_Handler($errno, $errstr, $errfile, $errline){
 	rpMsg($errstr.'<br>'.$errfile.'&nbsp;&nbsp;&nbsp;&nbsp;Line:  '.$errline);
 }
 function Debug_Exception_Handler($exception){
-	rpMsg(rp\Config::get('webConfig.isDevelop') ? $exception->getMessage() : '未找到页面');
+	rpMsg(rp\Config::get('webConfig.isDevelop') ? $exception->getMessage() : '请求页面错误');
 }
 
 /**

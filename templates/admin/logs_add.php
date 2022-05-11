@@ -11,6 +11,7 @@
 .taglist a:hover{color: #f40;}
 #excerpt{display:none;}
 .me_input .tips{margin-left: 1rem;color: #f40;}
+.fixed_tab{width: 23.5rem;padding-left: 5rem;padding-top: 1rem;}
 </style>
 <form class="me_form" action="" onSubmit="return false">
 	<div class="left" style="width: calc(100% - 23.5rem);">
@@ -42,7 +43,7 @@
 		<div class="me_input big"><label style="width: auto;">关键词<font class="tips"></font></label><input type="text" name="keywords" value="{$logData['keywords']|default=''}" onafterpaste="this.value=this.value.replace(/，/g,',')" onkeyup="this.value=this.value.replace(/，/g,',')"/></div>
 		<div class="extendBox">{hook:admin_logs_edit_hook2($logData)}</div>
 	</div>
-	<div class="right fixed_tab" data-offset="3.2" data-unit="rem" style="width: 23.5rem;padding-left: 5rem;padding-top: 1rem;">
+	<div class="right fixed_tab" data-space="3.2" data-unit="rem">
 		<div class="me_input"><label>分类</label><select name="cateId">
 			<option value="">选择分类</option>
 			{$categoryHtml}
@@ -77,9 +78,11 @@ var logtype="{$logData['status']|default=2}";
 var attrReload={'logid':logid};
 var ispost=false;
 $(document).ready(function(){
-	$(".menu_tree").find(".menu_item[data-type='logs_add']").addClass('active');
-	$.config({"ajaxPageDom":document}),$(".fixed_tab").fixedTab();
+	$(".menu_tree").find(".menu_item[data-type='logs_add']").addClass('active'),$.config({"ajaxPageDom":document});
 	bodyUE=UE.getEditor('log_content',{topOffset:$(".top").outerHeight(true)});
+	bodyUE.ready(function(){
+		$(".fixed_tab").fixedTab();
+	});
 	$(document).click(function (e) {
 		$('.taglist').slideUp("fast");
 	});

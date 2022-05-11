@@ -3,6 +3,7 @@
 <style>
 .me_input input[type='text'],.me_input input[type='number'],.me_input select{width: calc(100% - 2.5rem);}
 .me_form .right.me_fixed{right: 2rem;}
+.fixed_tab{width: 23.5rem;padding-left: 5rem;padding-top: 1rem;}
 </style>
 <form class="me_form" action="" onSubmit="return false">
 	<div class="left" style="width: calc(100% - 23.5rem);">
@@ -30,7 +31,7 @@
 		<div class="me_input big"><label>SEO描述</label><textarea name="seo_desc">{$pageData['seo_desc']|default=''}</textarea></div>
 		<div class="extendBox">{hook:admin_pages_edit_hook2($pageData)}</div>
 	</div>
-	<div class="right fixed_tab" data-offset="3.2" data-unit="rem" style="width: 23.5rem;padding-left: 5rem;padding-top: 1rem;">
+	<div class="right fixed_tab" data-space="3.2" data-unit="rem">
 		<div class="me_input"><label>作者</label><select name="authorId">{$authorHtml}</select></div>
 		<div class="me_input"><label>别名</label><input type="text" name="alias" value="{$pageData['alias']|default=''}"></div>
 		<div class="me_input"><label>密码</label><input type="text" name="password" value="{$pageData['password']|default=''}"></div>
@@ -49,9 +50,11 @@
 var pageId="{$pageId|default=''}";
 var attrReload={'pageId':pageId};
 $(document).ready(function(){
-	$(".menu_tree").find(".menu_item[data-type='pages']").addClass('active');
-	$.config({"ajaxPageDom":document}),$(".fixed_tab").fixedTab();
+	$(".menu_tree").find(".menu_item[data-type='pages']").addClass('active'),$.config({"ajaxPageDom":document});
 	bodyUE=UE.getEditor('page_content',{topOffset:$(".top").outerHeight(true)});
+	bodyUE.ready(function(){
+		$(".fixed_tab").fixedTab();
+	});
 	$(".uploadBtn").click(function(){
 		var formData = new FormData(),
 			file=$('.attrFile')[0].files[0];

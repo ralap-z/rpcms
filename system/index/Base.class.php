@@ -115,8 +115,9 @@ class Base{
 	*获取公共配置
 	*/
 	private function getDefault(){
+		$app=$this->App;
 		$this->webConfig['totalCode']=stripslashes($this->webConfig['totalCode']);
-		View::assign('host',$this->App->baseUrl);
+		View::assign('host',$app::server('HTTP_HOST'));
 		View::assign('webConfig',$this->webConfig);
 		View::assign('tempConfig',$this->template['config']);
 		View::assign('tempUrl',$this->tempUrl);

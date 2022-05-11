@@ -255,6 +255,8 @@ class App{
 			}
 			$this->routePath=$path;
 			$this->params=$result['params'];
+			$_GET=array_merge($_GET, $this->params);
+			$_REQUEST=array_merge($_REQUEST, $this->params);
 			$this->route=array('action'=>$path[2],'controller'=>$path[1],'module'=>$path[0]);
 		}
 	}

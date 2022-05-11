@@ -118,7 +118,7 @@ class Cache{
 			array('(select authorId,count(*) as pageNum FROM '.$this->prefix.'pages where status =0 group by authorId) c','a.id=c.authorId','left'),
 			array('(select authorId,count(*) as commentNum FROM '.$this->prefix.'comment where status =0 group by authorId) d','a.id=d.authorId','left'),
 			array('(select userId,count(*) as commentPostNum FROM '.$this->prefix.'comment where status =0 group by userId) e','a.id=e.userId','left'),
-		))->where('a.status = 0')->field('a.id,a.username,a.nickname,a.role,a.status,IFNULL(b.logNum,0) as logNum,IFNULL(c.pageNum,0) as pageNum,IFNULL(d.commentNum,0) as commentNum,IFNULL(e.commentPostNum,0) as commentPostNum')->select();
+		))->where('a.status = 0')->field('a.id,a.username,a.nickname,a.role,a.status,IFNULL(b.logNum,0) as logNum,IFNULL(c.pageNum,0) as pageNum,IFNULL(d.commentNum,0) as commentNum,IFNULL(e.commentPostNum,0) as commentPostNum')->slave('cache')->select();
 		$user=array_column($user,NULL,'id');
 		$this->cacheWrite($user, 'user');
 		return $user;
@@ -143,9 +143,9 @@ class Cache{
 	
 	/*统计缓存*/
 	private function me_total(){
-		$log=Db::name('logs')->field('count(*) as logNum,authorId,status')->group('status,authorId')->select();
-		$pages=Db::name('pages')->field('count(*) as pageNum,authorId')->group('authorId')->select();
-		$comment=Db::name('comment')->field('count(*) as commentNum,authorId,status')->group('authorId,status')->select();
+		$log=Db::name('logs')->field('count(*) as logNum,authorId,status')->group('status,authorId')->slave('cache')->select();
+		$pages=Db::name('pages')->field('count(*) as pageNum,authorId')->group('authorId')->slave('cache')->select();
+		$comment=Db::name('comment')->field('count(*) as commentNum,authorId,status')->group('authorId,status')->slave('cache')->select();
 		$total=array(
 			'logNum'=>0,
 			'logOk'=>0,
@@ -208,7 +208,7 @@ class Cache{
 	
 	/*文章归档缓存*/
 	private function me_logRecord(){
-		$log=Db::name('logs')->field('count(*) as logNum,DATE_FORMAT(createTime,\'%Y-%m\') as ym')->group('ym')->order('ym','desc')->select();
+		$log=Db::name('logs')->field('count(*) as logNum,DATE_FORMAT(createTime,\'%Y-%m\') as ym')->group('ym')->order('ym','desc')->slave('cache')->select();
 		$logRecord=array();
 		foreach($log as $k=>$v){
 			$logRecord[]=array(
@@ -238,7 +238,7 @@ class Cache{
 	
 	/*专题缓存*/
 	private function me_special() {
-		$special=Db::name('special')->alias('a')->join('(select specialId,count(*) as logNum FROM '.$this->prefix.'logs where status =0 group by specialId) b','a.id=b.specialId','left')->field('a.*,IFNULL(b.logNum,0) as logNum')->select();
+		$special=Db::name('special')->alias('a')->join('(select specialId,count(*) as logNum FROM '.$this->prefix.'logs where status =0 group by specialId) b','a.id=b.specialId','left')->field('a.*,IFNULL(b.logNum,0) as logNum')->slave('cache')->select();
 		$special = array_column($special,NULL,'id');
         $this->cacheWrite($special, 'special');
 		return $special;
@@ -253,7 +253,7 @@ class Cache{
 	
 	/*tag标签缓存*/
 	private function me_tages(){
-		$allTag=Db::name('logs')->alias('a')->join('tages as b','find_in_set(b.id,a.tages)')->where('a.status =0 and a.tages != ""')->field('b.id,COUNT(*) as num')->group('b.id')->select();
+		$allTag=Db::name('logs')->alias('a')->join('tages as b','find_in_set(b.id,a.tages)')->where('a.status =0 and a.tages != ""')->field('b.id,COUNT(*) as num')->group('b.id')->slave('cache')->select();
 		$allTag=array_column($allTag,'num','id');
 		$tages=Db::name('tages')->select();
 		foreach($tages as $k=>$v){

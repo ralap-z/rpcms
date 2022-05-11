@@ -15,6 +15,7 @@ class Db{
 	private static $_mysqli=[];
 	private static $prefix;
 	private static $table;
+	private static $slave;
 	private $field = '*';
 	private $join = '';
 	private $where = array();
@@ -22,18 +23,19 @@ class Db{
 	private $order = '';
 	private $group = '';
 	private $results = '';
+	private $isGetSql = false;
 	
 	public function __construct(){
 		$this->options=Config::get('db');
 		self::$prefix=$this->options["prefix"];
 	}
 	
-	public static function instance($type=''){
+	public static function instance($slave=''){
         if(is_null(self::$instance)){
             self::$instance = new self();
         }
-		if(!empty($type) && empty(self::$_mysqli[$type])){
-			self::$_mysqli[$type]=self::$instance->connect();
+		if(!empty($slave) && empty(self::$_mysqli[$slave])){
+			self::$_mysqli[$slave]=self::$instance->connect();
 		}
         return self::$instance;
     }
@@ -50,12 +52,14 @@ class Db{
 
 	public static function name($table){
 		$con=self::instance();
+		$con->_reset_sql();
 		self::$table=self::$prefix . $table;
 		return $con;
 	}
 	
 	public static function table($table){
 		$con=self::instance();
+		$con->_reset_sql();
 		self::$table=$table;
 		return $con;
 	}
@@ -220,9 +224,18 @@ class Db{
 		return $this;
 	}
 	
+	public function slave($slaveName){
+		$slaveName=(string)$slaveName;
+		self::$slave=$slaveName;
+		return $this;
+	}
+	
 	public function find($type="assoc"){
 		$this->limit=' limit 1';
 		$sql="select ".$this->field." from ".self::$table.$this->join.$this->buildWhere().$this->group.$this->order.$this->limit;
+		if($this->isGetSql){
+			return $sql;
+		}
 		$this->results=$this->execute($sql, 'r');
 		$res=$this->result($type);
 		$this->_reset_sql();
@@ -231,6 +244,9 @@ class Db{
 	
 	public function count($key="*"){
 		$sql="select count(".$key.") as me_count from ".self::$table.$this->join.$this->buildWhere().$this->group;
+		if($this->isGetSql){
+			return $sql;
+		}
 		$this->results=$this->execute($sql, 'g');
 		$res=$this->result();
 		$this->_reset_sql();
@@ -239,6 +255,9 @@ class Db{
 	
 	public function sum($field){
 		$sql="select sum(".$field.") as me_sum from ".self::$table.$this->join.$this->buildWhere().$this->group;
+		if($this->isGetSql){
+			return $sql;
+		}
 		$this->results=$this->execute($sql, 'g');
 		$res=$this->result();
 		$this->_reset_sql();
@@ -247,16 +266,29 @@ class Db{
 	
 	public function select($type="assoc"){
 		$sql="select ".$this->field." from ".self::$table.$this->join.$this->buildWhere().$this->group.$this->order.$this->limit;
-		$this->results=$this->execute($sql, 'r');	
+		if($this->isGetSql){
+			return $sql;
+		}
+		$this->results=$this->execute($sql, 'r');
+		if($type != 'yield'){
+			return $this->returnResult($type);
+		}
+		return $this->yieldResult();
+	}
+	private function returnResult($type){
 		$res=$this->result($type,"all");
 		$this->_reset_sql();
 		return $res;
 	}
+	private function yieldResult(){
+		while($row=$this->results->fetch_assoc()){
+			yield $row;
+		}
+	}
 	
-	public function getSql(){
-		$sql="select ".$this->field." from ".self::$table.$this->join.$this->buildWhere().$this->group.$this->order.$this->limit;
-		$this->_reset_sql();
-		return $sql;
+	public function getSql($isGet=true){
+		$this->isGetSql=$isGet;
+		return $this;
 	}
 	
 	public function query($sql){
@@ -330,6 +362,9 @@ class Db{
 		$key="(`".join("`,`",$key_arr)."`)";
 		$vals=join(",",$val_arr).";";
 		$sql="insert ".$modifier." into ".self::$table.$key." values".$vals;
+		if($this->isGetSql){
+			return $sql;
+		}
 		$this->execute($sql, 'w');
 		$this->_reset_sql();
 		return !empty($this->insert_id()) ? $this->insert_id() : $this->affected_rows();
@@ -342,24 +377,36 @@ class Db{
 		}
 		$updata=join(" , ",$strs);
 		$sql="update ".$modifier." ".self::$table." SET ".$updata.$this->buildWhere();
+		if($this->isGetSql){
+			return $sql;
+		}
 		$this->_reset_sql();
 		return $this->execute($sql, 'w');
 	}
 	
 	public function setInc($field,$val=1){
 		$sql="update ".self::$table." SET `".$field."`=".$field."+".$val." ".$this->buildWhere();
+		if($this->isGetSql){
+			return $sql;
+		}
 		$this->_reset_sql();
 		return $this->execute($sql, 'w');
 	}
 	
 	public function setDec($field,$val=1){
 		$sql="update ".self::$table." SET `".$field."`=".$field."-".$val." ".$this->buildWhere();
+		if($this->isGetSql){
+			return $sql;
+		}
 		$this->_reset_sql();
 		return $this->execute($sql, 'w');
 	}
 	
 	public function dele(){
 		$sql="delete from ".self::$table.$this->buildWhere().$this->order.$this->limit;
+		if($this->isGetSql){
+			return $sql;
+		}
 		$this->_reset_sql();
 		return $this->execute($sql, 'w');
 	}
@@ -384,7 +431,7 @@ class Db{
 		$link = mysqli_init();
 		$link->options(MYSQLI_OPT_CONNECT_TIMEOUT, 10);
 		if(!$link->real_connect($this->options["hostname"], $this->options["username"], $this->options["password"], $this->options['database'])){
-			die('Connect Error (' . $link->connect_errno . ') '. $link->connect_error());
+			throw new \Exception(json_encode(['message'=>'Connect Error (' . $link->connect_errno . ') '. $link->connect_error]), 1500);
 		}
 		$link->set_charset($this->options["charset"]);
 		return $link;
@@ -398,53 +445,36 @@ class Db{
 		$this->limit = '';
 		$this->order = '';
 		$this->group = '';
+		$this->isGetSql = false;
 	}
 	
-	private function execute($sql, $type='r'){
-		if(empty(self::$_mysqli[$type])){
-			self::$_mysqli[$type]=$this->connect();
+	private function execute($sql, $slave='r'){
+		if(!empty(self::$slave)){
+			$slave=self::$slave;
 		}
-		$res=self::$_mysqli[$type]->query($sql, MYSQLI_USE_RESULT);
-		if(!$res){$this->error(self::$_mysqli[$type]->error_list,$sql);}
+		if(empty(self::$_mysqli[$slave])){
+			self::$_mysqli[$slave]=$this->connect();
+		}
+		$res=self::$_mysqli[$slave]->query($sql, MYSQLI_USE_RESULT);
+		if(!$res){
+			$error=self::$_mysqli[$slave]->error_list;
+			$errorMsg=[
+				'message'=>[],
+				'sql'=>$sql,
+			];
+			if(is_array($error)){
+				foreach($error as $k=>$v){
+					$errorMsg['message'][]='Error:'.$v["errno"].'<br> Message:'.$v['error'];
+				}
+			}else{
+				$errorMsg['message']=$error;
+			}
+			throw new \Exception(json_encode($errorMsg), 1500);
+		}
 		return $res;
 	}
 	private function escapeString($str){
         return addslashes(stripslashes($str));
     }
-	private function error($msg,$sql=""){
-		global $App;
-		if(!Config::get('webConfig.isDevelop')){
-			echo $App->isAjax() ? json(array('code'=>-1,'msg'=>'SQL执行错误')) : rpMsg('SQL执行错误');exit;
-		}else{
-			$error="";
-			if(is_array($msg)){
-				foreach($msg as $k=>$v){
-					$error.="Error Number:".$v["errno"]."<br>".$v['error'];
-				}
-			}else{
-				$error.=$msg;
-			}
-			if($App->isAjax()){
-				json(array('code'=>-1,'msg'=>$error));
-			}else{
-				!empty($sql) && $error.="<p>".$sql."</p>";
-				$heading="A Database Error Occurred";
-				$message=array();
-				$trace = debug_backtrace();
-				foreach ($trace as $call){
-					if (isset($call['file'], $call['class'])){
-						if (DIRECTORY_SEPARATOR !== '/'){
-							$call['file'] = str_replace('\\', '/', $call['file']);
-						}
-						$message[] = 'Filename: '.$call['file'].'    On Line Number: '.$call['line'];
-					}
-				}
-				$message = '<p>'.(is_array($message) ? implode('</p><p>', $message) : $message).'</p>';
-				echo "<h3>".$heading."</h3>";
-				echo "<div style='border: 1px solid #ccc;padding: 10px;color: #313131;font-size: 15px;'>".$error."</div><div style='font-size: 13px;color: #444444;line-height: 13px;'>".$message."</div>";
-				exit(8);
-			}
-		}
-	}
 	
 }

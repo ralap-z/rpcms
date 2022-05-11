@@ -71,6 +71,9 @@ class Route{
 	}
 	
 	protected static function buildRule($rule){
+		if(0 !== stripos($rule['model'],'/')){
+			$rule['model']='/'.$rule['model'];
+		}
 		$modelArr=explode('/',$rule['model']);
 		$ruleArr=explode('/',$rule['pattern']);
 		$nameKey=0;
@@ -116,7 +119,7 @@ class Route{
 		$rule['pattern']=join('/',$ruleArr).(!empty($rule['ext']) ? '(\.('.$rule['ext'].'))' : '');
 		$rule['patternUrl']=rtrim(join('/',$urlparam),'/');
 		$rule['param']=$name;
-		$rule['domain']=$modelArr[0] == 'plugin' ? 'index' : $modelArr[1];
+		$rule['domain']=$modelArr[1] == 'plugin' ? 'index' : $modelArr[1];
 		return $rule;
 	}
 }

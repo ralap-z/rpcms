@@ -47,7 +47,10 @@
 		</tbody>
 	</table>
 	<div class="rp_row clear">
-		<button type="button" class="rp_btn upSort">更新排序</button>
+		<div class="left" style="margin-top: 0.4rem;">
+			<button type="button" class="rp_btn upSort">更新排序</button>
+		</div>
+		<div class="right pages">{$pageHtml}</div>
 	</div>
 </div>
 <div class="me_model me_anim_bounce me_model_links">

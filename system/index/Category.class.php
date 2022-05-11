@@ -44,7 +44,7 @@ class Category extends base{
 		$this->assign('title',$title.'-'.$this->webConfig['webName']);
 		$this->assign('listId',$cateId);
 		$this->assign('listType','cate');
-		$this->assign('cateName',$title);
+		$this->assign('cateName',self::$category[$cateId]['cate_name']);
 		$this->assign('logList',$logData['list']);
 		$this->assign('pageHtml',$pageHtml);
 		return $this->display('/'.$template);

@@ -110,7 +110,7 @@ class LogsMod{
 	}
 	
 	public function select(){
-		$sonSql=Db::name('logs')->alias('a')->where($this->whereArr)->where($this->whereStr)->field('a.id')->limit(($this->page-1)*$this->limit.','.$this->limit)->order($this->order)->getSql();
+		$sonSql=Db::name('logs')->alias('a')->where($this->whereArr)->where($this->whereStr)->field('a.id')->limit(($this->page-1)*$this->limit.','.$this->limit)->order($this->order)->getSql()->select();	
 		$list=$this->getData($sonSql);
 		Hook::doHook('index_logs_list',array(&$list));
 		return array('count'=>0,'limit'=>$this->limit,'page'=>$this->page,'list'=>$list);

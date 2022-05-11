@@ -29,7 +29,7 @@
 				<div class="img" title="点击切换模板">
 					<img src="{$v['preview']}"/>
 				</div>
-				<p class="title">{$v['name']} {$v['version']}</p>
+				<p class="title">{$v['name']}({$v['version']})</p>
 				<div class="info clear">
 					{if !empty($v['author'])}
 						<p class="left">作者：

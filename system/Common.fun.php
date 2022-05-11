@@ -50,6 +50,9 @@ function _encrypt($string){
 }
 
 function _decrypt($string){
+	if(strlen($string) % 2 != 0){
+		return '';
+	}
 	$appkey=rp\Config::get('app_key');
 	return openssl_decrypt(hex2bin($string), 'AES-128-ECB', $appkey, OPENSSL_RAW_DATA);
 }
@@ -445,30 +448,20 @@ function hideStr($type, $str, $replace='*'){
 }
 
 /*标签关键字替换*/
-function content2keyword($content,$limit=1){
-	$tages =rp\Cache::read('tages');
-	if(!is_array($tages) || empty($tages)){
-		return $content;
-	}
-	preg_match_all('/<a(\s[^>]*)?>.*<\/a>|<img\s[^>]+>/Uis', $content, $matches);
-	if(is_array($matches[0])){
-		foreach($matches[0] as $key=>$val ){
-			$flag = "{*=*=*=*{$key}*=*=*=*}";
-			$content = str_replace($val, $flag, $content);
+function content2keyword($content,$limit=1,$maxLink=0){
+	$tages=function(){
+		$data =rp\Cache::read('tages');
+		foreach($data as $k=>$v){
+			yield $v;
 		}
-	}
-	$content='<div>'. PHP_EOL .$content. PHP_EOL .'</div>';
-	foreach($tages as $val){
-		$tagurl = '<a title="'.$val['tagName'].'" href="'.rp\Url::tag($val['id']).'" target="_blank">'.$val['tagName'].'</a>';
-		$content = preg_replace('/('.$val['tagName'].')(?=[^<>]*<)/', $tagurl, $content, $limit);
-	}
-	$content=trim(ltrim(rtrim($content,'</div>'),'<div>'));
-	//$content=trim(rtrim(ltrim($content,'<div>'),'</div>'));
-	if(is_array($matches[0])){
-		foreach($matches[0] as $key=>$val){
-			$flag = "{*=*=*=*{$key}*=*=*=*}";
-			$content = str_replace($flag, $val, $content);
+	};
+	$isLink=0;
+	foreach($tages() as $k=>$v){
+		if(!empty($maxLink) && $isLink >= $maxLink){
+			break;
 		}
+		$regEx='/(?!(<.*?))('.$v['tagName'].')(?!(([^<>]*?)>)|([^>]*?<\/a>))/si';
+		$content=preg_replace($regEx, '<a href="'. rp\Url::tag($v['id']) .'" target="_blank">\2</a>', $content, 1, $islink);
 	}
 	return $content;
 }
@@ -814,8 +807,26 @@ function Debug_Error_Handler($errno, $errstr, $errfile, $errline){
 	}
 	rpMsg($errstr.'<br>'.$errfile.'&nbsp;&nbsp;&nbsp;&nbsp;Line:  '.$errline);
 }
+
 function Debug_Exception_Handler($exception){
-	rpMsg(rp\Config::get('webConfig.isDevelop') ? $exception->getMessage() : '请求页面错误');
+	$errorCode=$exception->getCode();
+	$isDevelop=rp\Config::get('webConfig.isDevelop');
+	if($errorCode == 1500){
+		if($isDevelop){
+			$message=json_decode($exception->getMessage(), true);
+			if(!empty($message['sql'])){
+				$message['message'][]='SQL：'.$message['sql'];
+			}
+			$message=join('<br>', $message['message']);
+		}else{
+			$message='SQL执行错误';
+		}
+	}elseif($isDevelop){
+		$message=$exception->getMessage();
+	}else{
+		$message='请求页面错误';
+	}
+	rpMsg($message);
 }
 
 /**
@@ -826,14 +837,18 @@ function Debug_Exception_Handler($exception){
 * @param boolean $isAuto 是否自动返回 true false
 */
 function rpMsg($msg, $url = 'javascript:history.back(-1);', $isAuto = false){
-	$trace = debug_backtrace();
+	$trace=debug_backtrace();
 	$code=(isset($trace[1]['function']) && in_array($trace[1]['function'],array('Debug_Error_Handler','Debug_Exception_Handler','error')) && $msg != '404') ? 500 : 404;
-	if (!headers_sent()){
+	global $App;
+	if(!headers_sent()){
 		rp\Url::setCode($code);
 		if(ob_get_length() > 0) ob_end_clean();
 	}
-	if ($msg == '404'){
+	if($msg == '404'){
 		$msg = '抱歉，你所请求的页面不存在！';
+	}
+	if($App->isAjax()){
+		return json(['code'=>$code,'message'=>$msg]);
 	}
 	if(rp\Config::get('webConfig.isDevelop')){
 		$error=$msg;
@@ -843,9 +858,9 @@ function rpMsg($msg, $url = 'javascript:history.back(-1);', $isAuto = false){
 			$error.='<br>'.$trace[1]['args'][0]->getFile().'&nbsp;&nbsp;&nbsp;&nbsp;Line:  '.$trace[1]['args'][0]->getLine();
 			$trace=$trace[1]['args'][0]->getTrace();
 		}
-		foreach ($trace as $call){
-			if (isset($call['file'])){
-				if (DIRECTORY_SEPARATOR !== '/'){
+		foreach($trace as $call){
+			if(isset($call['file'])){
+				if(DIRECTORY_SEPARATOR !== '/'){
 					$call['file'] = str_replace('\\', '/', $call['file']);
 				}
 				$message[] = 'Filename: '.$call['file'].'&nbsp;&nbsp;&nbsp;&nbsp;Line: '.$call['line'];
@@ -855,7 +870,6 @@ function rpMsg($msg, $url = 'javascript:history.back(-1);', $isAuto = false){
 		echo "<h3>".$heading."</h3>";
 		echo "<div style='border: 1px solid #ccc;padding: 10px;color: #313131;font-size: 15px;'>".$error."</div><div style='font-size: 13px;color: #444444;line-height: 13px;'>".$message."</div>";
 	}else{
-		global $App;
 		if(\rp\View::checkTemp('404')){
 			\rp\View::assign('code',$code);
 			\rp\View::assign('message',$msg);

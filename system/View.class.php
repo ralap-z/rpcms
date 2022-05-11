@@ -58,6 +58,7 @@ class View{
 		}
 		self::$data['cmspath']=!empty(Config::get('app_default_path')) ? '/'.Config::get('app_default_path') : '';
 		self::$data['baseUrl']=$App->baseUrl;
+		self::$data['route']=$App->route;
 		ob_start();
 		ob_implicit_flush(0);
 		self::startGzip();
@@ -370,7 +371,7 @@ class View{
 		$this->includeFile[$tempDir]=filemtime($tempDir);
 		$data=$dataEnd='';
 		if(!empty($matches[2])){
-			preg_match_all("/([a-z]+)\=[\"\']?([^\"\']+)[\"\']?/", stripslashes($matches[2]), $matchesParam, PREG_SET_ORDER);
+			preg_match_all("/([a-zA-Z0-9_-]+)\=[\"\']?([^\"\']+)[\"\']?/", stripslashes($matches[2]), $matchesParam, PREG_SET_ORDER);
 			$matchesParam=array_map(function($v){
 				$v[2]=trim($v[2]);
 				$flag=substr($v[2], 0, 1);

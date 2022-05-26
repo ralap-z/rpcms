@@ -35,36 +35,27 @@ class Upload{
     }
 	
 	public function saveFile($tmpName,$isThumb=true){
-		if(!file_exists($this->dirNames) && !mkdir($this->dirNames, 0777, true)){
-			return array('code'=>-1, 'msg'=>'目录创建失败');
-		}else if(!is_writeable($this->dirNames)){
-			return array('code'=>-1, 'msg'=>'目录没有写权限');
+		$dirRes=$this->checkDir();
+		if($dirRes !== true){
+			return array('code'=>-1, 'msg'=>$dirRes);
 		}
         if(!(move_uploaded_file($tmpName, $this->filePath) && file_exists($this->filePath))){ //移动失败
 			return array('code'=>-1, 'msg'=>'文件保存时出错');
-        }else{ //移动成功
-			//$this->saveAttr();
-			if($isThumb && in_array($this->fileTypes, array('.jpg','.jpeg','.png','.gif','.bmp'))){
-				$this->createThumbnail($this->filePath);
-			}
-			Hook::doHook('admin_attach_upload',array($this->filePath));
-            return array('code'=>200, 'msg'=>'SUCCESS', 'data'=>$this->fullName);
         }
+		return $this->doOper($isThumb);
     }
 	
 	public function saveBase64File($base64Data,$isThumb=true){
+		$dirRes=$this->checkDir();
+		if($dirRes !== true){
+			return array('code'=>-1, 'msg'=>$dirRes);
+		}
 		$img = base64_decode($base64Data);
         if(!(file_put_contents($this->filePath, $img) && file_exists($this->filePath))){ //移动失败
             return array('code'=>-1, 'msg'=>'写入文件内容错误');
-        }else{ //移动成功
-			$this->oriName=date('YmdHis') . '_' . $this->oriName;
-			//$this->saveAttr();
-			if($isThumb && in_array($this->fileTypes, array('.jpg','.jpeg','.png','.gif','.bmp'))){
-				$this->createThumbnail($this->filePath);
-			}
-			Hook::doHook('admin_attach_upload',array($this->filePath));
-            return array('code'=>200, 'msg'=>'SUCCESS', 'data'=>$this->fullName);
         }
+		$this->oriName=date('YmdHis') . '_' . $this->oriName;
+		return $this->doOper($isThumb);
 	}
 	
 	/*保存附件信息到数据库*/
@@ -141,5 +132,23 @@ class Upload{
 				break;
 		}
 		return false;
+	}
+	
+	private function checkDir(){
+		if(!is_dir($this->dirNames) && !mkdir($this->dirNames, 0777, true)){
+			return '目录创建失败';
+		}else if(!is_writeable($this->dirNames)){
+			return '目录没有写权限';
+		}
+		return true;
+	}
+	
+	private function doOper($isThumb){
+		//$this->saveAttr();
+		if($isThumb && in_array($this->fileTypes, array('.jpg','.jpeg','.png','.gif','.bmp'))){
+			$this->createThumbnail($this->filePath);
+		}
+		Hook::doHook('admin_attach_upload',array($this->filePath));
+		return array('code'=>200, 'msg'=>'SUCCESS', 'data'=>$this->fullName);
 	}
 }

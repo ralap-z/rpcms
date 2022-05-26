@@ -52,8 +52,8 @@
 				<th>标题</th>
 				<th>分类</th>
 				<th>作者</th>
-				<th>评论<i class="me-icon order {$s_sort == 'comnum' ? 'active' : ''} {$s_sort == 'comnum' && $s_order == 'asc' ? 'me-icon-up' : 'me-icon-down'}" data-sort="comnum" data-order="{$s_order|default='desc'}"></i>/点赞<i class="me-icon order {$s_sort == 'upnum' ? 'active' : ''} {$s_sort == 'upnum' && $s_order == 'asc' ? 'me-icon-up' : 'me-icon-down'}" data-sort="upnum" data-order="{$s_order|default='desc'}"></i></th>
-				<th>阅读<i class="me-icon order {$s_sort == 'views' ? 'active' : ''} {$s_sort == 'views' && $s_order == 'asc' ? 'me-icon-up' : 'me-icon-down'}" data-sort="views" data-order="{$s_order|default='desc'}"></i></th>
+				<th>评论<i class="me-icon order {$s_sort == 'comnum' ? 'active ' : ' '}{$s_sort == 'comnum' && $s_order == 'asc' ? 'me-icon-up' : 'me-icon-down'}" data-sort="comnum" data-order="{$s_order|default='desc'}"></i>/点赞<i class="me-icon order {$s_sort == 'upnum' ? 'active ' : ''}{$s_sort == 'upnum' && $s_order == 'asc' ? 'me-icon-up' : 'me-icon-down'}" data-sort="upnum" data-order="{$s_order|default='desc'}"></i></th>
+				<th>阅读<i class="me-icon order {$s_sort == 'views' ? 'active ' : ''}{$s_sort == 'views' && $s_order == 'asc' ? 'me-icon-up' : 'me-icon-down'}" data-sort="views" data-order="{$s_order|default='desc'}"></i></th>
 				<th>时间</th>
 			</tr> 
 		</thead>

@@ -70,12 +70,14 @@ class Comment extends Base{
 			'createTime'=>date('Y-m-d H:i:s'),
 			'status'=>0,
 		);
+		$num=1;
 		if($comment['status'] != 0){
 			$res=Db::name('comment')->where('id='.$id)->update(array('status'=>0));
+			$num=2;
 		}
 		$res=Db::name('comment')->insert($data);
 		Hook::doHook('comment_reply',array($data));
-		$this->me_updateCommentNum($data);
+		$this->me_updateCommentNum($data, $num);
 		$this->me_updateCache();
 		return json(array('code'=>200,'msg'=>'回复成功'));
 	}

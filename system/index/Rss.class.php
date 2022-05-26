@@ -24,11 +24,11 @@ class Rss extends base{
 	}
 	
 	private function getLogs(){
-		return Db::name('logs')->where('status=0')->field('id,title,upateTime,createTime')->order(array('upateTime'=>'desc','id'=>'desc'))->limit('0,5000')->select();
+		return Db::name('logs')->where('status=0')->field('id,title,upateTime,createTime')->order(array('upateTime'=>'desc'))->limit('0,5000')->select();
 	}
 	
 	private function getPages(){
-		return Db::name('pages')->where('status=0')->field('id,title,createTime')->order(array('createTime'=>'desc','id'=>'desc'))->select();
+		return Db::name('pages')->where('status=0')->field('id,title,createTime')->order(array('createTime'=>'desc'))->select();
 	}
 	
 	private function getCates(){

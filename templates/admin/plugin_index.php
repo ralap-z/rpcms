@@ -30,7 +30,7 @@
 		<tbody class="rowList">
 			{foreach $list as $k=>$v}
 				<tr data-id="{$k}">
-					<td><img src="{$v['icon']}" style="width: 40px;height: 40px;"/>
+					<td><img src="{$v['icon']}" style="width: 40px;height: 40px;margin-right: 5px;"/>
 						{if in_array($k,$pluginUse) && $v['setting']}
 							<a href="{:url('plugin/setting')}?plugin={$k}" title="点击设置插件">{$v['name']}</a>
 						{else}

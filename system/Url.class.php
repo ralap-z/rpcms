@@ -254,7 +254,7 @@ class Url{
 				return self::special($data,$page);
 			case 'page':
 				return self::page($data,$page);
-			case 'tages':
+			case 'tag':
 				return self::tag($data,$page);
 		}
 	}

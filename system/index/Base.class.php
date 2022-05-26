@@ -90,7 +90,9 @@ class Base{
 				if(!empty($orderStr)){
 					$order['('.join('+',$orderStr).')']='desc';
 				}
-			break;
+				break;
+			default:
+				$order['a.id']='desc';
 		}
 		$order=array_merge($orderAdd, $order);
 		Hook::doHook('index_logs_order',array(&$order));

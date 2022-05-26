@@ -17,7 +17,9 @@ spl_autoload_register("autoLoadClass");
 doStrslashes();
 \rp\Config::set(include_once CMSPATH . '/config.php');
 \rp\Config::set('webConfig',\rp\Cache::read('option'));
-
+$App=new \rp\App();
+$App->runHook();
+		
 if(!isLogin() && !session('MEUSER')){
 	return json(array('code'=>-1, 'msg'=>'请先登录'));
 }

@@ -15,18 +15,18 @@
 function autoLoadClass($class){
 	$classArr=explode('\\',$class);
 	$controller=array_pop($classArr);
-	$class=ltrim(join('/',$classArr),'\\');
-	$class= preg_replace('/\brp\b/', LIBPATH, $class);
-	$class= preg_replace('/\bplugin\b/', PLUGINPATH, $class);
-	$class= preg_replace('/\btemplates\b/', TMPPATH, $class);
-	$class = strtolower(str_replace('\\','/',$class));
+	$class=strtolower(ltrim(join('/',$classArr),'\\'));
+	$class=preg_replace('/\brp\b/', LIBPATH, $class);
+	$class=preg_replace('/\bplugin\b/', PLUGINPATH, $class);
+	$class=preg_replace('/\btemplates\b/', TMPPATH, $class);
+	$class=str_replace('\\','/',$class);
 	if(empty($class)){
-		$class = LIBPATH;
+		$class=LIBPATH;
 	}
-	$controller = ucfirst($controller);
+	$controller=ucfirst($controller);
 	if(file_exists($class . '/'.$controller.'.class.php')){
 		require_once($class . '/'.$controller.'.class.php');
-	}elseif (file_exists($class . '/'.$controller.'.lib.php')){
+	}elseif(file_exists($class . '/'.$controller.'.lib.php')){
 		require_once($class . '/'.$controller.'.lib.php');
 	}else{
 		rpMsg($controller . '控制器加载失败。');

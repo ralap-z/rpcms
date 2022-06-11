@@ -4,7 +4,7 @@
 // +----------------------------------------------------------------------
 // | Copyright (c) 2019 http://www.rpcms.cn All rights reserved.
 // +----------------------------------------------------------------------
-// | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
+// | Licensed ( https://www.rpcms.cn/html/license.html )
 // +----------------------------------------------------------------------
 // | Author: ralap <www.rpcms.cn>
 // +----------------------------------------------------------------------
@@ -12,40 +12,60 @@
 namespace rp;
 
 class App{
+	
 	public $pathinfo;
-	public $pathinfoFetch=array('ORIG_PATH_INFO', 'REDIRECT_PATH_INFO', 'REDIRECT_URL');
-	public $pageExt='html';
-	public $path;
-	public $route;
-	public $routePath=array();
-	public $baseUrl;
-	public $params='';
 	public $varPathinfo='s';
+	public $pathinfoFetch=array('ORIG_PATH_INFO', 'REDIRECT_PATH_INFO', 'REDIRECT_URL');
+	public $path;
+	public $pathArr;
+	public $pageExt;
 	public $diyAdmin='';
+	public $appPath;
+	public $baseUrl;
+	public $route=['module'=>'','controller'=>'','action'=>''];
+	public $routePath=array();
+	public $params;
 	public $allPlugin=array();
+	public $errorMsgReturn=false;
 	public static $server=array();
 	
 	public function __construct(){
-		$this->appPath=!empty(Config::get('app_default_path')) ? '/'.Config::get('app_default_path') : '';
-		$this->pageExt=Config::get('url_html_suffix');
 		self::$server = $_SERVER;
-		$this->baseUrl= self::$server['REQUEST_SCHEME'] . '://'.self::$server['HTTP_HOST'] . $this->appPath;
+		$this->pageExt=Config::get('url_html_suffix', 'html');
 		$this->diyAdmin=Config::get('diy_admin');
+		$this->appPath=!empty(Config::get('app_default_path')) ? '/'.Config::get('app_default_path') : '';
+		$this->baseUrl=self::server('REQUEST_SCHEME') . '://'.self::server('HTTP_HOST').$this->appPath;
 	}
 	
 	public function __destruct(){
-		\rp\Db::close();
+		Db::close();
 	}
 	
 	public function run(){
 		register_shutdown_function('Debug_Shutdown_Handler');
 		set_error_handler('Debug_Error_Handler');
         set_exception_handler('Debug_Exception_Handler');
-		$this->route=$this->parseModule();
+		$this->pathinfo();
+		$this->path();
+		$this->pathArr=array_filter(explode('/', $this->path));
+		$this->route['module']=isset($this->pathArr[0]) ? $this->pathArr[0] : '';
 		$this->denyModule();//检查module是否允许访问
 		$this->isInstall();
+		$this->upgradeCheck();//升级提示
 		$this->routeCheck();//路由分发
-		\rp\Hook::doHook('cms_index_run');
+		Hook::doHook('cms_index_run');
+		$htmlData=$this->makeContent();
+		echo (is_array($htmlData) || is_object($htmlData)) ? rpMsg('请求错误') : $htmlData;
+		exit;
+	}
+	
+	private function upgradeCheck(){
+		if(is_file(CMSPATH.'/data/upgrade.lock') && $this->route['module'] != 'admin'){
+			echo '系统正在升级...';exit;
+		}
+	}
+	
+	public function makeContent(){
 		if(!preg_match('/^[A-Za-z](\w|\.)*$/', $this->route['controller'])){
 			rpMsg('controller not exists:' . $this->route['controller']);
 		}
@@ -54,21 +74,20 @@ class App{
 			if(!is_dir($dir)){
 				rpMsg($this->route['module'].' module is not find');
 			}
-			$controllerName = '\rp\\'.$this->route['module'] .'\\'. $this->route['controller'];
+			$controllerName='\rp\\'.$this->route['module'] .'\\'. $this->route['controller'];
 		}else{
 			if(!in_array($this->route['controller'],$this->allPlugin)){
 				rpMsg($this->route['controller'].' plugin in not enabled');
 			}
 			$controllerName = '\plugin\\'. $this->route['controller'].'\\'.$this->route['action'];
-			$this->route['action']=isset($this->routePath[3]) ? $this->routePath[3] : 'index';
+			$this->route['action']=isset($this->routePath[3]) ? $this->routePath[3] : (isset($this->pathArr[3]) ? $this->pathArr[3] : 'index');
 		}
-		if(!in_array($this->route['module'],array('index','install','admin','api')) && file_exists(CMSPATH .'/'.$this->route['module'].'_config.php')){
-			\rp\Config::set(include_once CMSPATH .'/'.$this->route['module'].'_config.php');
-			\rp\Db::close();
+		$moduleConfig=SETTINGPATH.'/config/'.$this->route['module'].'.php';
+		if(!in_array($this->route['module'],array('index','install','admin','api')) && is_file($moduleConfig)){
+			Config::set(include_once $moduleConfig);
+			Db::close();
 		}
-		$htmlData=$this->invokeClass($controllerName, $this->route['action']);
-		echo is_array($htmlData) ? rpMsg('请求错误') : $htmlData;
-		exit;
+		return $this->invokeClass($controllerName, $this->route['action']);
 	}
 	
 	public function invokeClass($class, $action){
@@ -84,75 +103,12 @@ class App{
 		return $reflect->invokeArgs($object, []);
 	}
 	
-	public function runHook(){
-		$hookFile=CMSPATH .'/data/hook.php';
-		$hookArr=array();
-		if(!is_file($hookFile) || filesize($hookFile) <= 0){
-			$this->resetHook();
-		}
-		$hookArr=include_once $hookFile;
-		if(is_array($hookArr) && !empty($hookArr)){
-			foreach($hookArr as $k=>$v){
-				foreach($v as $sk=>$sv){
-					\rp\Hook::addHook($k,$sv);
-				}
-			}
-		}
-	}
-	
-	public function resetHook(){
-		\rp\Hook::setHookNull();
-		$defaultHook=Config::get('default_hook');
-		foreach($defaultHook as $k=>$v){
-			foreach($v as $sk=>$sv){
-				\rp\Hook::addHook($k,$sv);
-			}
-		}
-		\rp\Plugin::ResetAllHook();
-		
-		$tempName=Cache::read('template');
-		$nameF='templates\\index\\'.strtolower($tempName['name']).'\\Hook';
-		if(file_exists(TMPPATH . '/index/'. $tempName['name'] .'/Hook.class.php') && class_exists($nameF)){
-			$temp=new $nameF;
-			if(method_exists($temp,'addHook')){
-				$hooks=$temp->addHook();
-				if(!empty($hooks) && is_array($hooks)){
-					foreach($hooks as $k=>$v){
-						\rp\Hook::addHook($k,$v);
-					}
-				}
-			}
-		}
-		\rp\Hook::saveHook();
-	}
-	
-	private function isInstall(){
-		if(!file_exists(CMSPATH .'/data/install.lock')){
-			$rootPath=str_replace(DIRECTORY_SEPARATOR, '/', input('SERVER.DOCUMENT_ROOT'));
-			$runPath=str_replace(DIRECTORY_SEPARATOR, '/', CMSPATH);
-			if($rootPath != $runPath){
-				$appPath=str_replace($rootPath.'/','',$runPath);
-				$this->appPath='/'.$appPath;
-				$this->baseUrl.=$this->appPath;
-				\rp\Config::set('app_default_path',$appPath);
-			}
-			if($this->route['module'] != 'install'){
-				redirect($this->appPath.'/install/index');
-			}
-		}else{
-			$option=Cache::read('option');
-			Config::set('webConfig',$option);
-			\rp\Plugin::getAllPlugin();
-			$this->runHook();
-		}
-	}
-	
 	public function getUrlModule(){
 		return !empty($this->diyAdmin) ? str_replace('admin',$this->diyAdmin,$this->route['module']) : $this->route['module'];
 	}
 	public function nowUrl($ext=true){
 		$module=$this->getUrlModule();
-		return \rp\Url::setUrl('/'. $module .'/'. $this->route['controller'] .'/'. $this->route['action']);
+		return Url::setUrl('/'. $module .'/'. $this->route['controller'] .'/'. $this->route['action']);
 	} 
 	
 	public function isAjax(){
@@ -170,86 +126,105 @@ class App{
 	}
 	
 	/**
-	* 解析URL地址为 模块/控制器/操作
-	* @access private
-	* @return array
+	* 获取server参数
+	* @access public
+	* @param  string $name 数据名称
+	* @param  string $default 默认值
+	* @return mixed
 	*/
-	private function parseModule($pathIn=''){
-		$path = !empty($pathIn) ? $pathIn : array_filter(explode('/', strtolower($this->path())));
-		$action = Config::get('default_action');
-		$controller = Config::get('default_controller');
-		$module = Config::get('default_module');
-		if(isset($path[0]) && !empty($path[0])){
-			$module = $path[0];
+	public static function server($name = '', $default = ''){
+		if(empty($name)){
+			return self::$server;
+		}else{
+			$name=strtoupper($name);
 		}
-		if(isset($path[1]) && !empty($path[1])){
-			$controller = $path[1];
-		}
-		if(isset($path[2]) && !empty($path[2])){
-			$action = $path[2];
-		}
-		return array('action'=>$action,'controller'=>$controller,'module'=>$module);
+		return isset(self::$server[$name]) ? self::$server[$name] : $default;
 	}
 	
-	private function denyModule(){
-		$module=$this->route['module'];
-		$denyModule=explode(',',Config::get('deny_module'));
-		if(!empty($this->diyAdmin)){
-			$denyModule[]='admin';
-			if($this->route['module'] == $this->diyAdmin){
-				$this->route['module']='admin';
+	/**
+	* 加载HOOK
+	* @access public
+	*/
+	public function runHook(){
+		$hookFile=CMSPATH .'/data/hook.php';
+		$hookArr=array();
+		if(!is_file($hookFile) || filesize($hookFile) <= 0){
+			$this->resetHook();
+		}
+		$hookArr=include_once $hookFile;
+		if(is_array($hookArr) && !empty($hookArr)){
+			foreach($hookArr as $k=>$v){
+				foreach($v as $sk=>$sv){
+					Hook::addHook($k,$sv);
+				}
 			}
 		}
-		if(in_array($module,$denyModule)){
-			rpMsg($module.' module is not find');
-		}
 	}
 	
+	/**
+	* 重置HOOK
+	* @access public
+	*/
+	public function resetHook(){
+		Hook::setHookNull();
+		$defaultHook=Config::get('default_hook');
+		foreach($defaultHook as $k=>$v){
+			foreach($v as $sk=>$sv){
+				Hook::addHook($k,$sv);
+			}
+		}
+		Plugin::ResetAllHook();
+		$tempName=Cache::read('template');
+		$nameF='templates\\index\\'.strtolower($tempName['name']).'\\Hook';
+		if(file_exists(TMPPATH . '/index/'. $tempName['name'] .'/Hook.class.php') && class_exists($nameF)){
+			$temp=new $nameF;
+			if(method_exists($temp,'addHook')){
+				$hooks=$temp->addHook();
+				if(!empty($hooks) && is_array($hooks)){
+					foreach($hooks as $k=>$v){
+						Hook::addHook($k,$v);
+					}
+				}
+			}
+		}
+		Hook::saveHook();
+	}
+	
+	/**
+	* 执行路由
+	* @access private
+	*/
 	private function routeCheck(){
 		$host=self::server('HTTP_HOST');
-		$rootDomain = Config::get('domain_root');
-		$domainRules = Config::get('domain_root_rules');
-		if(!empty($rootDomain)){
-			$domain = explode('.', rtrim(stristr($host, $rootDomain, true), '.'));
+		$this->rootDomain=Config::get('domain_root');
+		$this->domainRules=Config::get('domain_root_rules');
+		if(!empty($this->rootDomain)){
+			$domain=explode('.', rtrim(stristr($host, $this->rootDomain, true), '.'));
 		}else{
-			$domain = explode('.', $host, -2);
+			$domain=explode('.', $host, -2);
 		}
-		$this->subDomain = implode('.', $domain);
-		if(Config::get('webConfig.wap_auto') == 1 && isMobile() && !empty(Config::get('webConfig.wap_domain')) && $this->subDomain != Config::get('webConfig.wap_domain')){
-			if(!empty($rootDomain)){
-				$mhost=Config::get('webConfig.wap_domain').'.'.$rootDomain;
-			}else{
-				$hostData=explode('.',$host);
-				$hostData[0]=Config::get('webConfig.wap_domain');
-				$mhost=implode('.',$hostData);
-			}
-			$url=self::server('REQUEST_SCHEME').'://'. $mhost .self::server('REQUEST_URI');
-			redirect($url);
-		}
-		if(!empty($this->subDomain) && $this->subDomain != Config::get('webConfig.wap_domain') && !empty($domainRules) && isset($domainRules[$this->subDomain])){
-			$domainRulesPattern=$domainRules[$this->subDomain];
-			$domainPath = array_values(array_filter(explode('/', $domainRulesPattern)));
-			if(!empty($domainPath)){
-				$domainPath=array_merge($domainPath, array_filter(explode('/', strtolower($this->path()))));
-				$this->route=$this->parseModule($domainPath);
-			}
-		}
-		$pluginRouteArr=array_filter(\rp\Hook::doHook('cms_index_begin'));
+		$this->subDomain=implode('.', $domain);
+		$this->isWapAuto();
+		$this->isSubDomain();
+		$pluginRouteArr=array_filter(Hook::doHook('cms_index_begin'));
 		$pluginRoute=array();
 		if(!empty($pluginRouteArr)){
 			foreach($pluginRouteArr as $v){
-				$pluginRoute=array_merge($pluginRoute,$v);
+				$pluginRoute=array_merge($pluginRoute, $v);
 			}
 		}
-		if(file_exists(CMSPATH . '/route.php')){
-			$rules=include CMSPATH . '/route.php';
-			$rules=array_merge($rules,$pluginRoute);
-			Route::rules($rules);
-			Route::subDomain($this->subDomain);
+		$routeFiles=glob(SETTINGPATH.'/route/*.php');
+		$moduleRoute=array();
+		foreach($routeFiles as $file){
+			$rules=include $file;
+			$moduleRoute=array_merge($moduleRoute, $rules);
 		}
-		$result = Route::check($this->path());
+		$rules=array_merge($moduleRoute, $pluginRoute);
+		Route::rules($rules);
+		Route::subDomain($this->subDomain);
+		$result=Route::check($this->path ? $this->path : 'index');
 		if(!empty($result['model'])){
-			$path = array_values(array_filter(explode('/', $result['model'])));
+			$path=array_values(array_filter(explode('/', $result['model'])));
 			if(count($path) < 3){
 				rpMsg('路由分发规则错误');
 			}
@@ -257,39 +232,126 @@ class App{
 			$this->params=$result['params'];
 			$_GET=array_merge($_GET, $this->params);
 			$_REQUEST=array_merge($_REQUEST, $this->params);
-			$this->route=array('action'=>$path[2],'controller'=>$path[1],'module'=>$path[0]);
+			$this->parseModule($path);
+		}
+		if(empty($this->route['action'])){
+			if(isset($this->domainRules[$this->subDomain])){
+				$this->pathArr=array_merge(array_values(array_filter($this->route)), $this->pathArr);
+			}elseif(count($this->pathArr) < 3 && !is_dir(LIBPATH.'/'.$this->pathArr[0]) && $this->pathArr[0] != $this->diyAdmin){
+				$this->pathArr=array_merge([Config::get('default_module')], $this->pathArr);
+			}
+			if(!isset($this->pathArr[0])){
+				$this->pathArr[0]=Config::get('default_module');
+			}
+			if(!isset($this->pathArr[1])){
+				$this->pathArr[1]=Config::get('default_controller');
+			}
+			if(!isset($this->pathArr[2])){
+				$this->pathArr[2]=Config::get('default_action');
+			}
+			$this->parseModule($this->pathArr);
+		}
+		if($this->route['module'] == $this->diyAdmin){
+			$this->route['module']='admin';
+		}
+	}
+	
+	/**
+	* 判断是否安装系统
+	* @access private
+	*/
+	private function isInstall(){
+		if(!is_file(CMSPATH .'/data/install.lock')){
+			$rootPath=str_replace(DIRECTORY_SEPARATOR, '/', input('SERVER.DOCUMENT_ROOT'));
+			$runPath=str_replace(DIRECTORY_SEPARATOR, '/', CMSPATH);
+			if($rootPath != $runPath){
+				$appPath=str_replace($rootPath.'/', '', $runPath);
+				$this->appPath='/'.$appPath;
+				$this->baseUrl.=$this->appPath;
+				Config::set('app_default_path', $appPath);
+			}
+			if($this->route['module'] != 'install'){
+				redirect($this->appPath.'/install/index/index');
+			}
+		}else{
+			$option=Cache::read('option');
+			Config::set('webConfig',$option);
+			Plugin::getAllPlugin();
+			$this->runHook();
+		}
+	}
+	
+	/**
+	* 判断module是否禁止
+	* @access private
+	*/
+	private function denyModule(){
+		if(empty($this->pathArr)){
+			return;
+		}
+		$module=$this->route['module'];
+		$denyModule=explode(',', Config::get('deny_module'));
+		if(!empty($this->diyAdmin)){
+			$denyModule[]='admin';
+			if($module == $this->diyAdmin){
+				$this->route['module']='admin';
+			}
+		}
+		if(!empty($module) && in_array($module, $denyModule)){
+			rpMsg($module.' module is not find');
 		}
 	}
 
 	/**
-	* 获取当前请求URL的pathinfo信息(不含URL后缀)
+	* 判断手机端
 	* @access private
-	* @return string
 	*/
-	private function path(){
-		if (is_null($this->path)) {
-			$suffix   = Config::get('url_html_suffix');
-			$pathinfo = $this->pathinfo();
-			if (false === $suffix) {
-				$this->path = $pathinfo;
-			} elseif ($suffix) {
-				$this->path = preg_replace('/\.(' . ltrim($suffix, '.') . ')$/i', '', $pathinfo);
-			} else {
-				$this->path = preg_replace('/\.' . $this->ext() . '$/i', '', $pathinfo);
+	private function isWapAuto(){
+		$wapAuto=Config::get('webConfig.wap_auto');
+		$wapDomain=Config::get('webConfig.wap_domain');
+		if($wapAuto == 1 && isMobile() && !empty($wapDomain) && $this->subDomain != $wapDomain){
+			if(!empty($this->rootDomain)){
+				$mhost=$wapDomain.'.'.$this->rootDomain;
+			}else{
+				$hostData=explode('.',$host);
+				$hostData[0]=$wapDomain;
+				$mhost=implode('.',$hostData);
 			}
-			$this->path = str_replace(Config::get('app_default_path'), '', $this->path);
-			$this->path = strip_tags(trim($this->path, '/'));
+			$url=self::server('REQUEST_SCHEME').'://'. $mhost .self::server('REQUEST_URI');
+			redirect($url);
+			exit;
 		}
-		return !empty($this->path) ? $this->path : Config::get('default_module');
 	}
 	
 	/**
-	* 当前URL的访问后缀
+	* 判断子域名
 	* @access private
-	* @return string
 	*/
-	private function ext(){
-		return pathinfo($this->pathinfo(), PATHINFO_EXTENSION);
+	private function isSubDomain(){
+		if(!empty($this->subDomain) && $this->subDomain != Config::get('webConfig.wap_domain') && !empty($this->domainRules) && isset($this->domainRules[$this->subDomain])){
+			$domainRulesPattern=$this->domainRules[$this->subDomain];
+			$domainPath=array_values(array_filter(explode('/', $domainRulesPattern)));
+			if(!empty($domainPath)){
+				$this->parseModule($domainPath);
+			}
+		}
+	}
+	
+	/**
+	* 解析URL地址为 模块/控制器/操作
+	* @access private
+	* @return array
+	*/
+	private function parseModule($path){
+		if(isset($path[0]) && !empty($path[0])){
+			$this->route['module']=$path[0];
+		}
+		if(isset($path[1]) && !empty($path[1])){
+			$this->route['controller']=$path[1];
+		}
+		if(isset($path[2]) && !empty($path[2])){
+			$this->route['action']=$path[2];
+		}
 	}
 	
 	/**
@@ -308,10 +370,9 @@ class App{
 				$pathinfo = strpos(self::server('REQUEST_URI'), '?') ? strstr(self::server('REQUEST_URI'), '?', true) : self::server('REQUEST_URI');
 			}
 			if(!isset($pathinfo)){
-				foreach ($this->pathinfoFetch as $type) {
-					if (self::server($type)) {
-						$pathinfo = (0 === strpos(self::server($type), self::server('SCRIPT_NAME'))) ?
-						substr(self::server($type), strlen(self::server('SCRIPT_NAME'))) : self::server($type);
+				foreach($this->pathinfoFetch as $type){
+					if(self::server($type)){
+						$pathinfo = (0 === strpos(self::server($type), self::server('SCRIPT_NAME'))) ? substr(self::server($type), strlen(self::server('SCRIPT_NAME'))) : self::server($type);
 						break;
 					}
 				}
@@ -322,18 +383,33 @@ class App{
 	}
 	
 	/**
-	* 获取server参数
-	* @access public
-	* @param  string $name 数据名称
-	* @param  string $default 默认值
-	* @return mixed
+	* 获取当前请求URL的pathinfo信息(不含URL后缀)
+	* @access private
+	* @return string
 	*/
-	public static function server($name = '', $default = ''){
-		if (empty($name)){
-			return self::$server;
-		}else{
-			$name = strtoupper($name);
+	private function path(){
+		if(is_null($this->path)){
+			$pathinfo=$this->pathinfo();
+			if(false === $this->pageExt){
+				$this->path=$pathinfo;
+			}elseif($this->pageExt){
+				$this->path=preg_replace('/\.('.$this->pageExt.')$/i', '', $pathinfo);
+			}else{
+				$this->path=preg_replace('/\.'.$this->ext().'$/i', '', $pathinfo);
+			}
+			$this->path=str_replace(Config::get('app_default_path'), '', $this->path);
+			$this->path=strip_tags(trim($this->path, '/'));
 		}
-		return isset(self::$server[$name]) ? self::$server[$name] : $default;
+		return $this->path;
 	}
+	
+	/**
+	* 当前URL的访问后缀
+	* @access private
+	* @return string
+	*/
+	private function ext(){
+		return pathinfo($this->pathinfo(), PATHINFO_EXTENSION);
+	}
+	
 }

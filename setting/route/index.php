@@ -1,14 +1,4 @@
 <?php
-// +----------------------------------------------------------------------
-// | RPCMS
-// +----------------------------------------------------------------------
-// | Copyright (c) 2019 http://www.rpcms.cn All rights reserved.
-// +----------------------------------------------------------------------
-// | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
-// +----------------------------------------------------------------------
-// | Author: ralap <www.rpcms.cn>
-// +----------------------------------------------------------------------
-
 return [
 	array(
 		'model'=>'/index/logs/index',
@@ -24,7 +14,7 @@ return [
 	),
 	array(
 		'model'=>'/index/rss/index',
-		'pattern'=>'sitemap<type#\?>',
+		'pattern'=>'sitemap<type#\?><page#_?>',
 		'ext'=>'xml|html'
 	),
 	array(

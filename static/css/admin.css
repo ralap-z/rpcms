@@ -80,6 +80,9 @@ img{display: inline-block;vertical-align: middle;border: none;}
 
 .menu{position: fixed;top:0;left:0;bottom:0;width: 15%;height: 100%;background: #20222A;}
 .menu .logo{height: 3.2rem;line-height: 3.2rem;padding: 0px 10px;box-sizing: border-box;overflow: hidden;font-weight: 300;text-align: center;color: #fff;}
+.menu .auth{font-size: 11px;background: #1fbae8;color: #222;padding: 1px 2px;border-radius: 3px;margin-left: 5px;vertical-align: bottom;}
+.menu .auth:empty{padding:0;}
+.menu .auth.ok{background: #f00;color: #fff;}
 .menu_tree{height: calc(100% - 5.2rem);overflow-x: hidden;overflow-y: auto;}
 .menu_item{line-height: 3rem;}
 .menu_item a{display: block;padding-left: 1rem;color: #bfbfbf;}

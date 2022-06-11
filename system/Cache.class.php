@@ -4,7 +4,7 @@
 // +----------------------------------------------------------------------
 // | Copyright (c) 2019 http://www.rpcms.cn All rights reserved.
 // +----------------------------------------------------------------------
-// | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
+// | Licensed ( https://www.rpcms.cn/html/license.html )
 // +----------------------------------------------------------------------
 // | Author: ralap <www.rpcms.cn>
 // +----------------------------------------------------------------------
@@ -12,24 +12,27 @@
 namespace rp;
 
 use rp\Db;
+set_time_limit(0);
 
 class Cache{
 	
 	protected static $instance;
 	protected static $cacheData=array();
 	private $prefix='';
+	private $cacheLock;
 	
 	public function __construct(){
 		$options=Config::get('db');
 		$this->prefix=$options["prefix"];
+		$this->cacheLock=CMSPATH .'/data/cache_';
 	}
 	
 	public static function instance(){
-        if (is_null(self::$instance)) {
-            self::$instance = new self();
-        }
-        return self::$instance;
-    }
+		if (is_null(self::$instance)) {
+			self::$instance = new self();
+		}
+		return self::$instance;
+	}
 	
 	public static function set($cacheName, $cacheData, $expire=0){
 		$cache=self::instance();
@@ -74,59 +77,70 @@ class Cache{
 			unset($data);
 			return self::$cacheData[$name]['data'];
 		}
-    }
+	}
 	
 	public static function update($name=''){
 		$cache=self::instance();
 		if(!empty($name) && is_string($name)){
-            if(method_exists($cache, 'me_' . $name)){
-                call_user_func(array($cache, 'me_' . $name));
-            }
-            return true;
-        }
+			if(method_exists($cache, 'me_' . $name) && !is_file($cache->cacheLock.$name.'.lock')){
+				@file_put_contents($cache->cacheLock.$name.'.lock', time());
+				call_user_func(array($cache, 'me_' . $name));
+			}
+			return true;
+		}
 		if(is_array($name)){
 			foreach($name as $v){
-                if(method_exists($cache, 'me_' . $v)){
-                    call_user_func(array($cache, 'me_' . $v));
-                }
-            }
-            return true;
+				if(method_exists($cache, 'me_' . $v) && !is_file($cache->cacheLock.$v.'.lock')){
+					@file_put_contents($cache->cacheLock.$v.'.lock', time());
+					call_user_func(array($cache, 'me_' . $v));
+				}
+			}
+			return true;
 		}
 		if(empty($name)){
-            $nameArr = get_class_methods($cache);
-            foreach ($nameArr as $method) {
-                if(preg_match('/^me_/', $method)){
-                    call_user_func(array($cache, $method));
-                }
-            }
+			$nameArr = get_class_methods($cache);
+			foreach ($nameArr as $method) {
+				if(preg_match('/^me_/', $method) && !is_file($cache->cacheLock.str_replace('me_','',$method).'.lock')){
+					@file_put_contents($cache->cacheLock.str_replace('me_','',$method).'.lock', time());
+					call_user_func(array($cache, $method));
+				}
+			}
 			return true;
-        }
+		}
 	}
 	
 	/*系统配置缓存*/
 	private function me_option(){
 		$option=Db::name('config')->where('cname = "webconfig"')->field('cvalue')->find();
 		$data=json_decode($option['cvalue'], true);
-        $this->cacheWrite($data, 'option');
+		$this->cacheWrite($data, 'option');
 		return $data;
 	}
 	
 	/*用户缓存*/
 	private function me_user(){
-		$user=Db::name('user')->alias('a')->join(array(
-			array('(select authorId,count(*) as logNum FROM '.$this->prefix.'logs where status =0 group by authorId) b','a.id=b.authorId','left'),
-			array('(select authorId,count(*) as pageNum FROM '.$this->prefix.'pages where status =0 group by authorId) c','a.id=c.authorId','left'),
-			array('(select authorId,count(*) as commentNum FROM '.$this->prefix.'comment where status =0 group by authorId) d','a.id=d.authorId','left'),
-			array('(select userId,count(*) as commentPostNum FROM '.$this->prefix.'comment where status =0 group by userId) e','a.id=e.userId','left'),
-		))->where('a.status = 0')->field('a.id,a.username,a.nickname,a.role,a.status,IFNULL(b.logNum,0) as logNum,IFNULL(c.pageNum,0) as pageNum,IFNULL(d.commentNum,0) as commentNum,IFNULL(e.commentPostNum,0) as commentPostNum')->slave('cache')->select();
-		$user=array_column($user,NULL,'id');
+		$getData=function($page){
+			$limit=20000;
+			return Db::name('user')->alias('a')->join(array(
+				array('(select authorId,count(*) as logNum FROM '.$this->prefix.'logs where status =0 group by authorId) b','a.id=b.authorId','left'),
+				array('(select authorId,count(*) as pageNum FROM '.$this->prefix.'pages where status =0 group by authorId) c','a.id=c.authorId','left'),
+				array('(select authorId,count(*) as commentNum FROM '.$this->prefix.'comment where status =0 group by authorId) d','a.id=d.authorId','left'),
+				array('(select userId,count(*) as commentPostNum FROM '.$this->prefix.'comment where status =0 group by userId) e','a.id=e.userId','left'),
+			))->where('a.status = 0')->field('a.id,a.username,a.nickname,a.role,a.status,IFNULL(b.logNum,0) as logNum,IFNULL(c.pageNum,0) as pageNum,IFNULL(d.commentNum,0) as commentNum,IFNULL(e.commentPostNum,0) as commentPostNum')->slave('cache')->limit(($page-1)*$limit.','.$limit)->select();
+		};
+		$page=1;
+		$user=[];
+		while($data=$getData($page)){
+			$user=array_merge($user, array_column($data,NULL,'id'));
+			$page++;
+		}
 		$this->cacheWrite($user, 'user');
 		return $user;
 	}
 	
 	/*导航缓存*/
 	private function me_nav() {
-        $nav_cache = array();
+		$nav_cache = array();
 		$nav=Db::name('nav')->where('status=0')->order(array('topId'=>'asc','sort'=>'ASC'))->select();
 		foreach($nav as $k=>$v){
 			$v['url']=Url::nav($v['types'],$v['typeId'],$v['url'],true);
@@ -137,9 +151,9 @@ class Cache{
 				$nav_cache[$v['topId']]['children'][] = $v;
 			}
 		}
-        $this->cacheWrite($nav_cache, 'nav');
+		$this->cacheWrite($nav_cache, 'nav');
 		return $nav_cache;
-    }
+	}
 	
 	/*统计缓存*/
 	private function me_total(){
@@ -223,7 +237,7 @@ class Cache{
 	
 	/*分类缓存*/
 	private function me_category() {
-        $cate_cache = array();
+		$cate_cache = array();
 		$category=Db::name('category')->alias('a')->join('(select cateId,count(*) as logNum FROM '.$this->prefix.'logs where status =0 group by cateId) b','a.id=b.cateId','left')->order(array('a.topId'=>'asc','a.sort'=>'ASC'))->field('a.*,IFNULL(b.logNum,0) as logNum')->select();
 		foreach($category as $k=>$v){
 			$cate_cache[$v['id']]=$v;
@@ -232,34 +246,37 @@ class Cache{
 				$cate_cache[$v['topId']]['children'][] = $v['id'];
 			}
 		}
-        $this->cacheWrite($cate_cache, 'category');
+		$this->cacheWrite($cate_cache, 'category');
 		return $cate_cache;
-    }
+	}
 	
 	/*专题缓存*/
 	private function me_special() {
 		$special=Db::name('special')->alias('a')->join('(select specialId,count(*) as logNum FROM '.$this->prefix.'logs where status =0 group by specialId) b','a.id=b.specialId','left')->field('a.*,IFNULL(b.logNum,0) as logNum')->slave('cache')->select();
 		$special = array_column($special,NULL,'id');
-        $this->cacheWrite($special, 'special');
+		$this->cacheWrite($special, 'special');
 		return $special;
-    }
+	}
 	
 	/*友情链接缓存*/
 	private function me_links() {
 		$links=Db::name('links')->where('status =0')->field('sitename,sitedesc,siteurl')->order('sort','asc')->select();
-        $this->cacheWrite($links, 'links');
+		$this->cacheWrite($links, 'links');
 		return $links;
-    }
+	}
 	
 	/*tag标签缓存*/
 	private function me_tages(){
-		$allTag=Db::name('logs')->alias('a')->join('tages as b','find_in_set(b.id,a.tages)')->where('a.status =0 and a.tages != ""')->field('b.id,COUNT(*) as num')->group('b.id')->slave('cache')->select();
-		$allTag=array_column($allTag,'num','id');
-		$tages=Db::name('tages')->select();
-		foreach($tages as $k=>$v){
-			$tages[$k]['logNum']=isset($allTag[$v['id']]) ? $allTag[$v['id']] : 0;
+		$getData=function($page){
+			$limit=100;
+			return Db::name('tages')->order('id', 'asc')->limit(($page-1)*$limit.','.$limit)->select();
+		};
+		$page=1;
+		$tages=[];
+		while($data=$getData($page)){
+			$tages=$tages + array_column($data,NULL,'id');
+			$page++;
 		}
-		$tages=array_column($tages,NULL,'id');
 		$this->cacheWrite($tages, 'tages');
 		return $tages;
 	}
@@ -298,7 +315,7 @@ class Cache{
 		return $template;
 	}
 	
-    private function cacheWrite($cacheData, $cacheName, $expire=0){
+	private function cacheWrite($cacheData, $cacheName, $expire=0){
 		$cachefile=$this->getCacheKey($cacheName);
 		$cacheDir=dirname($cachefile);
 		if(!is_dir($cacheDir)){
@@ -312,12 +329,17 @@ class Cache{
 		$cacheData="<?php exit;//".sprintf('%012d', $expire)."?>\n".$cacheData;
 		self::$cacheData[$cacheName]= null;
 		$res=@file_put_contents($cachefile,$cacheData);
+		unset($cacheData);
 		if($res){
 			clearstatcache();
+			$cacheLockFile=$this->cacheLock.$cacheName.'.lock';
+			if(is_file($cacheLockFile)){
+				@unlink($cacheLockFile);
+			}
 			return true;
 		}
 		return false;
-    }
+	}
 	
 	private function getCacheKey($name){
 		$name=md5($name);

@@ -22,6 +22,7 @@ class Logs extends base{
 		$page=isset($this->params['page']) ? intval($this->params['page']) : 1;
 		$logData=$this->LogsMod->page($page)->order(array('a.upateTime'=>'desc'))->select();
 		$logData['count']=!empty($total) ? $total['logNum'] : 0;
+		unset($total);
 		$pageHtml=pageInationHome($logData['count'],$logData['limit'],$logData['page'],'index');
 		$this->setKeywords();
 		$this->setDescription();
@@ -109,7 +110,6 @@ class Logs extends base{
 			$this->checkPassword($postpwd,$cookiepwd,$data['password'],'logspsw_'.$data['id']);
 		}
 		$tages=Cache::read('tages');
-		$user=Cache::read('user');
 		$tagName=array();
 		$tagArr=explode(',',$data['tages']);
 		foreach($tagArr as $v){
@@ -122,9 +122,11 @@ class Logs extends base{
 			}
 		}
 		$data['tages']=$tagName;
-		$data['cateUrl']=!empty($data['cateId']) ? Url::cate($data['cateId']) : '';
-		$data['author']=$user[$data['authorId']]['nickname'];
+		unset($tages, $tagName);
+		$user=Db::name('user')->where(array('id'=>$data['authorId']))->field('nickname')->find();
+		$data['author']=$user['nickname'];
 		$data['authorUrl']=Url::other('author',$data['authorId']);
+		$data['cateUrl']=!empty($data['cateId']) ? Url::cate($data['cateId']) : '';
 		$data['extend'] =json_decode($data['extend'],true);
 		Hook::doHook('index_logs_detail',array(&$data));
 		if(!empty($data['template'])){

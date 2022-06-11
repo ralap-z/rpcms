@@ -4,7 +4,7 @@
 // +----------------------------------------------------------------------
 // | Copyright (c) 2019 http://www.rpcms.cn All rights reserved.
 // +----------------------------------------------------------------------
-// | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
+// | Licensed ( https://www.rpcms.cn/html/license.html )
 // +----------------------------------------------------------------------
 // | Author: ralap <www.rpcms.cn>
 // +----------------------------------------------------------------------
@@ -15,7 +15,10 @@
 function autoLoadClass($class){
 	$classArr=explode('\\',$class);
 	$controller=array_pop($classArr);
-	$class=strtolower(ltrim(join('/',$classArr),'\\'));
+	$class=ltrim(join('/',$classArr),'\\');
+	if(strtolower($classArr[0]) == 'rp'){
+		$class=strtolower($class);
+	}
 	$class=preg_replace('/\brp\b/', LIBPATH, $class);
 	$class=preg_replace('/\bplugin\b/', PLUGINPATH, $class);
 	$class=preg_replace('/\btemplates\b/', TMPPATH, $class);
@@ -342,7 +345,7 @@ function GetFilePermsOct($file){
 }
 
 /*截取指定长度字符*/
-function getContentByLength($content, $strlen = 180){
+function getContentByLength($content, $strlen = 160){
 	$content = preg_replace('/(\s|&nbsp;)/u','',strip_tags($content));
 	return subString($content, 0, $strlen);
 }
@@ -840,15 +843,18 @@ function rpMsg($msg, $url = 'javascript:history.back(-1);', $isAuto = false){
 	$trace=debug_backtrace();
 	$code=(isset($trace[1]['function']) && in_array($trace[1]['function'],array('Debug_Error_Handler','Debug_Exception_Handler','error')) && $msg != '404') ? 500 : 404;
 	global $App;
-	if(!headers_sent()){
-		rp\Url::setCode($code);
-		if(ob_get_length() > 0) ob_end_clean();
+	if($App->errorMsgReturn){
+		return ['code'=>$code,'msg'=>$msg];
 	}
 	if($msg == '404'){
 		$msg = '抱歉，你所请求的页面不存在！';
 	}
 	if($App->isAjax()){
-		return json(['code'=>$code,'message'=>$msg]);
+		return json(['code'=>$code,'msg'=>$msg]);
+	}
+	if(!headers_sent()){
+		rp\Url::setCode($code);
+		if(ob_get_length() > 0) ob_end_clean();
 	}
 	if(rp\Config::get('webConfig.isDevelop')){
 		$error=$msg;

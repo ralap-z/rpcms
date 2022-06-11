@@ -26,17 +26,19 @@ class Special extends base{
 		if(empty($specialId) || !isset($special[$specialId])){
 			rpMsg('当前专题不存在！');
 		}
+		$specialData=$special[$specialId];
+		unset($special);
 		$LogsMod=new LogsMod();
 		$logData=$LogsMod->page($page)->where(array('a.specialId'=>$specialId))->order($this->getLogOrder(array('a.isTop'=>'desc')))->select();
-		$logData['count']=$special[$specialId]['logNum'];
-		$title=!empty($special[$specialId]['seo_title']) ? $special[$specialId]['seo_title'] : $special[$specialId]['title'].'专题';
+		$logData['count']=$specialData['logNum'];
+		$title=!empty($specialData['seo_title']) ? $specialData['seo_title'] : $specialData['title'].'专题';
 		$pageHtml=pageInationHome($logData['count'],$logData['limit'],$logData['page'],'special',$specialId);
-		$template=!empty($special[$specialId]['temp_list']) ? $special[$specialId]['temp_list'] : 'special';
-		$this->setDescription($special[$specialId]['seo_desc']);
+		$template=!empty($specialData['temp_list']) ? $specialData['temp_list'] : 'special';
+		$this->setDescription($specialData['seo_desc']);
 		$this->assign('title',$title.'-'.$this->webConfig['webName']);
 		$this->assign('listId',$specialId);
 		$this->assign('listType','special');
-		$this->assign('special',$special[$specialId]);
+		$this->assign('special',$specialData);
 		$this->assign('logList',$logData['list']);
 		$this->assign('pageHtml',$pageHtml);
 		return $this->display('/'.$template);

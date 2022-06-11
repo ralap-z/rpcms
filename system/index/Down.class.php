@@ -20,7 +20,7 @@ class Down extends base{
 			return rpMsg('下载错误，附件错误或不存在');
 		}
 		$attrfile=CMSPATH . $attr['filepath'];
-		if(!file_exists($attrfile)){
+		if(!is_file($attrfile)){
 			return rpMsg('下载错误，附件错误或不存在');
 		}
 		\rp\Hook::doHook('index_down',array($attr));

@@ -55,9 +55,9 @@ class Logs extends Base{
 			);
 		}
 		$count=Db::name('logs')->alias('a')->where($where)->field('a.id')->count();
-		$pages = ceil($count / $limit);
+		$pages=ceil($count / $limit);
         if($page >= $pages && $pages > 0){
-            $page = $pages;
+            $page=$pages;
         }
 		$res=Db::name('logs')->alias('a')->join(array(
 			array('category as b force index(PRIMARY)','a.cateId=b.id','left'),
@@ -144,8 +144,12 @@ class Logs extends Base{
 		$msg='于'.date('H:i:s');
 		$this->checkAlias($data['alias']);
 		$this->checkTemplate($data['template']);
+		$oldData=[];
+		if(!empty($logid)){
+			$oldData=Db::name('logs')->where(array('id'=>$logid))->find();
+		}
 		if($param['type'] != 2){
-			$data['tages']=$this->replaceTages($param['tagesName']);
+			$data['tages']=$this->replaceTages($param['tagesName'], $oldData);
 		}
 		if($param['click'] == 'true'){
 			$msg=(empty($logid) || ($data['status'] == 0 && $param['status'] != 0)) ? '添加成功' : '修改成功';
@@ -171,9 +175,9 @@ class Logs extends Base{
 			Db::name('special')->where('id='.$data['specialId'])->update(array('updateTime'=>date('Y-m-d H:i:s')));
 		}
 		if($param['type'] != 2){
-			$this->updateCache();
+			$this->updateCache(5);
 		}
-		Hook::doHook('admin_logs_save',array($logid));
+		Hook::doHook('admin_logs_save',array($logid, $oldData));
 		return json(array('code'=>200,'msg'=>$msg,'data'=>$logid));
 	}
 	
@@ -210,7 +214,7 @@ class Logs extends Base{
 		$res=Db::name('logs')->where(array('id'=>array('in',$ids)))->dele();//删除文章
 		$res2=Db::name('attachment')->where(array('logId'=>array('in',$ids)))->dele();//删除附件
 		$res2=Db::name('comment')->where(array('logId'=>array('in',$ids)))->dele();//删除评论
-		$this->updateCache();
+		$this->updateCache(5);
 		Hook::doHook('admin_logs_dele',array($ids));
 		return json(array('code'=>200,'msg'=>'删除成功'));
 	}
@@ -225,32 +229,32 @@ class Logs extends Base{
 			return json(array('code'=>-1,'msg'=>'目标分类不存在'));
 		}
 		$res=Db::name('logs')->where(array('id'=>array('in',$ids)))->update(array('cateId'=>$value));
-		$this->updateCache();
+		$this->updateCache(1);
 		return json(array('code'=>200,'msg'=>'移动成功'));
 	}
 	/*设置置顶*/
 	private function me_top($ids,$value=''){
-		$value = $value == 1 ? 1 : 0;
+		$value=$value == 1 ? 1 : 0;
 		$res=Db::name('logs')->where(array('id'=>array('in',$ids)))->update(array('isTop'=>$value));
 		return json(array('code'=>200,'msg'=>($value == 1 ? '置顶' : '取消置顶').'成功'));
 	}
 	
 	/*设置状态*/
 	private function me_status($ids,$value=''){
-		$value = !empty($value) ? $value : 0;
+		$value=!empty($value) ? $value : 0;
 		$res=Db::name('logs')->where(array('id'=>array('in',$ids)))->update(array('status'=>$value));
-		$this->updateCache();
-		Hook::doHook('admin_logs_status',array($ids));
+		$this->updateCache(5);
+		Hook::doHook('admin_logs_status',array($ids, $value));
 		return json(array('code'=>200,'msg'=>'状态设置成功'));
 	}
 	
-	private function replaceTages($tages){
-		$tages = str_replace(array(';','，','、'), ',', $tages);
-		$tages = RemoveSpaces(strip_tags($tages));
-		$tagesArr = explode(',', $tages);
-		$tagesArr = array_unique(array_filter($tagesArr));
+	private function replaceTages($tages, $tagesOld=[]){
+		$tages=str_replace(array(';','，','、'), ',', $tages);
+		$tages=RemoveSpaces(strip_tags($tages));
+		$tagesArr=explode(',', $tages);
+		$tagesArr=array_unique(array_filter($tagesArr));
 		if(empty($tagesArr)) return '';
-		$tagesArr = array_slice($tagesArr, 0, 10);//最多10个标签
+		$tagesArr=array_slice($tagesArr, 0, 10);//最多10个标签
 		$data=array();
 		$tagesAll=Cache::read('tages');
 		$tagesAll=array_column($tagesAll,NULL,'tagName');
@@ -261,13 +265,25 @@ class Logs extends Base{
 				$data[]=Db::name('tages')->insert(array('tagName'=>$value));
 			}
 		}
+		if(!empty($tagesOld)){
+			$tagesOld=array_filter(explode(',', $tagesOld['tages']));
+		}
+		$deleTages=array_diff($tagesOld, $data);
+		$addTages=array_diff($data, $tagesOld);
+		if(!empty($deleTages)){
+			Db::name('tages')->where(array('id'=>array('in', join(',',$deleTages))))->setDec('logNum');
+		}
+		if(!empty($addTages)){
+			Db::name('tages')->where(array('id'=>array('in', join(',',$addTages))))->setInc('logNum');
+		}
 		return join(',',$data);
 	}
 	
-	private function updateCache(){
+	private function updateCache($level){
 		if(!isset($this->config['isPostUpCache']) || $this->config['isPostUpCache'] != 1) return;
-		Cache::update('tages');
 		Cache::update('category');
+		if($level < 5) return;
+		Cache::update('tages');
 		Cache::update('special');
 		Cache::update('total');
 		Cache::update('logRecord');

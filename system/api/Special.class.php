@@ -50,6 +50,7 @@ class Special extends Base{
 			$specialData=$special[$key];
 			$specialData['url']=Url::special($specialData['id']);
 		}
+		unset($special);
 		$this->response($specialData);
 	}
 	
@@ -88,6 +89,7 @@ class Special extends Base{
 		$this->checkAlias($data['alias']);
 		$specialAlias=array_column($special,'alias','id');
 		$key2=array_search($data['alias'],$specialAlias);
+		unset($special);
 		if(!empty($data['alias']) && $key2 && (empty($specialId) || $key2 != $specialId)){
 			$this->response('',401,'别名重复！');
 		}

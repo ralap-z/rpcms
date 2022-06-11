@@ -50,6 +50,7 @@ class Cate extends Base{
 			$cateData=$category[$key];
 			$cateData['url']=Url::cate($cateData['id']);
 		}
+		unset($category);
 		$this->response($cateData);
 	}
 	
@@ -93,6 +94,7 @@ class Cate extends Base{
 		$this->checkAlias($data['alias']);
 		$categoryAlias=array_column($category,'alias','id');
 		$key=array_search($data['alias'],$categoryAlias);
+		unset($category);
 		if(!empty($data['alias']) && $key && (empty($cateId) || ($key != $cateId))){
 			$this->response('',401,'别名重复！');
 		}

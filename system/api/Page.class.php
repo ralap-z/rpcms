@@ -20,10 +20,11 @@ class Page extends Base{
 			$this->response('',404,'页面不存在！');
 		}
 		$data=$pages[$id];
-		$user=Cache::read('user');
+		unset($pages);
+		$user=Db::name('user')->where(array('id'=>$data['authorId']))->field('nickname')->find();
 		$content=Db::name('pages')->field('content')->where(array('id'=>$id))->find();
 		$data['content']=$content['content'];
-		$data['author']=$user[$data['authorId']]['nickname'];
+		$data['author']=$user['nickname'];
 		$data['authorUrl']=Url::other('author',$data['authorId']);
 		$data['extend'] =json_decode($data['extend'],true);
 		if(!empty($data['password']) && !$this->checkPassword($password,$data['password'])){

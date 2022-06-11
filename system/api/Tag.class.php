@@ -51,6 +51,7 @@ class Tag extends Base{
 			$tagData=$tages[$key];
 			$tagData['url']=Url::tag($tagData['id']);
 		}
+		unset($tages);
 		$this->response($tagData);
 	}
 	
@@ -80,6 +81,7 @@ class Tag extends Base{
 		$this->checkAlias($data['alias']);
 		$tagesAlias=array_column($tages,'alias','id');
 		$key2=array_search($data['alias'],$tagesAlias);
+		unset($tages);
 		if(!empty($data['alias']) && $key2 && (empty($tageId) || $key2 != $tageId)){
 			$this->response('',401,'别名重复！');
 		}

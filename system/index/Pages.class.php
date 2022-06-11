@@ -29,28 +29,29 @@ class Pages extends base{
 		if(empty($pageId) || !isset($pages[$pageId])){
 			rpMsg('当前页面不存在！');
 		}
-		$title=$pages[$pageId]['title'];
+		$data=$pages[$pageId];
+		unset($pages);
+		$title=$data['title'];
 		$GLOBALS['title']=$title;
 		$this->assign('title',$title.'-'.$this->webConfig['webName']);
 		$this->assign('listId',$pageId);
-		if(!empty($pages[$pageId]['password'])){
+		if(!empty($data['password'])){
 			$postpwd=input('post.pagepwd');
 			$cookiepwd=cookie('rpcms_pagepsw_'.$pageId);
-			$this->checkPassword($postpwd,$cookiepwd,$pages[$pageId]['password'],'pagepsw_'.$pageId);
+			$this->checkPassword($postpwd,$cookiepwd,$data['password'],'pagepsw_'.$pageId);
 		}
-		$data=$pages[$pageId];
-		$user=Cache::read('user');
+		$user=Db::name('user')->where(array('id'=>$data['authorId']))->field('nickname')->find();
 		$content=Db::name('pages')->field('content')->where('id='.$pageId)->find();
 		$data['content']=$content['content'];
-		$data['author']=$user[$data['authorId']]['nickname'];
+		$data['author']=$user['nickname'];
 		$data['authorUrl']=Url::other('author',$data['authorId']);
 		$data['extend'] =json_decode($data['extend'],true);
 		Hook::doHook('index_logs_detail',array(&$data));
-		$template=!empty($pages[$pageId]['template']) ? $pages[$pageId]['template'] : 'page';
+		$template=!empty($data['template']) ? $data['template'] : 'page';
 		$CommentData=(new Comment())->getListByPages($pageId);
 		Hook::doHook('index_comment',array(&$CommentData));
-		$this->setKeywords($pages[$pageId]['seo_key']);
-		$this->setDescription($pages[$pageId]['seo_desc']);
+		$this->setKeywords($data['seo_key']);
+		$this->setDescription($data['seo_desc']);
 		$this->assign('listType','page');
 		$this->assign('data',$data);
 		$this->assign('CommentData',$CommentData);

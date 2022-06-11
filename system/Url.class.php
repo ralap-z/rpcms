@@ -4,7 +4,7 @@
 // +----------------------------------------------------------------------
 // | Copyright (c) 2019 http://www.rpcms.cn All rights reserved.
 // +----------------------------------------------------------------------
-// | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
+// | Licensed ( https://www.rpcms.cn/html/license.html )
 // +----------------------------------------------------------------------
 // | Author: ralap <www.rpcms.cn>
 // +----------------------------------------------------------------------
@@ -115,6 +115,11 @@ class Url{
 		$domainRules = Config::get('domain_root_rules');
 		$rootDomain = Config::get('domain_root');
 		$httpHost=$App::server('HTTP_X_REAL_HOST') ? $App::server('HTTP_X_REAL_HOST') : $App::server('HTTP_HOST');
+		$defaultDomain='';
+		if(0 === stripos($httpHost, 'www.')){
+			$httpHost=substr($httpHost,4);
+			$defaultDomain='www.';
+		}
 		if(empty($rootDomain)){
 			$rootDomain=$httpHost;
 			foreach($domainRules as $dk=>$dv){
@@ -127,17 +132,22 @@ class Url{
 		foreach($domainRules as $dk=>$dv){
 			if(1 === stripos($modulePath, $dv)){
 				$rootDomain=$dk.'.'.$rootDomain;
-				$url=!$isRule ? str_replace('/'.$dv, '' ,$url) : $url;
+				$url=!$isRule ? preg_replace('/\/'.$dv.'/', '' , $url, 1) : $url;
+				$defaultDomain='';
 				break;
 			}
 		}
 		$isAbs=$httpHost == $rootDomain ? false : true;
 		$domain='';
 		if($isDomain || $isAbs){
-			$domain=is_string($isDomain) ? $isDomain.'.'.$rootDomain : $rootDomain;
+			$domain=is_string($isDomain) ? $isDomain.'.'.$rootDomain : $defaultDomain.$rootDomain;
 			$domain=$App::server('REQUEST_SCHEME').'://'.$domain;
 		}
 		$pageExt = in_array($url, ['/', '']) ? '' : '.'.$ext;
+		$module='/'.Config::get('default_module');
+		if(0 === stripos($url, $module) && !$isRule){
+			$url=substr($url, strlen($module));
+		}
 		$url=$domain.$App->appPath.$url.$pageExt;
 		$data=array_filter($data);
 		if(!empty($data)){

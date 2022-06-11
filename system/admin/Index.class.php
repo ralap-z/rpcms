@@ -12,13 +12,16 @@ class Index extends Base{
 	
 	public function index(){
 		$total=Cache::read('total');
+		$tages=Cache::read('tages');
+		$category=Cache::read('category');
 		$totalData=array(
 			'logs'=>$total['logNum'],
 			'page'=>$total['pageNum'],
-			'cate'=>count(Cache::read('category')),
-			'tages'=>count(Cache::read('tages')),
+			'cate'=>count($category),
+			'tages'=>count($tages),
 			'comment'=>$total['commentNum'],
 		);
+		unset($total, $tages, $category);
 		View::assign('totalData',$totalData);
 		return View::display('/index');
 	}

@@ -15,7 +15,7 @@
 </style>
 <form class="me_form" action="" onSubmit="return false">
 	<div class="left" style="width: calc(100% - 23.5rem);">
-		<div class="me_input big"><label style="width: auto;">标题<font class="tips"></font></label><input type="text" name="title" value="{$logData['title']|default=''}"></div>
+		<div class="me_input big"><label style="width: auto;">标题<font class="tips autoSaveTip"></font></label><input type="text" name="title" value="{$logData['title']|default=''}"></div>
 		<div class="me_input big"><label>标签</label><input type="text" name="tagesName" id="tagesName" value="{$logData['tagesName']|default=''}">
 			<span class="inblock allTages">选择标签</span>
 			<div class="taglist">加载中...</div>
@@ -40,7 +40,7 @@
 		</div>
 		<div class="me_input big"><label>正文</label><textarea name="content" id="log_content" style="height: 30rem;">{$logData['content']|default=''}</textarea></div>
 		<div class="me_input big"><label style="width: auto;cursor: pointer;" id="excerptBtn">摘要<font style="color: #888;margin-left: 0.5rem;">系统会自动截取文字摘要，你也可以手动书写</font></label><textarea name="excerpt" id="excerpt" style="">{$logData['excerpt']|default=''}</textarea></div>
-		<div class="me_input big"><label style="width: auto;">关键词<font class="tips"></font></label><input type="text" name="keywords" value="{$logData['keywords']|default=''}" onafterpaste="this.value=this.value.replace(/，/g,',')" onkeyup="this.value=this.value.replace(/，/g,',')"/></div>
+		<div class="me_input big"><label style="width: auto;">关键词<font class="tips autoSaveTip"></font></label><input type="text" name="keywords" value="{$logData['keywords']|default=''}" onafterpaste="this.value=this.value.replace(/，/g,',')" onkeyup="this.value=this.value.replace(/，/g,',')"/></div>
 		<div class="extendBox">{hook:admin_logs_edit_hook2($logData)}</div>
 	</div>
 	<div class="right fixed_tab" data-space="3.2" data-unit="rem">
@@ -168,13 +168,13 @@ function sendPostFrom(){
 		c ? $.Msg("别名错误，应由字母、数字、短横线组成") : setTimeout("sendPostFrom()", 60000);
 		return !1;
 	}
-	!c && logtype ==  2 && $('.tips').text('正在保存');
+	!c && logtype ==  2 && $('.autoSaveTip').text('正在保存');
 	c && $.loading('正在保存数据...');
 	$.post('{:url("logs/dopost")}',param,function(res){
 		ispost=false;
 		res.code == 200 && (logid=res.data,attrReload.logid=res.data);
 		if(!c && logtype == 2){
-			$('.tips').text('自动保存'+(res.code == 200 ? '' : '错误，')+res.msg);
+			$('.autoSaveTip').text('自动保存'+(res.code == 200 ? '' : '错误，')+res.msg);
 			setTimeout("sendPostFrom()", 60000);
 		}else{
 			$.Msg(res.msg);

@@ -22,7 +22,7 @@
 </head>
 <body>
 <div class="menu">
-	<div class="logo"><span>RPCMS</span></div>
+	<div class="logo"><span>RPCMS</span><a class="auth"></a></div>
 	<ul class="menu_tree">
 		<li class="menu_item" data-type="logs_add"><a href="{:url('logs/add')}"><i class="me-icon me-icon-edit"></i><span>发布文章</span></a></li>
 		<li class="menu_item" data-type="logs_list"><a href="{:url('logs/index')}"><i class="me-icon me-icon-list"></i><span>文章</span></a></li>
@@ -51,6 +51,7 @@
 <div class="top">
 	<ul class="top_left">
 		<li class="top_item"><a href="{:url('index/index')}" title="主页"><i class="me-icon me-icon-home"></i></a></li>
+		<li class="top_item"><a href="{$baseUrl}" title="网站" target="_blank"><i class="me-icon me-icon-website"></i></a></li>
 	</ul>
 	<ul class="top_right">
 		{hook:admin_top_menu}

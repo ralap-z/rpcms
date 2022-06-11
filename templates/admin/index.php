@@ -36,6 +36,7 @@
 		<ul class="contents adminMsg_list"></ul>
 	</div>
 	<script>
+		var upgAllFile=[];
 		function getAdminMsg(){
 			$.getJSON("//www.rpcms.cn/upgrade/message?v={RP.RPCMS_VERSION}&callback=?", function(res){
 				$(".adminMsg_list").html("");
@@ -43,6 +44,36 @@
 					$(".adminMsg_list").append('<li>'+(item.type == 'img' ? '<a href="'+item.url+'" target="_blank"><img src="'+item.title+'"/></a>' : '<a href="'+item.url+'" target="_blank" class="'+(item.class == 1 ? 'c' : '')+'">'+item.title+'</a>')+'</li>');
 				});
 			});
+		}
+		function upgradeFiles(a){
+			if(!upgAllFile[a]){
+				upgAllFile=[];
+				return $.get("{:url('upgrade/ending')}",function(){
+					$.loading("系统更新完毕",1,"color:#10ff62");
+					setTimeout(function(){window.location.reload()},2200);
+				});
+			}
+			var c=upgAllFile[a];
+			$.ajax({
+				"url":"{:url('upgrade/files')}",
+				"type":"post",
+				"async":false,
+				"data":{"file":c},
+				"dataType":"json",
+				"beforeSend":function(){
+					$.loading("准备更新"+c,1);
+				},
+				"success":function(res){
+					a++;
+					$.loading(res.msg,2,"color:"+(res.code == 200 ? "#10ff62" : "#ff7420"));
+					if(res.code != -2){
+						upgradeFiles(a);
+					}
+				},
+				"error":function(){
+					$.loading("更新"+c+"失败，服务连接失败<br>",2);
+				}
+			});	
 		}
 		$(document).ready(function(){
 			getAdminMsg();
@@ -53,29 +84,15 @@
 				});
 			}),
 			$(document).on("click",".upgradeFiles",function(){
-				var allFile=$(".ids:checked").length,exNum=0;
 				$.each($(".ids:checked"),function(a,b){
 					var c=$(b).val();
-					c && setTimeout(function(){
-						$.ajax({
-							"url":"{:url('upgrade/files')}",
-							"type":"post",
-							"async":false,
-							"data":{"file":c},
-							"dataType":"json",
-							"beforeSend":function(){
-								$.loading("准备更新"+c,1);
-							},
-							"success":function(res){
-								exNum++;
-								$.loading(res.msg,2,"color:"+(res.code == 200 ? "#10ff62" : "#ff7420"));
-								exNum >= allFile && setTimeout(function(){window.location.reload()},2200);
-							},
-							"error":function(){
-								$.loading("更新"+c+"失败，服务连接失败<br>",2);
-							}
-						});	
-					},a*1000);
+					c && upgAllFile.push(c);
+				});
+				if(upgAllFile.length <= 0){
+					return $.Msg("请选择需更新的文件"), !1;
+				}
+				$.get("{:url('upgrade/start')}",function(){
+					upgradeFiles(0);
 				});
 			}),
 			$(".checkUpgrade").click(function(){

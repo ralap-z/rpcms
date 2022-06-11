@@ -4,7 +4,7 @@
 // +----------------------------------------------------------------------
 // | Copyright (c) 2019 http://www.rpcms.cn All rights reserved.
 // +----------------------------------------------------------------------
-// | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
+// | Licensed ( https://www.rpcms.cn/html/license.html )
 // +----------------------------------------------------------------------
 // | Author: ralap <www.rpcms.cn>
 // +----------------------------------------------------------------------
@@ -42,7 +42,7 @@ class View{
 		$view=self::instance();
 		$tempArr=$view->setTempFile($temp);
 		if(!is_file($tempArr['tempDir'])){
-            rpMsg($tempArr['temp']." template is not find");
+            return rpMsg($tempArr['temp']." template is not find");
         }
 		if(Config::get('tpl_cache')){
 			$cashFiles=$view->cacheDir.$tempArr['temp'];
@@ -74,7 +74,7 @@ class View{
 	
 	public static function checkTemp($temp){
 		global $App;
-		if(isset($App->indexTemp) && !empty($App->indexTemp)){
+		if($App->route['module'] == 'index'){
 			$tempDir=TMPPATH .'/index/'.$App->indexTemp.'/'.$temp.'.php';
 		}else{
 			$tempDir=TMPPATH .'/'.$App->route['module'].'/'.$temp.'.php';
@@ -239,7 +239,7 @@ class View{
 		global $App;
 		$temp='block';
 		if(self::checkTemp($temp)){
-			$blockDir=TMPPATH .'/'.$App->route['module'].'/'.(isset($App->indexTemp) ? $App->indexTemp.'/' : '').$temp.'.php';
+			$blockDir=TMPPATH .'/'.$App->route['module'].'/'.($App->route['module'] == 'index' ? $App->indexTemp.'/' : '').$temp.'.php';
 			$blockHtml=@file_get_contents($blockDir);
 			$content=preg_replace_callback('/\{block:([^\}]+)\}/', function($matches)use($blockHtml){
 				$blockId=$matches[1];
@@ -366,7 +366,7 @@ class View{
 			}
 		}
 		if(!is_file($tempDir)){
-            rpMsg($matches[1]." template is not find");
+            return rpMsg($matches[1]." template is not find");
         }
 		$this->includeFile[$tempDir]=filemtime($tempDir);
 		$data=$dataEnd='';

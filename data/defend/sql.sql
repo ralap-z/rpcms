@@ -175,6 +175,7 @@ CREATE TABLE IF NOT EXISTS `%pre%tages` (
   `seo_title` VARCHAR(30) NULL DEFAULT '',
   `seo_desc` text,
   `template` varchar(200) DEFAULT '',
+  `logNum` int(10) UNSIGNED NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `tagName` (`tagName`),
   KEY `alias` (`alias`)

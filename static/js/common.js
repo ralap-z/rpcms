@@ -35,6 +35,17 @@ function selectAttr(param){
 		}
 	},"json");
 }
+function authText(auth){
+	var authDom=$(".menu .auth"),authStr;
+	if(auth == 200){
+		authStr="授权";
+		authDom.addClass("ok");
+	}else{
+		authStr="免费";
+		authDom.attr({"target":"_blank","title":"去授权","href":"//www.rpcms.cn/html/auth.html"});
+	}
+	authDom.text(authStr+"用户");
+}
 $(document).ready(function(){
 	var extendLeft=0;
 	$(".me_extend_menu").each(function(a,b){
@@ -71,7 +82,6 @@ $(document).ready(function(){
 		var _this=$(this),
 			a=_this.data('downurl'),
 			b=_this.data('name');
-		console.log(a);
 		a && b && bodyUE && bodyUE.execCommand('insertHtml', '<span class="attachment"><a target="_blank" href="'+a+'" title="'+b+'" rel="external nofollow">'+b+'</a></span>');
 	})
 	$("body").on("click",".attr_dele",function(e){
@@ -136,4 +146,9 @@ $(document).ready(function(){
 			}
 		});
 	})
+	var auth=$.localStorage.get("rpcmsAuth");
+	auth ? authText(auth) : $.getJSON("//www.rpcms.cn/upgrade/auth/check?host="+location.host+"&callback=?", function(res){
+		$.localStorage.set("rpcmsAuth", res.auth, 24*3600),authText(res.auth);
+	});
+	
 })

@@ -112,7 +112,7 @@ class Index{
 			'pagesize'=>'10',
 			'fileTypes'=>'rar,zip,gz,gif,jpg,jpeg,png,txt,pdf,docx,doc,xls,xlsx',
 			'fileSize'=>'20',
-			'logOrder'=>array('id'),
+			'logOrder'=>array('updateTime'),
 			'logWeight'=>'',
 			'cateAlias'=>'0',
 			'logAlias'=>'0',
@@ -206,7 +206,7 @@ class Index{
 			'admin_top_menu'=>[],
 		),
 	);";
-		$configFile = CMSPATH.'/config.php';
+		$configFile = SETTINGPATH.'/config/default.php';
 		return @file_put_contents($configFile, $config);
 	}
 	

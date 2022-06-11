@@ -31,15 +31,17 @@ class Tags extends base{
 		if(empty($tagId) || !isset($tages[$tagId])){
 			rpMsg('当前标签不存在！');
 		}
+		$tagData=$tages[$tagId];
+		unset($tages);
 		$LogsMod=new LogsMod();
 		$logData=$LogsMod->page($page)->order($this->getLogOrder(array('a.isTop'=>'desc')))->tages($tagId)->select();
-		$logData['count']=$tages[$tagId]['logNum'];
-		$title=!empty($tages[$tagId]['seo_title']) ? $tages[$tagId]['seo_title'] : $tages[$tagId]['tagName'];
+		$logData['count']=$tagData['logNum'];
+		$title=!empty($tagData['seo_title']) ? $tagData['seo_title'] : $tagData['tagName'];
 		$pageHtml=pageInationHome($logData['count'],$logData['limit'],$logData['page'],'tag',$tagId);
-		$template=!empty($tages[$tagId]['template']) ? $tages[$tagId]['template'] : 'list';
+		$template=!empty($tagData['template']) ? $tagData['template'] : 'list';
 		$this->setKeywords($title);
-		if(!empty($tages[$tagId]['seo_desc'])){
-			$this->setDescription($tages[$tagId]['seo_desc']);
+		if(!empty($tagData['seo_desc'])){
+			$this->setDescription($tagData['seo_desc']);
 		}else{
 			$this->setDescription('关于“'.$title.'”标签的所有文章信息');
 		}

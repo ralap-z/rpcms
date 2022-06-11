@@ -4,7 +4,7 @@
 // +----------------------------------------------------------------------
 // | Copyright (c) 2019 http://www.rpcms.cn All rights reserved.
 // +----------------------------------------------------------------------
-// | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
+// | Licensed ( https://www.rpcms.cn/html/license.html )
 // +----------------------------------------------------------------------
 // | Author: ralap <www.rpcms.cn>
 // +----------------------------------------------------------------------
@@ -54,12 +54,9 @@ class Route{
 	
 	public static function checkDomain(){
 		$domain=(self::$subDomain == '' || self::$subDomain == 'www') ? '' : self::$subDomain;
-		$domainRules = Config::get('domain_root_rules');
-		if(!empty($domain) && isset($domainRules[$domain])){
-			$domainModule=$domainRules[$domain];
-			return array_filter(self::$rules,function($v)use($domainModule){return $v['domain'] == $domainModule;});
-		}
-		return self::$rules;
+		$domainRules=Config::get('domain_root_rules');
+		$domainModule=!empty($domain) && isset($domainRules[$domain]) ? $domainRules[$domain] : Config::get('default_module');
+		return array_filter(self::$rules,function($v)use($domainModule){return $v['domain'] == $domainModule;});
 	}
 	
 	protected static function match($path, $pattern){

@@ -29,33 +29,34 @@ class Category extends base{
 		if(empty($cateId) || !isset(self::$category[$cateId])){
 			rpMsg('当前栏目不存在！');
 		}
-		$children=isset(self::$category[$cateId]) ? self::$category[$cateId]['children'] : array();
+		$cateData=self::$category[$cateId];
+		$children=$cateData['children'];
 		$children[]=intval($cateId);
 		$LogsMod=new LogsMod();
 		$logData=$LogsMod->page($page)->order($this->getLogOrder(array('a.isTop'=>'desc')))->cate($children)->select();
 		foreach($children as $ck=>$cv){
 			$logData['count']+=self::$category[$cv]['logNum'];
 		}
-		$title=!empty(self::$category[$cateId]['seo_title']) ? self::$category[$cateId]['seo_title'] : self::$category[$cateId]['cate_name'];
+		$title=!empty($cateData['seo_title']) ? $cateData['seo_title'] : $cateData['cate_name'];
 		$pageHtml=pageInationHome($logData['count'],$logData['limit'],$logData['page'],'cate',$cateId);
-		$template=$this->getTemp($cateId);
-		$this->setKeywords(self::$category[$cateId]['seo_key']);
-		$this->setDescription(self::$category[$cateId]['seo_desc']);
+		$template=$this->getTemp($cateData);
+		$this->setKeywords($cateData['seo_key']);
+		$this->setDescription($cateData['seo_desc']);
 		$this->assign('title',$title.'-'.$this->webConfig['webName']);
 		$this->assign('listId',$cateId);
 		$this->assign('listType','cate');
-		$this->assign('cateName',self::$category[$cateId]['cate_name']);
+		$this->assign('cateName',$cateData['cate_name']);
 		$this->assign('logList',$logData['list']);
 		$this->assign('pageHtml',$pageHtml);
 		return $this->display('/'.$template);
 	}
 	
-	private function getTemp($cateId){
-		if(!empty(self::$category[$cateId]['temp_list'])){
-			return self::$category[$cateId]['temp_list'];
+	private function getTemp($cateData){
+		if(!empty($cateData['temp_list'])){
+			return $cateData['temp_list'];
 		}
-		if(!empty(self::$category[$cateId]['topId'])){
-			return $this->getTemp(self::$category[$cateId]['topId']);
+		if(!empty($cateData['topId'])){
+			return $this->getTemp(self::$category[$cateData['topId']]);
 		}
 		return 'list';
 	}

@@ -39,7 +39,7 @@ class Index{
 			'gd2'=>'<font>不支持</font>',
 			'mbstring'=>'<font>不支持</font>',
 			'mysqli'=>'<font>不支持</font>',
-			'config.php'=>GetFilePermsOct(CMSPATH . '/config.php'),
+			'config/default.php'=>GetFilePermsOct(SETTINGPATH.'/config/default.php'),
 			'data'=>GetFilePermsOct(CMSPATH . '/data'),
 			'plugin'=>GetFilePermsOct(CMSPATH . '/plugin'),
 			'templates/index'=>GetFilePermsOct(CMSPATH . '/templates/index'),
@@ -156,7 +156,7 @@ class Index{
 			$lock=@file_put_contents(CMSPATH .'/data/install.lock', 'installed');
 			return json(array('code'=>200, 'msg'=>'success', 'data'=>$data['baseUrl']));
 		}
-		return json(array('code'=>-1, 'msg'=>'config.php写入失败，请确保文件存在并拥有读写权限'));
+		return json(array('code'=>-1, 'msg'=>'config/default.php写入失败，请确保文件存在并拥有读写权限'));
 	}
 	
 	private function setConfig($data,$randStr){

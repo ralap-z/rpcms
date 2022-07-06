@@ -238,13 +238,37 @@ function pageInation($count, $perlogs, $page, $url='', $anchor = '') {
 	$prepg=$page-1;
 	$nextpg=($page==$pnums ? 0 : $page+1);
 	$re = '';
+	$param=[];
+	$isRoute=true;
 	if(empty($url)){
-		$url=$App->nowUrl() .(!empty($anchor) ? '?'.$anchor.'&' : '?').'page=';
+		$url=$App->nowUrl();
 	}
-	$urlHome = preg_replace("|[\?&/][^\./\?&=]*page[=/\-]|", "", $url);
+	$urlQuery=parse_url($url, PHP_URL_QUERY);
+	if(!empty($urlQuery)){
+		$param=parse_str($urlQuery, $param);
+	}
+	if(!empty($anchor)){
+		parse_str($anchor, $anchor);
+		$param=array_merge($param, $anchor);
+	}
+	if(strpos($url, '[PAGE]') === false){
+		$isRoute=false;
+		$param['page']='[PAGE]';
+	}
+	if(!empty($param)){
+		$url.='?'.str_replace('%5BPAGE%5D', '[PAGE]', http_build_query($param));
+	}
+	$makeUrl=function($page)use($url){
+		return str_replace('[PAGE]', (string)$page, $url);
+	};
+	if($isRoute){
+		$urlHome=str_replace('[PAGE]', 1, $url);
+	}else{
+		$urlHome=preg_replace("|[\?&/][^\./\?&=]*page[=/\-]\[PAGE\]|", "", $url);
+	}
 	if($pnums<=1) return false;
 	if($page!=1) $re .=' <a href="'.$urlHome.'">首页</a> '; 
-	if($prepg) $re .=' <a href="'.$url.$prepg.'" >‹‹</a> ';
+	if($prepg) $re .=' <a href="'.$makeUrl($prepg).'" >‹‹</a> ';
 	for ($i = $page-2;$i <= $page+2 && $i <= $pnums; $i++){
 		if ($i > 0){
 			if ($i == $page){
@@ -252,12 +276,12 @@ function pageInation($count, $perlogs, $page, $url='', $anchor = '') {
 			}elseif($i == 1){
 				$re .= ' <a href="'.$urlHome.'">'.$i.'</a> ';
 			}else{
-				$re .= ' <a href="'.$url.$i.'">'.$i.'</a> ';
+				$re .= ' <a href="'.$makeUrl($i).'">'.$i.'</a> ';
 			}
 		}
 	}
-	if($nextpg) $re .=' <a href="'.$url.$nextpg.'">››</a> '; 
-	if($page!=$pnums) $re.=' <a href="'.$url.$pnums.'" title="尾页">尾页</a>';
+	if($nextpg) $re .=' <a href="'.$makeUrl($nextpg).'">››</a> '; 
+	if($page!=$pnums) $re.=' <a href="'.$makeUrl($pnums).'" title="尾页">尾页</a>';
 	return $re;
 }
 

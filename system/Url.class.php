@@ -134,6 +134,7 @@ class Url{
 				$rootDomain=$dk.'.'.$rootDomain;
 				$url=!$isRule ? preg_replace('/\/'.$dv.'/', '' , $url, 1) : $url;
 				$defaultDomain='';
+				$isRule=true;
 				break;
 			}
 		}

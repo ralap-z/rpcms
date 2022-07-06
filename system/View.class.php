@@ -157,10 +157,13 @@ class View{
 			if(0 !== strpos($temp, '/')){
 				$temp='/'.$App->route['controller'].'/'.$temp;
 			}
-			if($App->route['module'] == 'plugin' || $temp == '/404'){
+			if($App->route['module'] == 'plugin'){
 				$temp='index/'.$App->indexTemp.$temp.'.php';
 			}else{
 				$temp=$App->route['module'].$temp.'.php';
+			}
+			if($temp == '/404' && !is_file(TMPPATH .'/'.$temp)){
+				$temp='index/'.$App->indexTemp.$temp.'.php';
 			}
 			$tempDir=TMPPATH .'/'.$temp;
 		}

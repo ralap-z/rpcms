@@ -51,12 +51,12 @@ class Temp extends Base{
 			Cache::update('template');
 			$this->App->resetHook();
 			$settingFile=TMPPATH . '/index/'.$value.'/setting.php';
-			if(file_exists($default)){
+			if(is_file($settingFile)){
 				View::assign('settingFile',$settingFile);
 				View::update('/temp_setting');
 			}
-			$cashFiles=CMSPATH .'/data/cache/plugin';
-			if(file_exists($cashFiles)){
+			$cashFiles=CMSPATH .'/data/temp/plugin';
+			if(is_file($cashFiles)){
 				deleteFile($cashFiles);
 			}
 			return json(array('code'=>200,'msg'=>'模板切换成功'));

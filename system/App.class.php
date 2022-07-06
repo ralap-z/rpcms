@@ -92,6 +92,10 @@ class App{
 	
 	public function invokeClass($class, $action){
 		$class=new \ReflectionClass($class);
+		$file=pathinfo(basename($class->getFileName(), '.php'), PATHINFO_EXTENSION);
+		if($file != 'class'){
+			rpMsg($this->route['controller'].'控制器加载失败。');
+		}
 		$object=$class->newInstanceArgs([$this->params]);
 		if(!is_callable([$object, $action])){
 			rpMsg($action.' action is not find');

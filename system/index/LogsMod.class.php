@@ -17,7 +17,6 @@ class LogsMod{
 	private $tagesData;
 	private $cateData;
 	
-	
 	public function __construct(){
 		$this->limit=!empty(Config::get('webConfig.pagesize')) ? Config::get('webConfig.pagesize') : 10;
 		$this->pageMax=Config::get('webConfig.pageMax');
@@ -185,7 +184,7 @@ class LogsMod{
 		$this->whereStr='';
 		$this->limit=$limit;
 		if($type == 'tages' && !empty($logData['tages'])){
-			$this->whereArr['a.tages']=array('in',join(',',arrayIdFilter(array_column($logData['tages'],'id'))));
+			$this->whereArr['a.tages']=array('exp', '(^|,)('.join('|',arrayIdFilter(array_column($logData['tages'],'id'))).')(,|$)');
 		}else{
 			$this->whereArr['a.cateId']=intval($logData['cateId']);
 		}

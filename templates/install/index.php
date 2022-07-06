@@ -124,7 +124,7 @@
 				},
 				success:function(res){
 					if(res.code == 200){
-						$(".content").html('<div class="successBox"><div class="msg"><b>恭喜，安装完成！</b><p>为了系统安全，请手动删除install应用模块或更换文件夹名称</p></div></div><div class="successBtn"><a href="'+res.data+'/'+diyname+'" class="color">访问后台</a><a href="'+res.data+'">立即体验</a></div>');
+						$(".content").html('<div class="successBox"><div class="msg"><b>恭喜，安装完成！</b><p>为了系统安全，请手动删除install应用模块或更换文件夹名称</p><p class="tips">'+(res.errorTip ? res.errorTip+'。<a href="https://www.rpcms.cn/html/getkey.html" target="_blank">自主获取</a>' : '')+'</p></div></div><div class="successBtn"><a href="'+res.data+'/'+diyname+'" class="color">访问后台</a><a href="'+res.data+'">立即体验</a></div>');
 						$(".footer").html('');
 					}else{
 						alert(res.msg);

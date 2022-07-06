@@ -4,6 +4,7 @@
 *{margin:0;padding:0;box-sizing: border-box;}
 html,body{width:100%;height:100%;font-size:16px;}
 a,button{cursor:pointer;outline:none;}
+a{text-decoration: none;}
 .install{position: absolute;top: 1rem;left: 0;right: 0;bottom: 2rem;width: 60%;margin: 0 auto;box-shadow: 0 0 20px #e8e8e8;border: 1px solid #eee;}
 .install .title{height: 2.8rem;line-height: 2.8rem;padding: 0 1rem;color: #fff;background: #19afdc;}
 .install .content{width: 100%;height: calc(100% - 5.3rem);overflow-x: hidden;overflow-y: auto;padding: 0 1rem;}
@@ -24,7 +25,9 @@ a,button{cursor:pointer;outline:none;}
 .successBox .msg{padding-top: 4rem;text-align: center;}
 .successBox .msg b{font-size: 2rem;}
 .successBox .msg p{margin-top: 2rem;color: #fbff00;}
+.successBox .msg .tips{color: #f00;text-shadow: 0px 0px 1px #fff;}
+.successBox .msg .tips a{background: #f00;color: #fff;padding: 2px 10px;border-radius: 5px;line-height: 1;}
 .successBtn{height: 40%;padding: 7rem 0;text-align: center;}
-.successBtn a{border: 1px solid #b3dce8;padding: 1rem 3rem;border-radius: 1.5rem;margin: 0 2rem;background: #eefbff;text-decoration: none;color: #333;}
+.successBtn a{border: 1px solid #b3dce8;padding: 1rem 3rem;border-radius: 1.5rem;margin: 0 2rem;background: #eefbff;color: #333;}
 .successBtn a.color{background: #19afdc;color: #fff;border-color: #19afdc;}
 .tip{position: fixed;top: 0;left: 0;right: 0;bottom: 0;width: 100%;height: 100%;z-index: 99999;text-align: center;display: flex;align-items: center;justify-content: center;background: rgba(255, 255, 255, 0.7);}

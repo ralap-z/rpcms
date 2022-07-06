@@ -89,9 +89,11 @@ class Index{
 		if($row[0] > 0){
 			return json(array('code'=>-1, 'msg'=>'您已经安装RPCMS，请手动删除所有数据表后再安装'));
 		}
-		$keyData=json_decode(http_post('http://www.rpcms.cn/upgrade/auth/getKey', array('host'=>$App->baseUrl)),true);
+		$keyData=json_decode(http_post('https://www.rpcms.cn/upgrade/auth/getKey', array('host'=>$App->baseUrl)),true);
+		$errorTip='';
 		if(!isset($keyData['data']) || empty($keyData['data'])){
-			return json(array('code'=>-1, 'msg'=>'请求数据失败'));
+			$keyData['data']='';
+			$errorTip='获取网站KEY失败，原因：'.$keyData['msg'];
 		}
 		$installSql=CMSPATH . '/data/defend/sql.sql';
 		if(!file_exists($installSql)){
@@ -154,7 +156,7 @@ class Index{
 			$this->_sql_execute("INSERT INTO ".$data['tablepre']."user (`username`,`password`,`nickname`,`role`,`status`) VALUES ('".$data['username']."','".psw($data['userpsw'])."','".$data['username']."','admin','0')");
 			Cache::update();
 			$lock=@file_put_contents(CMSPATH .'/data/install.lock', 'installed');
-			return json(array('code'=>200, 'msg'=>'success', 'data'=>$data['baseUrl']));
+			return json(array('code'=>200, 'msg'=>'success', 'data'=>$data['baseUrl'], 'errorTip'=>$errorTip));
 		}
 		return json(array('code'=>-1, 'msg'=>'config/default.php写入失败，请确保文件存在并拥有读写权限'));
 	}

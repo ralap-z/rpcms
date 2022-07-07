@@ -34,7 +34,7 @@ class Plugin{
 		$this->Db_prefix=$options['prefix'];
 		$this->pluginName=$this->getPlugin();
 		$this->pluginPath=$App->appPath.'/plugin/'.$this->pluginName;
-		if($this->App->route['module'] != 'admin' && get_parent_class($this)){
+		if(in_array($this->App->route['module'], array('index','api')) && get_parent_class($this)){
 			$indexBase=new \rp\index\base();
 			$this->tempUrl=$indexBase->tempUrl;
 		}

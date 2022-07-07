@@ -156,7 +156,7 @@ class Plugin extends Base{
 		if(!empty($res) && $res['status'] == 0){
 			return array('code'=>-1,'msg'=>'插件已激活');
 		}
-		$pluginName='plugin\\'.strtolower($plugin).'\\Index';
+		$pluginName='plugin\\'.$plugin.'\\Index';
 		$pluginClass=new $pluginName;
 		if(method_exists($pluginClass,'install')){
 			$ires=$pluginClass->install();

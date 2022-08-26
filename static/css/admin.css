@@ -131,7 +131,7 @@ img{display: inline-block;vertical-align: middle;border: none;}
 .cacheUpdate .contents button{}
 
 .allCheck{color: #1fbae8;margin-right: 1rem;cursor: pointer;}
-.oper_dele{color: #fff;cursor: pointer;padding: 0 1rem;background: #f40;height: 2.4rem;line-height: 2.4rem;}
+.oper_dele{color: #fff;cursor: pointer;padding: 0 1rem;background: #f40;height: 2.4rem;line-height: 2.4rem;vertical-align: middle;}
 .operBtn{margin: 0 0.3rem;}
 .operBtn.delete{color: #c32d25;}
 .upStatus{cursor: pointer;}

@@ -266,8 +266,8 @@ class App{
 	*/
 	private function isInstall(){
 		if(!is_file(CMSPATH .'/data/install.lock')){
-			$rootPath=str_replace(DIRECTORY_SEPARATOR, '/', input('SERVER.DOCUMENT_ROOT'));
-			$runPath=str_replace(DIRECTORY_SEPARATOR, '/', CMSPATH);
+			$rootPath=strtolower(str_replace(DIRECTORY_SEPARATOR, '/', input('SERVER.DOCUMENT_ROOT')));
+			$runPath=strtolower(str_replace(DIRECTORY_SEPARATOR, '/', CMSPATH));
 			if($rootPath != $runPath){
 				$appPath=str_replace($rootPath.'/', '', $runPath);
 				$this->appPath='/'.$appPath;

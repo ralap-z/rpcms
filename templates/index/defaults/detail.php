@@ -15,7 +15,7 @@
 			</div>
 			<div class="news_about"><strong>简介</strong>{$data['excerpt']}</div>
 			<div class="news_content">
-				{$data['content']|content2keyword}
+				{$data['content']|content2keyword|raw}
 			</div>
 		</div>
 		<div class="share">

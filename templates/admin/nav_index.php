@@ -99,7 +99,7 @@
 			<option value="{$v['id']}">{$v['navname']}</option>
 			{/foreach}
 		</select></div>
-		{$cateCheckbox}
+		{$cateCheckbox|raw}
 		<button type="sumbit" class="rp_btn success sendPost_cate">添加</button>
 	</div>
 </div>

@@ -46,7 +46,7 @@ class Temp extends Base{
 				$defaultArr=include_once $default;
 			}
 			if(is_array($defaultArr) && !empty($defaultArr) && !$res=Db::name('config')->where('cname = "temp_'.$value.'"')->find()){
-				$res=Db::name('config')->insert(array('cname' => 'temp_'.$value,'cvalue'=>addslashes(json_encode($defaultArr))));
+				$res=Db::name('config')->insert(array('cname' => 'temp_'.$value,'cvalue'=>json_encode($defaultArr)));
 			}
 			Cache::update('template');
 			$this->App->resetHook();
@@ -107,9 +107,9 @@ class Temp extends Base{
 			}
 			$data=array_merge($defaultArr,$data);
 			if($cfg){
-				$res=Db::name('config')->where('cname = "temp_'.$temp.'"')->update(array('cvalue'=>addslashes(json_encode($data))));
+				$res=Db::name('config')->where('cname = "temp_'.$temp.'"')->update(array('cvalue'=>json_encode($data)));
 			}else{
-				$res=Db::name('config')->insert(array('cname' => 'temp_'.$temp,'cvalue'=>addslashes(json_encode($data))));
+				$res=Db::name('config')->insert(array('cname' => 'temp_'.$temp,'cvalue'=>json_encode($data)));
 			}
 			Cache::update('template');
 			Cache::update('waptemplate');

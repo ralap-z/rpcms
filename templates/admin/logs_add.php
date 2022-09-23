@@ -38,7 +38,7 @@
 			</div>
 			{hook:admin_logs_edit_hook($logData)}
 		</div>
-		<div class="me_input big"><label>正文</label><textarea name="content" id="log_content" style="height: 30rem;">{$logData['content']|default=''}</textarea></div>
+		<div class="me_input big"><label>正文</label><textarea name="content" id="log_content" style="height: 30rem;">{$logData['content']|default=''|raw}</textarea></div>
 		<div class="me_input big"><label style="width: auto;cursor: pointer;" id="excerptBtn">摘要<font style="color: #888;margin-left: 0.5rem;">系统会自动截取文字摘要，你也可以手动书写</font></label><textarea name="excerpt" id="excerpt" style="">{$logData['excerpt']|default=''}</textarea></div>
 		<div class="me_input big"><label style="width: auto;">关键词<font class="tips autoSaveTip"></font></label><input type="text" name="keywords" value="{$logData['keywords']|default=''}" onafterpaste="this.value=this.value.replace(/，/g,',')" onkeyup="this.value=this.value.replace(/，/g,',')"/></div>
 		<div class="extendBox">{hook:admin_logs_edit_hook2($logData)}</div>
@@ -46,10 +46,10 @@
 	<div class="right fixed_tab" data-space="3.2" data-unit="rem">
 		<div class="me_input"><label>分类</label><select name="cateId">
 			<option value="">选择分类</option>
-			{$categoryHtml}
+			{$categoryHtml|raw}
 		</select></div>
-		<div class="me_input"><label>作者</label><select name="authorId">{$authorHtml}</select></div>
-		<div class="me_input"><label>专题</label><select name="specialId">{$specialHtml}</select></div>
+		<div class="me_input"><label>作者</label><select name="authorId">{$authorHtml|raw}</select></div>
+		<div class="me_input"><label>专题</label><select name="specialId">{$specialHtml|raw}</select></div>
 		<div class="me_input"><label>别名</label><input type="text" name="alias" value="{$logData['alias']|default=''}" placeholder="仅字母、数字、-和_"></div>
 		<div class="me_input"><label>密码</label><input type="text" name="password" value="{$logData['password']|default=''}"></div>
 		<div class="me_input"><label>模板</label><input type="text" name="template" placeholder="指定模板请输入模板名称" value="{$logData['template']|default=''}"></div>

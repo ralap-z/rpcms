@@ -157,9 +157,11 @@ class Db{
 			switch($value[0]){
 				case 'in':
 				case 'not in':
+					return '{key} '.$value[0].'('.$this->escapeString($value[1]).')';
+					break;
 				case 'exists':
 				case 'not exists':
-					return '{key} '.$value[0].'('.$value[1].')';
+					return ' '.$value[0].'('.$value[1].')';
 					break;
 				case 'between':
 				case 'not between':
@@ -356,7 +358,7 @@ class Db{
 		$val_arr=array();
 		foreach($dataval as $k=>$v){
 			if(!is_array($v)) continue;
-			$v=array_map(function($vv){return $this->escapeString($vv);},$v);
+			$v=array_map(function($vv){return $this->escapeString($vv, false);},$v);
 			$val_arr[]="('".join("','",$v)."')";
 		}
 		$key="(`".join("`,`",$key_arr)."`)";
@@ -373,7 +375,7 @@ class Db{
 	public function update($data=array(),$modifier=''){
 		$strs=array();
 		foreach($data as $k=>$v){
-			$strs[]=$v === NULL  ? "`".$k."` = NULL" : "`".$k."` ='".$this->escapeString($v)."'";
+			$strs[]=$v === NULL  ? "`".$k."` = NULL" : "`".$k."` ='".$this->escapeString($v, false)."'";
 		}
 		$updata=join(" , ",$strs);
 		$sql="update ".$modifier." ".self::$table." SET ".$updata.$this->buildWhere();
@@ -473,8 +475,9 @@ class Db{
 		}
 		return $res;
 	}
-	private function escapeString($str){
-        return addslashes(stripslashes($str));
+	private function escapeString($str, $filterBackslash=true){
+		$filterBackslash && $str=str_replace('\\','\\\\',$str);
+        return addslashes($str);
     }
 	
 }

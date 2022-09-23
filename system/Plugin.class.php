@@ -76,7 +76,7 @@ class Plugin{
 		if(empty($res)){
 			rpMsg('该插件未安装');
 		}
-		$res=Db::name('plugin')->where("ppath='".$plugin."'")->update(array('config'=>addslashes(json_encode($data))));
+		$res=Db::name('plugin')->where("ppath='".$plugin."'")->update(array('config'=>json_encode($data)));
 		if(!$res){
 			rpMsg('修改配置失败，请检查插件是否安装或稍后重试');
 		}

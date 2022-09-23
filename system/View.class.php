@@ -395,11 +395,20 @@ class View{
 	private function parse_vars_do($matches){
 		$str = $matches[1];
 		if(false == strpos($str, '=') || false != strpos($str, '?') || false != strpos($str, '|')){
+			$isFilter=true;
+			if(preg_match('/\|(\s)?raw(\||\s)?/i', $str)){
+				$isFilter=false;
+			}
 			if(false != strpos($str, '|')){
 				$this->parse_vars_function($str);
-				return '{php}echo '.$str.';{/php}';
+			}else if(false == strpos($str, '?') && !preg_match('/[\+\-\*\/\%]/', $str)){
+				$str='isset($'.$str.') ? $'.$str.' : \'\'';
+			}else{
+				$str='$'.$str.'';
+				$isFilter=false;
 			}
-			return (false == strpos($str, '?') && !preg_match('/[\+\-\*\/\%]/', $str)) ? '{php}echo isset($'.$str.') ? $'.$str.' : \'\';{/php}' : '{php}echo $'.$str.';{/php}';
+			$isFilter && $str='htmlentities('.$str.')';
+			return '{php}echo '.$str.';{/php}';
 		}
 		return '{php}$'.$str.';{/php}';
     }
@@ -424,6 +433,8 @@ class View{
 				$args=explode('=', $varArray[$i], 2);
 				$fun=trim($args[0]);
 				switch($fun){
+					case 'raw':
+                        break;
 					case 'default': 
 						$name='(isset('.$name.') && ('.$name.' !== \'\') ? '.$name.' : '.$args[1].')';
 						break;

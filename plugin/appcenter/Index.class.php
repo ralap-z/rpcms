@@ -96,11 +96,11 @@ class Index extends Plugin{
 				return $res;
 				break;
 			case 'login':
-				$token=input('post.token');
-				$res=$curl->http_curl('login','token='.$token);
+				$data['token']=input('post.token');
+				$res=$curl->http_curl('login',$data);
 				$resArr=json_decode($res,true);
 				if($resArr['code'] == 200){
-					$this->setConfig('appcenter',array('token'=>$token));
+					$this->setConfig('appcenter',array('token'=>$data['token']));
 				}
 				return $res;
 				break;

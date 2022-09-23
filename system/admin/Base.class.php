@@ -27,6 +27,14 @@ class Base{
 		$this->user=Db::name('user')->where('id='.$session['uid'])->find();
 		$leftMenu=Hook::getHook('admin_left_menu');
 		$this->getCommentExamNum();
+		if($this->isAjax || $this->App->isPost()){
+			if(!csrf_token_check() || empty($App::server('HTTP_REFERER'))){
+				return json(array('code'=>-1, 'msg'=>'token验证失败'));
+			}
+			csrf_token_create();
+		}else{
+			csrf_token_create();
+		}
 		View::assign('user',$this->user);
 		View::assign('hasLeftMenu',!empty($leftMenu));
 	}
@@ -66,7 +74,7 @@ class Base{
 				$extend[$name] = $value;
 			}
 		}
-		return !empty($extend) ? addslashes(json_encode($extend)) : '';
+		return !empty($extend) ? json_encode($extend) : '';
 	}
 	
 	protected function getKey(){

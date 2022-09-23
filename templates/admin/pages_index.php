@@ -49,7 +49,7 @@
 			<span>选择项：</span>
 			<span class="inblock oper_dele" onClick="javascript:logOper('dele');">删除</span>
 		</div>
-		<div class="right pages">{$pageHtml}</div>
+		<div class="right pages">{$pageHtml|raw}</div>
 	</div>
 </div>
 <script>

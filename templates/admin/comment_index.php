@@ -37,7 +37,7 @@
 					<td>{$v['topId'] ? $v['topId'] : ''}</td>
 					<td>
 						{if $v['status'] == 1}<span class="exam">[审]</span>{/if}
-						<a href="javascript:;" title="快速回复" data-id="{$v['id']}" class="replay">{$v['content']|htmlspecialchars|subString=###,0,50}</a>
+						<a href="javascript:;" title="快速回复" data-id="{$v['id']}" class="replay">{$v['content']|subString=###,0,50}</a>
 						<p class="commentTime">{$v['createTime']|formatDate=###,3}</p>
 					</td>
 					<td>
@@ -65,7 +65,7 @@
 			<span class="inblock oper_dele" onClick="javascript:logOper('exam');">审核</span>
 			<span class="inblock oper_dele" onClick="javascript:logOper('unexam');">反审</span>
 		</div>
-		<div class="right pages">{$pageHtml}</div>
+		<div class="right pages">{$pageHtml|raw}</div>
 	</div>
 </div>
 

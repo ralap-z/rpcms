@@ -268,7 +268,7 @@ class Cache{
 	/*tag标签缓存*/
 	private function me_tages(){
 		$getData=function($page){
-			$limit=100;
+			$limit=1000;
 			return Db::name('tages')->order('id', 'asc')->limit(($page-1)*$limit.','.$limit)->select();
 		};
 		$page=1;

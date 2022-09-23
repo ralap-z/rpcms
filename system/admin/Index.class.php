@@ -44,9 +44,9 @@ class Index extends Base{
 			$data['fileTypes']=join(',',$fileTypesArr);
 		}
 		if(Db::name('config')->where('cname="webconfig"')->find()){
-			$res=Db::name('config')->where('cname="webconfig"')->update(array('cvalue'=>addslashes(json_encode($data))));
+			$res=Db::name('config')->where('cname="webconfig"')->update(array('cvalue'=>json_encode($data)));
 		}else{
-			$res=Db::name('config')->insert(array('cname'=>'webconfig','cvalue'=>addslashes(json_encode($data))));
+			$res=Db::name('config')->insert(array('cname'=>'webconfig','cvalue'=>json_encode($data)));
 		}
 		Cache::update('option');
 		Cache::update('waptemplate');

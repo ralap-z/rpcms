@@ -109,7 +109,7 @@
 				</select>
 			</div>
 		</div>
-		<div class="right pages">{$pageHtml}</div>
+		<div class="right pages">{$pageHtml|raw}</div>
 	</div>
 </div>
 <script>

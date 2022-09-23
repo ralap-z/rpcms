@@ -130,18 +130,25 @@ function doStrslashes(){
 }
 
 /**
-* 递归去除转义字符
+* 递归去除被转义字符
 */
 function strDeep($value){
 	if(is_array($value)){
 		$value=array_map('strDeep', $value);
-	}else{
+	}else if(version_compare(PHP_VERSION, '5.4', '<=') && function_exists('get_magic_quotes_gpc') && get_magic_quotes_gpc()){
 		$value=stripslashes(trim($value));
-		if(version_compare(PHP_VERSION, '7.4', '>=') || !function_exists('get_magic_quotes_gpc') || !get_magic_quotes_gpc()){
-			$value=addslashes($value);
-		}
 	}
 	return $value;
+}
+
+function csrf_token_create(){
+	$token=_encrypt(randStr(10));
+	session('csrfToken',$token);
+}
+
+function csrf_token_check(){
+	$token=session('csrfToken');
+	return !empty(_decrypt($token));
 }
 
 /**

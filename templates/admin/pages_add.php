@@ -26,13 +26,13 @@
 			</div>
 			{hook:admin_pages_edit_hook($pageData)}
 		</div>
-		<div class="me_input big"><label>内容</label><textarea name="content" id="page_content" style="height: 30rem;">{$pageData['content']|default=''}</textarea></div>
+		<div class="me_input big"><label>内容</label><textarea name="content" id="page_content" style="height: 30rem;">{$pageData['content']|default=''|raw}</textarea></div>
 		<div class="me_input big"><label>SEO关键词</label><input type="text" name="seo_key" value="{$pageData['seo_key']|default=''}"></div>
 		<div class="me_input big"><label>SEO描述</label><textarea name="seo_desc">{$pageData['seo_desc']|default=''}</textarea></div>
 		<div class="extendBox">{hook:admin_pages_edit_hook2($pageData)}</div>
 	</div>
 	<div class="right fixed_tab" data-space="3.2" data-unit="rem">
-		<div class="me_input"><label>作者</label><select name="authorId">{$authorHtml}</select></div>
+		<div class="me_input"><label>作者</label><select name="authorId">{$authorHtml|raw}</select></div>
 		<div class="me_input"><label>别名</label><input type="text" name="alias" value="{$pageData['alias']|default=''}"></div>
 		<div class="me_input"><label>密码</label><input type="text" name="password" value="{$pageData['password']|default=''}"></div>
 		<div class="me_input"><label>模板</label><input type="text" name="template" placeholder="指定模板请输入模板名称" value="{$pageData['template']|default=''}"></div>

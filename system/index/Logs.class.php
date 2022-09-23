@@ -74,6 +74,7 @@ class Logs extends base{
 		$logData=$this->LogsMod->title($key)->page($page)->select();
 		$logData['count']=$this->LogsMod->getCount();
 		$pageHtml=pageInationHome($logData['count'],$logData['limit'],$logData['page'],'search',$key);
+		$key=htmlentities($key);
 		$key2='搜索 '.$key;
 		$this->setKeywords();
 		$this->setDescription('搜索关键词“'.$key.'”的索引结果',true);

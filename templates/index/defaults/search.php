@@ -17,7 +17,7 @@
 			{/foreach}
 		</ul>
 	</div>
-	<div class="pages">{$pageHtml}</div>
+	<div class="pages">{$pageHtml|raw}</div>
 </main>
 <aside class="sidebar">
 	<ul class="sidenews">

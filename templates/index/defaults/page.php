@@ -6,7 +6,7 @@
         <h3>{$data['title']}</h3>
 		<p></p>
 		<div>
-			{$data['content']}
+			{$data['content']|raw}
 		</div>
 	</div>
 	<div class="comment_box" id="commentlist">

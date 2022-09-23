@@ -43,7 +43,7 @@
 		</tbody>
 	</table>
 	<div class="rp_row clear">
-		<div class="right pages">{$pageHtml}</div>
+		<div class="right pages">{$pageHtml|raw}</div>
 	</div>
 </div>
 <div class="me_model me_anim_bounce me_model_tages">

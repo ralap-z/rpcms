@@ -129,6 +129,21 @@ class App{
 		return $result;
 	}
 	
+	public function isGet(){
+		$method=self::server('REQUEST_METHOD', 'GET');
+        return $method == 'GET';
+    }
+
+    public function isPost(){
+		$method=self::server('REQUEST_METHOD', 'GET');
+        return $method == 'POST';
+    }
+
+    public function isPut(){
+		$method=self::server('REQUEST_METHOD', 'GET');
+        return $method == 'PUT';
+    }
+	
 	/**
 	* 获取server参数
 	* @access public

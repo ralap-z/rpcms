@@ -1,7 +1,7 @@
 <?php if (!defined('CMSPATH')){exit('error!');}?>
 {include:/header}
 {php}
-	$pluginName='plugin\\'.strtolower($plugin).'\\Setting';
+	$pluginName='plugin\\'.$plugin.'\\Setting';
 	$pluginClass=new $pluginName;
 	$res='';
 	if(method_exists($pluginClass,'index')){

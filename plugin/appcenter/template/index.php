@@ -1,4 +1,4 @@
 <?php if (!defined('CMSPATH')){exit('error!');}?>
 {include:/header}
-{$html}
+{$html|raw}
 {include:/footer}

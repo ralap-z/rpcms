@@ -14,7 +14,7 @@
 			<div class="me_input me_input_line">
 				<select name="cateId">
 					<option value="">所有分类</option>
-					{$categoryHtml}
+					{$categoryHtml|raw}
 				</select>
 			</div>
 			<div class="me_input me_input_line">

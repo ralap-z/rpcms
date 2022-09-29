@@ -72,13 +72,12 @@ class View{
         return $content;
 	}
 	
-	public static function checkTemp($temp){
+	public static function checkTemp($temp, $module=''){
 		global $App;
-		if($App->route['module'] == 'index'){
-			$tempDir=TMPPATH .'/index/'.$App->indexTemp.'/'.$temp.'.php';
-		}else{
-			$tempDir=TMPPATH .'/'.$App->route['module'].'/'.$temp.'.php';
+		if(empty($module)){
+			$module=$App->route['module'];
 		}
+		$tempDir=TMPPATH .($module == 'index' ? '/index/'.$App->indexTemp : '/'.$module).'/'.$temp.'.php';
 		return is_file($tempDir);
 	}
 	

@@ -157,7 +157,7 @@ class Db{
 			switch($value[0]){
 				case 'in':
 				case 'not in':
-					return '{key} '.$value[0].'('.$this->escapeString($value[1]).')';
+					return '{key} '.$value[0].'('.$value[1].')';
 					break;
 				case 'exists':
 				case 'not exists':

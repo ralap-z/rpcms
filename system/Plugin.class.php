@@ -34,7 +34,7 @@ class Plugin{
 		$this->Db_prefix=$options['prefix'];
 		$this->pluginName=$this->getPlugin();
 		$this->pluginPath=$App->appPath.'/plugin/'.$this->pluginName;
-		if(in_array($this->App->route['module'], array('index','api')) && get_parent_class($this)){
+		if(in_array($this->App->route['module'], array('index','api','plugin')) && get_parent_class($this)){
 			$indexBase=new \rp\index\base();
 			$this->tempUrl=$indexBase->tempUrl;
 		}
@@ -64,8 +64,8 @@ class Plugin{
 		return View::display($tmp);
 	}
 	
-	public function checkTemp($tmp){
-		return View::checkTemp($tmp);
+	public function checkTemp($tmp, $module=''){
+		return View::checkTemp($tmp, $module);
 	}
 	
 	public function setConfig($plugin,$data=array()){

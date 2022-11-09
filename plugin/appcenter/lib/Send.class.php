@@ -4,7 +4,7 @@ namespace plugin\appcenter\lib;
 
 class Send{
 	
-	private $RPCMSAPI='http://app.rpcms.cn/api/';
+	private $RPCMSAPI='https://app.rpcms.cn/api/';
 	public function __construct(){
 		
 	}

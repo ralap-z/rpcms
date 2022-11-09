@@ -5,7 +5,7 @@ use rp\Db;
 
 class Upgrade extends Base{
 	
-	private $server='http://www.rpcms.cn';
+	private $server='https://www.rpcms.cn';
 	private $updateLockFile;
 	
 	public function __construct(){

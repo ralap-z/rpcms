@@ -131,7 +131,7 @@ class Cache{
 		$page=1;
 		$user=[];
 		while($data=$getData($page)){
-			$user=array_merge($user, array_column($data,NULL,'id'));
+			$user=$user + array_column($data,NULL,'id');
 			$page++;
 		}
 		$this->cacheWrite($user, 'user');

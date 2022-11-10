@@ -144,6 +144,7 @@ class View{
 	
 	private function setTempFile($temp){
 		global $App;
+		$tempOrigin=$temp;
 		if(($App->route['controller'] == 'plugin' && $App->route['action'] == 'run') || 0 === strpos($temp, '/plugin/')){
 			if(0 === strpos($temp, '/') && false === strpos($temp, 'plugin')){
 				$temp='index/'.(isset($App->indexTemp) ? $App->indexTemp .'/' : '').$temp.'.php';
@@ -161,8 +162,8 @@ class View{
 			}else{
 				$temp=$App->route['module'].$temp.'.php';
 			}
-			if($temp == '/404' && !is_file(TMPPATH .'/'.$temp)){
-				$temp='index/'.$App->indexTemp.$temp.'.php';
+			if($tempOrigin == '/404' && !is_file(TMPPATH .'/'.$temp)){
+				$temp='index/'.$App->indexTemp.$tempOrigin.'.php';
 			}
 			$tempDir=TMPPATH .'/'.$temp;
 		}

@@ -136,7 +136,7 @@ class Logs extends Base{
 		$data['password']=strip_tags($param['password']);
 		$data['template']=strip_tags($param['template']);
 		$data['createTime']=!empty($param['createTime']) ? date('Y-m-d H:i:s',strtotime($param['createTime'])) : date('Y-m-d H:i:s');
-		$data['upateTime']=date('Y-m-d H:i:s');
+		$data['updateTime']=date('Y-m-d H:i:s');
 		$data['isTop']=!empty($param['isTop']) ? intval($param['isTop']) : 0;
 		$data['isRemark']=!empty($param['isRemark']) ? intval($param['isRemark']) : 0;
 		$data['extend']=$this->extendPost($param);
@@ -211,9 +211,31 @@ class Logs extends Base{
 	
 	/*删除文章*/
 	private function me_dele($ids,$value=''){
-		$res=Db::name('logs')->where(array('id'=>array('in',$ids)))->dele();//删除文章
-		$res2=Db::name('attachment')->where(array('logId'=>array('in',$ids)))->dele();//删除附件
-		$res2=Db::name('comment')->where(array('logId'=>array('in',$ids)))->dele();//删除评论
+		$tages=Db::name('logs')->where(array('id'=>array('in',$ids)))->field('tages')->select();
+		$tagesNum=[];
+		$tages=array_map(function($v){return explode(',', $v['tages']);}, $tages);
+		$tages=array_filter(array_reduce($tages, 'array_merge', array()));
+		foreach($tages as $v){
+			if(isset($tagesNum[$v])){
+				$tagesNum[$v]++;
+			}else{
+				$tagesNum[$v]=1;
+			}
+		}
+		unset($tages);
+		Db::transaction();
+		try{
+			foreach($tagesNum as $k=>$v){
+				Db::name('tages')->where(['id'=>$k])->setDec('logNum', $v);
+			}
+			$res=Db::name('logs')->where(array('id'=>array('in',$ids)))->dele();//删除文章
+			$res=Db::name('attachment')->where(array('logId'=>array('in',$ids)))->dele();//删除附件
+			$res=Db::name('comment')->where(array('logId'=>array('in',$ids)))->dele();//删除评论
+			Db::commit();
+		}catch(\Exception $e){
+			Db::rollback();
+			return json(array('code'=>-1,'msg'=>'删除失败'));
+		}
 		$this->updateCache(5);
 		Hook::doHook('admin_logs_dele',array($ids));
 		return json(array('code'=>200,'msg'=>'删除成功'));

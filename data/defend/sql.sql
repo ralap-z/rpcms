@@ -98,7 +98,7 @@ CREATE TABLE IF NOT EXISTS `%pre%logs` (
   `comnum` int(10) DEFAULT '0' COMMENT '评论量',
   `upnum` int(10) DEFAULT '0' COMMENT '点赞量',
   `template` varchar(200) DEFAULT '',
-  `upateTime` datetime DEFAULT NULL,
+  `updateTime` datetime DEFAULT NULL,
   `createTime` datetime DEFAULT NULL,
   `extend` longtext NULL DEFAULT NULL COMMENT '扩展数据',
   `status` tinyint(1) DEFAULT '0' COMMENT '状态, 0发布 1审核 2草稿 -1下架 -2审核不通过',
@@ -106,7 +106,7 @@ CREATE TABLE IF NOT EXISTS `%pre%logs` (
   UNIQUE KEY `id` (`id`),
   UNIQUE KEY `alias` (`alias`) USING BTREE,
   KEY `comnum` (`comnum`),
-  KEY `upateTime` (`upateTime`),
+  KEY `updateTime` (`updateTime`),
   KEY `views` (`views`),
   KEY `title` (`title`),
   KEY `authorId` (`authorId`),
@@ -114,7 +114,7 @@ CREATE TABLE IF NOT EXISTS `%pre%logs` (
   KEY `specialId` (`specialId`),
   KEY `tages` (`tages`),
   KEY `upnum` (`upnum`),
-  KEY `isTop` (`status`,`isTop`,`upateTime`)
+  KEY `isTop` (`status`,`isTop`,`updateTime`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='文章列表';
 
 CREATE TABLE IF NOT EXISTS `%pre%nav` (

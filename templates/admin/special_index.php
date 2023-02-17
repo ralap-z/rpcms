@@ -5,10 +5,7 @@
 .upSort{margin-top: 0.4rem;margin-left: 0;}
 .addSpecial .me_input label{width: 5rem;text-align: right;}
 .me_model .rp_row{text-align: right;}
-.imgUpload{display: inline-block;width: 14rem;height: 8rem;background: #e6e6e6;position: relative;}
-.imgUpload img{position: absolute;top: 0;left: 0;width: 100%;height: 100%;z-index: 1;}
-.imgUpload span{background: rgba(31, 186, 232, 0.5);line-height: 1;padding: 0.5rem 1rem;position: absolute;top: calc(50% - 1rem);left: calc(50% - 3rem);color: #fff;z-index: 2;}
-.imgUpload .headimgFile{position: absolute;top: 0;left: 0;width: 100%;height: 100%;opacity: 0;z-index: 3;}
+.imgUpload:after{padding-bottom: 57%;}
 </style>
 <div class="me_body">
 	<div class="me_head">
@@ -62,7 +59,7 @@
 			<div class="me_input"><label>副标题</label><input type="text" class="special_subTitle" value="" style="width: calc(100% - 6rem);"></div>
 			<div class="me_input me_input_line"><label>专题图片</label>
 				<div class="imgUpload">
-					<input type="file" accept="image/*" class="headimgFile"/>
+					<input type="file" accept="image/*" class="imgFile"/>
 					<span>选择图片</span>
 				</div>
 			</div>
@@ -78,7 +75,7 @@
 <script>
 $(document).ready(function(){
 	$(".menu_tree").find(".menu_item[data-type='special']").addClass('active');
-	$(".headimgFile").change(function(){
+	$(".imgFile").change(function(){
 		var a=$(this)[0].files[0];
 		if($(".imgUpload").find("img").length > 0){
 			$(".imgUpload").find("img").attr("src",window.URL.createObjectURL(a));
@@ -111,7 +108,7 @@ $(document).ready(function(){
 		formData.append("seo_title", param.seo_title);
 		formData.append("seo_desc", param.seo_desc);
 		formData.append("temp_list", param.temp_list);
-		formData.append("headimg", $(".headimgFile")[0].files[0]);
+		formData.append("headimg", $(".imgFile")[0].files[0]);
 		updateId && formData.append("id", updateId);
 		$.ajax({
 			'url':url,

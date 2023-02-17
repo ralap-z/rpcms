@@ -10,18 +10,25 @@ header("Content-Type: text/html; charset=utf-8");
 defined('CMSPATH') or define('CMSPATH', realpath(dirname(__FILE__) .'/../../../'));
 defined('LIBPATH') or define('LIBPATH', CMSPATH . '/system');
 defined('PLUGINPATH') or define('PLUGINPATH', CMSPATH . '/plugin');
+defined('SETTINGPATH') or define('SETTINGPATH', CMSPATH . '/setting');
 defined('TMPPATH') or define('TMPPATH', CMSPATH . '/templates');
 defined('UPLOADPATH') or define('UPLOADPATH',  'uploads');
+defined('RPCMS_VERSION') or define('RPCMS_VERSION',  @file_get_contents(CMSPATH . '/data/defend/sersion.txt'));
 include_once LIBPATH . '/Common.fun.php';
 spl_autoload_register("autoLoadClass");
 doStrslashes();
-\rp\Config::set(include_once CMSPATH . '/config.php');
+\rp\Config::set(include_once SETTINGPATH.'/config/default.php');
 \rp\Config::set('webConfig',\rp\Cache::read('option'));
 $App=new \rp\App();
 $App->runHook();
 		
 if(!isLogin() && !session('MEUSER')){
 	return json(array('code'=>-1, 'msg'=>'请先登录'));
+}
+$host=input('server.HTTP_HOST');
+$httpReferer=str_replace(['http://','https://'], '', input('server.HTTP_REFERER'));
+if(stripos($httpReferer, $host) !== 0){
+	die();
 }
 
 function getUEConfig(){

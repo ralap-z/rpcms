@@ -127,7 +127,7 @@ class LogsMod{
 		}else{
 			$join[]=array('('.$ids.') as l','a.id=l.id','inner');
 		}
-		$data=Db::name('logs')->alias('a')->join($join)->where($where)->field('a.id,a.title,a.authorId,a.cateId,a.excerpt,a.keywords,a.content,a.tages,a.isTop,a.views,a.comnum,a.upnum,a.upateTime,a.createTime,a.extend,a.status,b.cate_name as cateName,c.nickname as author,c.email as authorEmail')->select();
+		$data=Db::name('logs')->alias('a')->join($join)->where($where)->field('a.id,a.title,a.authorId,a.cateId,a.excerpt,a.keywords,a.content,a.tages,a.isTop,a.views,a.comnum,a.upnum,a.updateTime,a.createTime,a.extend,a.status,b.cate_name as cateName,c.nickname as author,c.email as authorEmail')->select();
 		foreach($data as $k=>$v){
 			$data[$k]['extend'] =json_decode($v['extend'],true);
 			$data[$k]['url'] = Url::logs($v['id']);
@@ -148,8 +148,8 @@ class LogsMod{
 		$where2['a.id']=array('>',$logId);
 		$order1=array('a.id'=>'DESC');
 		$order2=array('a.id'=>'ASC');
-		$prev=Db::name('logs')->alias('a')->where($where1)->field('a.id,a.title,a.authorId,a.cateId,a.excerpt,a.keywords,a.content,a.tages,a.views,a.comnum,a.upnum,a.upateTime,a.createTime,a.extend')->limit(1)->order($order1)->find();
-		$next=Db::name('logs')->alias('a')->where($where2)->field('a.id,a.title,a.authorId,a.cateId,a.excerpt,a.keywords,a.content,a.tages,a.views,a.comnum,a.upnum,a.upateTime,a.createTime,a.extend')->limit(1)->order($order2)->find();
+		$prev=Db::name('logs')->alias('a')->where($where1)->field('a.id,a.title,a.authorId,a.cateId,a.excerpt,a.keywords,a.content,a.tages,a.views,a.comnum,a.upnum,a.updateTime,a.createTime,a.extend')->limit(1)->order($order1)->find();
+		$next=Db::name('logs')->alias('a')->where($where2)->field('a.id,a.title,a.authorId,a.cateId,a.excerpt,a.keywords,a.content,a.tages,a.views,a.comnum,a.upnum,a.updateTime,a.createTime,a.extend')->limit(1)->order($order2)->find();
 		if(!empty($prev)){
 			$prev['url']=Url::logs($prev['id']);
 			$prev['extend'] =json_decode($prev['extend'],true);

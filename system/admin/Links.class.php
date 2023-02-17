@@ -41,7 +41,7 @@ class Links extends Base{
 			return json(array('code'=>-1,'msg'=>'URL地址格式错误(http(s)://等前缀)'));
 		}
 		$linkId=isset($param['id']) ? intval($param['id']) : '';
-		$data['sitedesc']=strip_tags($param['sitedesc']);
+		$data['sitedesc']=str_replace(['"', '\''], '', strip_tags($param['sitedesc']));
 		$data['sort']=intval($param['sort']);
 		$data['status']=intval($param['status']) == -1 ? -1 : 0;
 		if(!empty($linkId)){

@@ -15,6 +15,14 @@
 		<div class="tabs">
 			<div id="tab1" class="tab active">
 				<div class="me_input big"><label>网站名称</label><input type="text" name="webName" value="{$option['webName']|default=''}"></div>
+				<div class="me_input big"><label>网站LOGO</label>
+					<div class="imgUpload">
+						<input type="file" accept="image/*" class="imgFile"/>
+						<span>选择图片</span>
+						<input type="hidden" name="webLogo" value="{$option['webLogo']|default=''}"/>
+						{if !empty($option['webLogo'])}<img src="{$option['webLogo']}"/>{/if}
+					</div>
+				</div>
 				<div class="me_input big"><label>SEO标题</label><input type="text" name="seoTitle" value="{$option['seoTitle']|default=''}"><p class="tips">seo标题优先使用此内容</p></div>
 				<div class="me_input big"><label>关键字</label><input type="text" name="keyword" value="{$option['keyword']|default=''}"><p class="tips">多个关键词用“,”隔开</p></div>
 				<div class="me_input big"><label>描述</label><textarea name="description">{$option['description']|default=''}</textarea></div>
@@ -84,6 +92,39 @@
 <script>
 $(document).ready(function(){
 	$(".menu_tree").find(".menu_item[data-type='webset']").addClass('active');
+	$(".imgFile").on("change",function(){
+		var parentBox=$(this).parents(".imgUpload"),
+			val=$(this)[0].files[0];
+		if(!val){
+			return !0;
+		}
+		var formData = new FormData();
+		formData.append("files", val);
+		$.ajax({
+			url: "{:url('index/upload')}",
+			type: "post",
+			data: formData,
+			dataType: 'json',
+			async:false,
+			processData: false,
+			contentType: false,
+			beforeSend:function(){
+				$.Msg("上传中");
+			},
+			success:function(res){
+				if(res.code == 200){
+					$.closeModal();
+					parentBox.find("img").length ? parentBox.find("img").prop("src",res.data) : parentBox.append("<img src='"+res.data+"'/>");
+					parentBox.find("input[type='hidden']").val(res.data);
+				}else{
+					$.Msg(res.msg);
+				}
+			},
+			error: function(){
+				$.Msg("上传失败");
+			}
+		});
+	});
 	$(".sendPost").click(function(){
 		var a=$('.me_form').serializeArray(),
 			param={

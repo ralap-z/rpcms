@@ -73,7 +73,7 @@ class Base{
 		$order=array();
 		switch($this->webConfig['logOrder']){
 			case 'updateTime':
-				$order['a.upateTime']='desc';
+				$order['a.updateTime']='desc';
 				break;
 			case 'weight':
 				$logWeight=explode(PHP_EOL,$this->webConfig['logWeight']);
@@ -158,9 +158,9 @@ class Base{
 		$pwd = !empty($cookiepwd) ? _decrypt($cookiepwd) : $postpwd . ip();
 		if($pwd !== $password . ip()){
 			$tempPswDir=TMPPATH . '/index/'.$this->template['name'].'/password.php';
-			$tempPswFile='/'.$this->template['name'].'/password';
-			if(file_exists($tempPswDir)){
-				echo View::display($tempPswFile);
+			$tempPswFile='password';
+			if(is_file($tempPswDir)){
+				return $tempPswFile;
 			}else{
 				echo '<!doctype html><html><head>
 					<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
@@ -205,5 +205,6 @@ class Base{
 			$referer=$app::server('HTTP_REFERER');
 			!empty($postpwd) && redirect($referer);
 		}
+		return;
 	}
 }

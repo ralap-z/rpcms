@@ -34,7 +34,7 @@
 				<tr>
 					<td><input type="checkbox" name="blog[]" value="{$v['id']}" class="ids"></td>
 					<td>{$v['id']}</td>
-					<td><a href="{:url('pages/update')}?id={$v['id']}" title="修改单页">{$v['title']}</a></td>
+					<td><a data-value="{$baseUrl}{php}echo rp\Url::page($v['id']){/php}" class="copyUrl" title="复制链接"><i class="me-icon me-icon-link"></i></a><a href="{:url('pages/update')}?id={$v['id']}" title="修改单页">{$v['title']}</a></td>
 					<td>{$v['nickname']}</td>
 					<td>{$v['template']}</td>
 					<td>{$v['comnum']}</td>

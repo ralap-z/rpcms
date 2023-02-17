@@ -16,7 +16,7 @@ function autoLoadClass($class){
 	$classArr=explode('\\',$class);
 	$controller=array_pop($classArr);
 	$class=ltrim(join('/',$classArr),'\\');
-	if(strtolower($classArr[0]) == 'rp'){
+	if(!empty($classArr[0]) && strtolower($classArr[0]) == 'rp'){
 		$class=strtolower($class);
 	}
 	$class=preg_replace('/\brp\b/', LIBPATH, $class);
@@ -252,7 +252,7 @@ function pageInation($count, $perlogs, $page, $url='', $anchor = '') {
 	}
 	$urlQuery=parse_url($url, PHP_URL_QUERY);
 	if(!empty($urlQuery)){
-		$param=parse_str($urlQuery, $param);
+		parse_str($urlQuery, $param);
 	}
 	if(!empty($anchor)){
 		parse_str($anchor, $anchor);
@@ -263,7 +263,7 @@ function pageInation($count, $perlogs, $page, $url='', $anchor = '') {
 		$param['page']='[PAGE]';
 	}
 	if(!empty($param)){
-		$url.='?'.str_replace('%5BPAGE%5D', '[PAGE]', http_build_query($param));
+		$url=explode('?', $url)[0];
 	}
 	$makeUrl=function($page)use($url){
 		return str_replace('[PAGE]', (string)$page, $url);
@@ -460,7 +460,7 @@ function hideStr($type, $str, $replace='*'){
 			$len=mb_strlen($str);
 			$surnames=array('欧阳','太史','端木','上官','司马','东方','独孤','南宫','万俟','闻人','夏侯','诸葛','尉迟','公羊','赫连','澹台','皇甫','宗政','濮阳','公冶','太叔','申屠','公孙','慕容','仲孙','钟离','长孙','宇文','城池','司徒','鲜于','司空','汝嫣','闾丘','子车','亓官','司寇','巫马','公西','颛孙','壤驷','公良','漆雕','乐正','宰父','谷梁','拓跋','夹谷','轩辕','令狐','段干','百里','呼延','东郭','南门','羊舌','微生','公户','公玉','公仪','梁丘','公仲','公上','公门','公山','公坚','左丘','公伯','西门','公祖','第五','公乘','贯丘','公皙','南荣','东里','东宫','仲长','子书','子桑','即墨','达奚','褚师'); 
 			$pretwo=mb_substr($str, 0, 2);
-			if(in_array($pretwo, $surnames)){
+			if($len > 2 && in_array($pretwo, $surnames)){
 				$str=$pretwo.$replace;
 			}else{
 				$str=mb_substr($str, 0, 1).$replace;

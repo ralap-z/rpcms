@@ -146,6 +146,10 @@ $(document).ready(function(){
 			}
 		});
 	})
+	$(".copyUrl").click(function(e){
+		var a=$(this).data("value");
+		return a && ($.winEvent.copy(e, a), $.Msg("已复制链接"));
+	})
 	var auth=$.localStorage.get("rpcmsAuth");
 	auth ? authText(auth) : $.getJSON("//www.rpcms.cn/upgrade/auth/check?host="+location.host+"&callback=?", function(res){
 		$.localStorage.set("rpcmsAuth", res.auth, 24*3600),authText(res.auth);

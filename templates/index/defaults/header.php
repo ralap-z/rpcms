@@ -34,7 +34,7 @@ main{float:left;}.sidebar{float: right;}
 	</div>
 	<div class="header-navigation">
 		<nav class="win">
-			<div class="logo"><a href="/" style="display:block;" title="{$webConfig['webName']}"><img src="{$tempUrl}/images/logo.png"/></a></div>
+			<div class="logo"><a href="/" style="display:block;" title="{$webConfig['webName']}"><img src="{$webConfig['webLogo']|default=$tempUrl.'/images/logo.png'}"/></a></div>
 			<h2 id="mnavh"><span class="navicon"></span></h2>
 			<ul id="starlist">
 				<li class="selected"><a href="/" >首页</a></li>

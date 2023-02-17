@@ -4,6 +4,7 @@
 .replayForm .me_input label{width: 3rem;text-align: right;}
 .me_model .rp_row{text-align: right;}
 .exam{color:#f40;}
+.rowList small{color: #666;margin-right: 3px;}
 </style>
 <div class="subMenu">
 	{hook:admin_comment_submenu_hook}
@@ -41,7 +42,7 @@
 						<p class="commentTime">{$v['createTime']|formatDate=###,3}</p>
 					</td>
 					<td>
-						<a href="javascript:;" title="{$v['home']}">{$v['nickname']}</a>
+						<a href="javascript:;" title="{$v['home']}">{if !empty($v['userId'])}<small>[会员]</small>{/if}{$v['nickname']}</a>
 						{if !empty($v['email'])}<span class="email">({$v['email']})</span>{/if}
 						<p>IP：{$v['ip']}</p>
 					</td>

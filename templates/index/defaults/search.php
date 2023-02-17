@@ -8,7 +8,7 @@
 				<li> 
 					<i class="blogpic"><a href="{$v['url']}" title="{$v['title']}" target="_blank">{:thumb($v)}</a></i>
 					<dl>
-						<dt><a href="{$v['url']}" title="{$v['title']}" target="_blank">{$v['title']|str_replace=$listId,'<font style="color: #f40;">'.$listId.'</font>',###}</a></dt>
+						<dt><a href="{$v['url']}" title="{$v['title']}" target="_blank">{$v['title']|str_replace=$listId,'<font style="color: #f40;">'.$listId.'</font>',###|raw}</a></dt>
 						<dd><span class="bloginfo">{$v['excerpt']}</span>
 						<p class="timeinfo"><span class="lanmu"><a href="{$v['cateUrl']}">{$v['cateName']|default='未分类'}</a></span><span class="date">{$v['createTime']}</span></p>
 						<a class="read" href="{$v['url']}">阅读更多</a> </dd>

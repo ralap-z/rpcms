@@ -63,6 +63,7 @@
 					<td><input type="checkbox" name="blog[]" value="{$v['id']}" class="ids"></td>
 					<td>{$v['id']}</td>
 					<td>
+						<a data-value="{$baseUrl}{php}echo rp\Url::logs($v['id']){/php}" class="copyUrl" title="复制链接"><i class="me-icon me-icon-link"></i></a>
 						{php}
 							switch($v['status']){
 								case -2:$text='失败';$tstyle='color:#f40';break;
@@ -92,7 +93,7 @@
 			<div class="me_input me_input_line">
 				<select id="oper_move" onchange="logOper('move');">
 					<option value="">移动到...</option>
-					{$categoryHtml}
+					{$categoryHtml|raw}
 				</select>
 				<select id="oper_top" onchange="logOper('top');">
 					<option value="">置顶操作</option>

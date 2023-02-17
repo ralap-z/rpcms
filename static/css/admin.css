@@ -72,7 +72,11 @@ img{display: inline-block;vertical-align: middle;border: none;}
 .me_model .title{height: 2.6rem;line-height: 2.6rem;padding: 0 1rem;border-bottom: 1px solid #ececec;}
 .me_model .contentes{padding: 1rem;height: calc(100% - 2.6rem);overflow: auto;}
 .me_model_close{position: absolute;top: 0;right: 0;font-size: 1.6rem;color: #333;height: 2.6rem;line-height: 2.6rem;width: 2.6rem;text-align: center;}
-
+.imgUpload{display: inline-block;width: 14rem;background: #e6e6e6;position: relative;}
+.imgUpload:after{content: "";display: block;width: 100%;height: 0;padding-bottom: 67%;}
+.imgUpload img{position: absolute;top: 0;left: 0;width: 100%;height: 100%;z-index: 1;object-fit: contain;}
+.imgUpload span{background: rgba(31, 186, 232, 0.5);line-height: 1;padding: 0.5rem 1rem;position: absolute;top: calc(50% - 1rem);left: calc(50% - 3rem);color: #fff;z-index: 2;}
+.imgUpload .imgFile{position: absolute;top: 0;left: 0;width: 100%;height: 100%;opacity: 0;z-index: 3;}
 
 .rp_btn_row{margin-top: 2rem;}
 .rp_btn{height:2.5rem;line-height:2.5rem;padding: 0 2rem;border: none;background: #1fbae8;color: #fff;display: inline-block;margin: 0 0.2rem;font-size: 1rem;}
@@ -151,7 +155,7 @@ img{display: inline-block;vertical-align: middle;border: none;}
 .color3{color: #1fbae8;}
 .color4{color: #f40;}
 .badge{font-size: 0.85rem;padding: 0.05rem 0.3rem;background: #1fbae8;color: #fff;border-radius: 2px;margin: 0 0.1rem;}
-
+.copyUrl{margin-right: 0.6rem;}
 @-webkit-keyframes me_bounceIn{
 	0%{opacity: 0;-webkit-transform: scale(.5);transform: scale(.5)}
 	100%{opacity: 1;-webkit-transform: scale(1);transform: scale(1)}

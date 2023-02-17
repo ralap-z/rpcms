@@ -38,7 +38,7 @@ class Rss extends base{
 		}
 		$step=$this->page-2;
 		$step < 0 && $step=0;
-		return Db::name('logs')->where('status=0')->field('id,title,upateTime,createTime')->order(array('upateTime'=>'desc'))->limit($step*$limitEnd+$limitStart.','.$limitEnd)->select();
+		return Db::name('logs')->where('status=0')->field('id,title,updateTime,createTime')->order(array('updateTime'=>'desc'))->limit($step*$limitEnd+$limitStart.','.$limitEnd)->select();
 	}
 	
 	private function getPages(){
@@ -50,9 +50,9 @@ class Rss extends base{
 	}
 	
 	private function getLastTime(){
-		$logTime=Db::name('logs')->where('status=0')->order(array('upateTime'=>'desc'))->field('upateTime')->find();
+		$logTime=Db::name('logs')->where('status=0')->order(array('updateTime'=>'desc'))->field('updateTime')->find();
 		$pageTime=Db::name('pages')->where('status=0')->order(array('createTime'=>'desc'))->field('createTime')->find();
-		return max($logTime['upateTime'],$pageTime['createTime']);
+		return max($logTime['updateTime'],$pageTime['createTime']);
 	}
 	
 	private function baidu(){
@@ -88,7 +88,7 @@ class Rss extends base{
 		foreach($this->getLogs() as $v){
 			echo '<url>
 				<loc>'.$this->App->baseUrl.Url::logs($v['id']).'</loc>
-				<lastmod>'.(!empty($v['upateTime']) ? $v['upateTime'] : $v['createTime']).'</lastmod>
+				<lastmod>'.(!empty($v['updateTime']) ? $v['updateTime'] : $v['createTime']).'</lastmod>
 				<changefreq>weekly</changefreq>
 				<priority>0.6</priority>
 			</url>';

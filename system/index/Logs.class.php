@@ -20,7 +20,7 @@ class Logs extends base{
 	public function index(){
 		$total=Cache::read('total');
 		$page=isset($this->params['page']) ? intval($this->params['page']) : 1;
-		$logData=$this->LogsMod->page($page)->order(array('a.upateTime'=>'desc'))->select();
+		$logData=$this->LogsMod->page($page)->order(array('a.updateTime'=>'desc'))->select();
 		$logData['count']=!empty($total) ? $total['logNum'] : 0;
 		unset($total);
 		$pageHtml=pageInationHome($logData['count'],$logData['limit'],$logData['page'],'index');
@@ -38,15 +38,15 @@ class Logs extends base{
 		if(empty($dateStr)){
 			rpMsg('当前栏目不存在！');
 		}
-		$logDataObj=$this->LogsMod->page($page)->order(array('a.upateTime'=>'desc'));
+		$logDataObj=$this->LogsMod->page($page)->order(array('a.updateTime'=>'desc'));
 		if(strlen($dateStr) == 6){
 			$date2=date('Ym',strtotime($dateStr.'01'));
 			$dataStart=$date2.'01';
-			$logDataObj=$logDataObj->whereStr('a.upateTime BETWEEN "'.date('Y-m-d 00:00:00',strtotime($dataStart)).'" AND "'.date('Y-m-d 23:59:59',strtotime($dataStart." +1 month -1 day")).'"');
+			$logDataObj=$logDataObj->whereStr('a.updateTime BETWEEN "'.date('Y-m-d 00:00:00',strtotime($dataStart)).'" AND "'.date('Y-m-d 23:59:59',strtotime($dataStart." +1 month -1 day")).'"');
 		}else{
 			$dateStr=str_pad($dateStr,8,0,STR_PAD_RIGHT);
 			$date2=date('Ymd',strtotime($dateStr));
-			$logDataObj=$logDataObj->whereStr('a.upateTime BETWEEN "'.date('Y-m-d 00:00:00',strtotime($date2)).'" AND "'.date('Y-m-d 23:59:59',strtotime($date2)).'"');
+			$logDataObj=$logDataObj->whereStr('a.updateTime BETWEEN "'.date('Y-m-d 00:00:00',strtotime($date2)).'" AND "'.date('Y-m-d 23:59:59',strtotime($date2)).'"');
 		}
 		$logData=$logDataObj->select();
 		$logData['count']=$logDataObj->getCount();
@@ -105,10 +105,11 @@ class Logs extends base{
 		$GLOBALS['title']=$data['title'];
 		$this->assign('title',$data['title'].'-'.$data['cateName'].'-'.$this->webConfig['webName']);
 		$this->assign('listId',$data['id']);
+		$tempPswFile='';
 		if(!empty($data['password'])){
 			$postpwd=input('post.pagepwd');
 			$cookiepwd=cookie('rpcms_logspsw_'.$data['id']);
-			$this->checkPassword($postpwd,$cookiepwd,$data['password'],'logspsw_'.$data['id']);
+			$tempPswFile=$this->checkPassword($postpwd,$cookiepwd,$data['password'],'logspsw_'.$data['id']);
 		}
 		$tages=Cache::read('tages');
 		$tagName=array();
@@ -136,6 +137,11 @@ class Logs extends base{
 			$template=$cateTemp;
 		}else{
 			$template='detail';
+		}
+		if(!empty($tempPswFile)){
+			$data['content']='';
+			$data['extend']=[];
+			$template=$tempPswFile;
 		}
 		$CommentData=(new Comment())->getListByLogs($data['id']);
 		Hook::doHook('index_comment',array(&$CommentData));

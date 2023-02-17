@@ -62,13 +62,13 @@ class Logs extends Base{
 			$key=strip_tags(strDeep($key));
 			$where['a.title']=array('like','%'.$key.'%');
 		}
-		$order=$this->getOrder(array('id'=>'a','isTop'=>'a','views'=>'a','comnum'=>'a','upnum'=>'a','upateTime'=>'a','createTime'=>'a'));
+		$order=$this->getOrder(array('id'=>'a','isTop'=>'a','views'=>'a','comnum'=>'a','upnum'=>'a','updateTime'=>'a','createTime'=>'a'));
 		
 		$count=Db::name('logs')->alias('a')->where($where)->where(join(' and ',$wherestr))->count();
 		$list=Db::name('logs')->alias('a')->join(array(
 			array('category as b force index(PRIMARY)','a.cateId=b.id','left'),
 			array('user as c force index(PRIMARY)','a.authorId=c.id','left'),
-		))->where($where)->where(join(' and ',$wherestr))->field('a.id,a.title,a.authorId,a.cateId,a.excerpt,a.keywords,a.content,a.tages,a.isTop,a.views,a.comnum,a.upnum,a.upateTime,a.createTime,a.status,b.cate_name as cateName,c.nickname as author')->limit(($page-1)*$this->limit.','.$this->limit)->order($order)->select();
+		))->where($where)->where(join(' and ',$wherestr))->field('a.id,a.title,a.authorId,a.cateId,a.excerpt,a.keywords,a.content,a.tages,a.isTop,a.views,a.comnum,a.upnum,a.updateTime,a.createTime,a.status,b.cate_name as cateName,c.nickname as author')->limit(($page-1)*$this->limit.','.$this->limit)->order($order)->select();
 		foreach($list as $k=>$v){
 			$list[$k]['url'] = Url::logs($v['id']);
 			$list[$k]['cateUrl'] = Url::cate($v['cateId']);
@@ -189,15 +189,19 @@ class Logs extends Base{
 		$data['password']=strip_tags($param['password']);
 		$data['template']=strip_tags($param['template']);
 		$data['createTime']=!empty($param['createTime']) ? date('Y-m-d H:i:s',strtotime($param['createTime'])) : date('Y-m-d H:i:s');
-		$data['upateTime']=date('Y-m-d H:i:s');
+		$data['updateTime']=date('Y-m-d H:i:s');
 		$data['isTop']=!empty($param['isTop']) ? intval($param['isTop']) : 0;
 		$data['isRemark']=!empty($param['isRemark']) ? intval($param['isRemark']) : 0;
 		$data['extend']=$this->extendPost($param);
 		$data['status']=intval($param['type']) == 3 ? intval($param['status']) : intval($param['type']);
 		$this->checkAlias($data['alias']);
 		$this->checkTemplate($data['template']);
+		$oldData=[];
+		if(!empty($logid)){
+			$oldData=Db::name('logs')->where(array('id'=>$logid))->find();
+		}
 		if($param['type'] != 2){
-			$data['tages']=$this->replaceTages($param['tagesName']);
+			$data['tages']=$this->replaceTages($param['tagesName'], $oldData);
 		}
 		$checkAlias=array();
 		if(!empty($data['alias'])){
@@ -220,7 +224,7 @@ class Logs extends Base{
 			Db::name('special')->where(array('id'=>$data['specialId']))->update(array('updateTime'=>date('Y-m-d H:i:s')));
 		}
 		if($param['type'] != 2){
-			$this->updateCache();
+			$this->updateCache(5);
 		}
 		Hook::doHook('api_logs_save',array($logid));
 		$this->response($logid,200,'操作成功！');
@@ -238,10 +242,32 @@ class Logs extends Base{
 			$ids=array_column($idsSelect,'id');
 			$ids=join(',',$ids);
 		}
-		$res=Db::name('logs')->where(array('id'=>array('in',$ids)))->dele();//删除文章
-		$res2=Db::name('attachment')->where(array('logId'=>array('in',$ids)))->dele();//删除附件
-		$res2=Db::name('comment')->where(array('logId'=>array('in',$ids)))->dele();//删除评论
-		$this->updateCache();
+		$tages=Db::name('logs')->where(array('id'=>array('in',$ids)))->field('tages')->select();
+		$tagesNum=[];
+		$tages=array_map(function($v){return explode(',', $v['tages']);}, $tages);
+		$tages=array_filter(array_reduce($tages, 'array_merge', array()));
+		foreach($tages as $v){
+			if(isset($tagesNum[$v])){
+				$tagesNum[$v]++;
+			}else{
+				$tagesNum[$v]=1;
+			}
+		}
+		unset($tages);
+		Db::transaction();
+		try{
+			foreach($tagesNum as $k=>$v){
+				Db::name('tages')->where(['id'=>$k])->setDec('logNum', $v);
+			}
+			$res=Db::name('logs')->where(array('id'=>array('in',$ids)))->dele();//删除文章
+			$res=Db::name('attachment')->where(array('logId'=>array('in',$ids)))->dele();//删除附件
+			$res=Db::name('comment')->where(array('logId'=>array('in',$ids)))->dele();//删除评论
+			Db::commit();
+		}catch(\Exception $e){
+			Db::rollback();
+			$this->response($ids,-1,'删除失败');
+		}
+		$this->updateCache(5);
 		Hook::doHook('api_logs_dele',array($ids));
 		$this->response($ids,200,'操作成功！');
 	}
@@ -261,13 +287,13 @@ class Logs extends Base{
 		return $tagData;
 	}
 	
-	private function replaceTages($tages){
-		$tages = str_replace(array(';','，','、'), ',', $tages);
-		$tages = RemoveSpaces(strip_tags($tages));
-		$tagesArr = explode(',', $tages);
-		$tagesArr = array_unique(array_filter($tagesArr));
+	private function replaceTages($tages, $tagesOld=[]){
+		$tages=str_replace(array(';','，','、'), ',', $tages);
+		$tages=RemoveSpaces(strip_tags($tages));
+		$tagesArr=explode(',', $tages);
+		$tagesArr=array_unique(array_filter($tagesArr));
 		if(empty($tagesArr)) return '';
-		$tagesArr = array_slice($tagesArr, 0, 10);//最多10个标签
+		$tagesArr=array_slice($tagesArr, 0, 10);//最多10个标签
 		$data=array();
 		$tagesAll=Cache::read('tages');
 		$tagesAll=array_column($tagesAll,NULL,'tagName');
@@ -278,13 +304,25 @@ class Logs extends Base{
 				$data[]=Db::name('tages')->insert(array('tagName'=>$value));
 			}
 		}
+		if(!empty($tagesOld)){
+			$tagesOld=array_filter(explode(',', $tagesOld['tages']));
+		}
+		$deleTages=array_diff($tagesOld, $data);
+		$addTages=array_diff($data, $tagesOld);
+		if(!empty($deleTages)){
+			Db::name('tages')->where(array('id'=>array('in', join(',',$deleTages))))->setDec('logNum');
+		}
+		if(!empty($addTages)){
+			Db::name('tages')->where(array('id'=>array('in', join(',',$addTages))))->setInc('logNum');
+		}
 		return join(',',$data);
 	}
 	
-	private function updateCache(){
+	private function updateCache($level){
 		if(!isset($this->config['isPostUpCache']) || $this->config['isPostUpCache'] != 1) return;
-		Cache::update('tages');
 		Cache::update('category');
+		if($level < 5) return;
+		Cache::update('tages');
 		Cache::update('special');
 		Cache::update('total');
 		Cache::update('logRecord');

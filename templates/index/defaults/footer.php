@@ -16,7 +16,7 @@
 </footer>
 <a href="javascript:;" class="cd-top">Top</a>
 {$webConfig['totalCode']|raw}
-<script src="/static/js/me.min.js"></script>
+<script src="{$cmspath}/static/js/me.min.js"></script>
 <script src="{$tempUrl}/js/default.js"></script>
 {hook:index_footer}
 </body>

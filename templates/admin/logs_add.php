@@ -92,6 +92,7 @@ $(document).ready(function(){
 		$(".taglist").find("a").length <= 0 && $.ajaxpost('{:url("tages/getall")}',param,function(res){
 			$(".taglist").html(res.data);
 			$(".taglist").tagTo("#tagesName");
+			buildTages();
 		});
 	}),
 	$("#excerptBtn").click(function(){
@@ -182,6 +183,12 @@ function sendPostFrom(){
 		}
 	},"json");
 }
+function buildTages(){
+	var arr = $("#tagesName").val().split(",");
+	$.each(arr, function(index, key){
+		$('.taglist a[data-text="'+key+'"]').addClass("selected");
+	});
+}
 function arrRemove(arr, rm) {
 	for(var i = 0, n = 0; i < arr.length; ++i){
 		if(arr[i] != rm) {
@@ -198,7 +205,7 @@ $.fn.tagTo = function(target, seperator, tclass) {
 	if(tagname == "input" || tagname == "textarea"){
 		$('a', this).click(function(){
 			var arr = target.val().split(seperator),
-				text=$(this).data('text'),
+				text=$(this).data('text').toString(),
 				key=arr.indexOf(text);
 			if(key >= 0){
 				arrRemove(arr, arr[key]),$(this).removeClass(tclass);

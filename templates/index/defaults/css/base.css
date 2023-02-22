@@ -2,7 +2,7 @@
 *{ margin: 0; padding: 0;box-sizing: border-box;}
 html{width:100%;height:100%;}
 body{ font: 15px "Microsoft YaHei", Arial, Helvetica, sans-serif; color: #555; background: #f1f1f1; line-height: 1.5; width:100%;height:100%;}
-img{ border: 0; display: block }
+img{ border: 0; display: block;object-fit: cover;}
 ul, li{ list-style: none; }
 a{ text-decoration: none; color: #444 }
 a:hove { text-decoration: none; color: #000; }
@@ -27,8 +27,12 @@ a:hove { text-decoration: none; color: #000; }
 #header{position: fixed;top: 0px;width: 100%;z-index: 9999;}
 .navbar{border-bottom: 1px solid #ececec;background-color: #555;color: #ccc;line-height: 36px;height: 36px;font-size: 14px;position: relative;}
 .topbox{margin: auto;overflow: hidden;display: block;position: relative;}
-.welcome{width: 70%;overflow: hidden;display: block;float: left;position: relative;}
-.searchbox{background: #fff;float: right;width: 30%;height: 36px;}
+.welcome{overflow: hidden;display: block;float: left;position: relative;}
+.topbar{float: right;}
+.topbar .login{float: right;color: #fff;margin-left: 1rem;}
+.topbar .login a{color: inherit;margin: 0 0.25rem;}
+.topbar .login a.logout{color: #d3d3d3;}
+.searchbox{background: #fff;float: right;height: 36px;}
 .searchbox .input{float:left;border:none;outline:none;height: 36px;line-height: 36px;z-index: 10;font-size: 16px;color: #333;width: 240px;padding-left: 10px;}
 .searchbox .search_ico{float: right;z-index: 90;border: none;outline: none;width: 30px;height: 36px;display: block;background: url(../images/searchbg.png) center no-repeat;font-size: 0;}
 .header-navigation{height: 73px;line-height: 73px;background: #fff;text-align: center;box-shadow: 0 1px 1px rgba(0,0,0,.04);}
@@ -154,7 +158,7 @@ main{width: 70%;float: left;overflow: hidden;z-index: 1;clear: both;min-height: 
 .cd-top {display: inline-block;height: 40px;width: 40px;position: fixed;bottom: 40px;right: 10px;box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);overflow: hidden;text-indent: 100%;white-space: nowrap;background: rgba(0, 0, 0, 0.8) url(../images/top.png) no-repeat center;visibility: hidden;opacity: 0;-webkit-transition: all 0.3s;-moz-transition: all 0.3s;transition: all 0.3s;z-index: 9999999;
 }
 .cd-top.cd-is-visible{visibility: visible;opacity: 1;}
-
+.mobileSearch{display:none !important;}
 
 @media screen and (min-width: 1024px) and (max-width: 1140px) {
 	body{ font-size: 16px}
@@ -226,11 +230,10 @@ main{width: 70%;float: left;overflow: hidden;z-index: 1;clear: both;min-height: 
 	.sidebar,.navbar { display: none }
 	main { width: 100% }
 	.wrapper{margin: 90px auto 0;}
-	#starlist { display: none; background: rgba(0,0,0,.5); width: 100%; margin-left: 0;position: fixed;top: 72px;bottom: 0;overflow: auto;z-index: 99999;}
+	#starlist { display: none; background: #fff; width: 100%; margin-left: 0;position: fixed;top: 72px;bottom: 0;overflow: auto;z-index: 99999;}
 	#starlist li { display: block; padding: 0 0 0 0; width: 60%;line-height: 60px; background: #fff; border-bottom: #ddd 1px solid; }
 	.sub { display: block; box-shadow: none; padding-left: 0 }
 	#starlist .sub li { border-bottom: none; }
-	#starlist li:last-child { padding-bottom: 100% }
 	#starlist .sub li:last-child { padding-bottom: 0 }
 	#mnavh { position: absolute; display: block; top: 15px; right: 10px }
 	.menu:after { display: none }
@@ -251,4 +254,6 @@ main{width: 70%;float: left;overflow: hidden;z-index: 1;clear: both;min-height: 
 	.newsview{ padding: 0 15px}
 	.imginfo{ font-size:16px; padding:0 20px}
 	.comment_post_form .input_line{width:50%;}
+	.mobileSearch{width: 100% !important;display: block !important;line-height: 47px !important;padding: 0.5rem !important;}
+	.mobileSearch .input{width: 100%;padding: 0.5rem;border: 1px solid #eaeaea;}
 }

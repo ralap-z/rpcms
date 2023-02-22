@@ -9,7 +9,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link href="{$tempUrl}/css/base.css" rel="stylesheet">
 {hook:index_header}
-<script src="/static/js/jquery-3.2.0.min.js"></script>
+<script src="{$cmspath}/static/js/jquery-3.2.0.min.js"></script>
 <style>
 .win{width:{$tempConfig['appWidth']}px}
 {if $tempConfig['layout'] == 'left'}
@@ -24,11 +24,14 @@ main{float:left;}.sidebar{float: right;}
 	<div class="navbar">
 		<div class="topbox win">
 			<p class="welcome">您好，欢迎您访问RPCMS！</p>
-			<div class="searchbox">
-				<form action="/search/" method="get" name="searchform">
-					<input class="input" placeholder="想搜点什么呢.."  name="q" type="text">
-					<input class="search_ico" type="submit"/>
-				</form>
+			<div class="topbar">
+				<div class="login"></div>
+				<div class="searchbox">
+					<form action="/search/" method="get" name="searchform">
+						<input class="input" placeholder="想搜点什么呢.."  name="q" type="text">
+						<input class="search_ico" type="submit"/>
+					</form>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -37,6 +40,11 @@ main{float:left;}.sidebar{float: right;}
 			<div class="logo"><a href="/" style="display:block;" title="{$webConfig['webName']}"><img src="{$webConfig['webLogo']|default=$tempUrl.'/images/logo.png'}"/></a></div>
 			<h2 id="mnavh"><span class="navicon"></span></h2>
 			<ul id="starlist">
+				<li class="mobileSearch">
+					<form action="/search/" method="get" name="searchform">
+						<input class="input" placeholder="想搜点什么呢.."  name="q" type="text">
+					</form>
+				</li>
 				<li class="selected"><a href="/" >首页</a></li>
 				{:navs()}
 			</ul>

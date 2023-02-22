@@ -263,7 +263,7 @@ function pageInation($count, $perlogs, $page, $url='', $anchor = '') {
 		$param['page']='[PAGE]';
 	}
 	if(!empty($param)){
-		$url=explode('?', $url)[0];
+		$url=explode('?', $url)[0].'?'.str_replace('%5BPAGE%5D', '[PAGE]', http_build_query($param));
 	}
 	$makeUrl=function($page)use($url){
 		return str_replace('[PAGE]', (string)$page, $url);

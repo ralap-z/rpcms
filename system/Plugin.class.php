@@ -25,6 +25,7 @@ class Plugin{
 	public $pluginPath;
 	public $tempUrl;
 	protected static $instance;
+	protected $admin;
 	public function __construct(){
 		global $App;
 		$options = Config::get('db');

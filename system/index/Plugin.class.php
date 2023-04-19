@@ -24,15 +24,16 @@ class Plugin extends base{
 		$controller=isset($this->params['controller']) ? trim(strip_tags(strDeep($this->params['controller'])),'/') : 'index';
 		$action=isset($this->params['action']) ? trim(strip_tags(strDeep($this->params['action'])),'/') : 'index';
 		$plugin=PLUGINPATH .'/'.$pluginName;
+		$errorBefore='['.$pluginName.']';
 		if(!is_dir($plugin)){
-			rpMsg('插件不存在');
+			rpMsg($errorBefore.'插件不存在');
 		}
 		if(!Db::name('plugin')->where("ppath='".$pluginName."' and status = 0")->find()){
-			rpMsg('插件未安装');
+			rpMsg($errorBefore.'插件未安装');
 		}
 		$controllerFile=$plugin .'/'.ucfirst(strtolower($controller)).'.class.php';
 		if(!file_exists($controllerFile)){
-			rpMsg('插件控制器不存在');
+			rpMsg($errorBefore.'插件控制器不存在');
 		}
 		$pluginObj='plugin\\'.strtolower($pluginName).'\\'.ucfirst($controller);
 		return $this->App->invokeClass($pluginObj, $action);

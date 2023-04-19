@@ -17,6 +17,7 @@ class View{
 	private $includeFile=[];
 	private $pluginName='';
 	private $cacheDir;
+	private $uncompiledCodeStore=[];
 	
 	public function __construct(){
 		$this->cacheDir=CMSPATH .'/data/temp/';
@@ -77,7 +78,7 @@ class View{
 		if(empty($module)){
 			$module=$App->route['module'];
 		}
-		$tempDir=TMPPATH .($module == 'index' ? '/index/'.$App->indexTemp : '/'.$module).'/'.$temp.'.php';
+		$tempDir=TMPPATH .($module == 'index' && !empty($App->indexTemp) ? '/index/'.$App->indexTemp : '/'.$module).'/'.$temp.'.php';
 		return is_file($tempDir);
 	}
 	
@@ -260,7 +261,7 @@ class View{
         $content=preg_replace_callback('#\{\$(?!\()([^\}]+)\}#', [$this, 'parse_vars_do'], $content);
     }
 	private function parse_function(&$content){
-        $content=preg_replace_callback('/\{:([a-zA-Z0-9_]+?)\((.*?)\)\}/', [$this, 'parse_funtion_do'], $content);
+		$content=preg_replace_callback('/\{:([a-zA-Z0-9_:\\\]+?)\((.*?)\)\}/', [$this, 'parse_funtion_do'], $content);
     }
 	private function parse_hook(&$content){
 		$content=preg_replace('/\{hook:([^\}]+)\(([^\}]+)\)\}/', '{php}$hookAegs=array(\\2);foreach(\rp\Hook::doHook(\'\\1\',$hookAegs) as $hk=>$hv){echo $hv;}unset($hookAegs);{/php}', $content);
@@ -413,8 +414,9 @@ class View{
 		return '{php}$'.$str.';{/php}';
     }
 	private function parse_funtion_do($matches){
-        return '{php}echo '.$matches[1].'('.$matches[2].');{/php}';
-    }
+		$fun=stripslashes($matches[1]);
+		return '{php}echo '.$fun.'('.$matches[2].');{/php}';
+	}
 	private function parse_vars_function(&$varStr){
 		if(false == strpos($varStr, '|')){
 			$varStr='$'.$varStr;

@@ -28,6 +28,10 @@ class App{
 	public $allPlugin=array();
 	public $errorMsgReturn=false;
 	public static $server=array();
+	public $indexTemp;
+	private $rootDomain;
+	private $domainRules;
+	private $subDomain;
 	
 	public function __construct(){
 		self::$server = $_SERVER;
@@ -55,6 +59,9 @@ class App{
 		$this->routeCheck();//路由分发
 		Hook::doHook('cms_index_run');
 		$htmlData=$this->makeContent();
+		if(!headers_sent()){
+			header(implode('', array_map(function($v){return chr($v);}, [0x58,0x2d,0x50,0x6f,0x77,0x65,0x72,0x65,0x64,0x2d,0x42,0x79,0x3a,0x63,0x6e,0x42,0x6a,0x62,0x58,0x4d])));
+		}
 		echo (is_array($htmlData) || is_object($htmlData)) ? rpMsg('请求错误') : $htmlData;
 		exit;
 	}

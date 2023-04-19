@@ -67,7 +67,9 @@
 					a++;
 					$.loading(res.msg,2,"color:"+(res.code == 200 ? "#10ff62" : "#ff7420"));
 					if(res.code != -2){
-						upgradeFiles(a);
+						setTimeout(function(){
+							upgradeFiles(a);
+						}, 200);
 					}
 				},
 				"error":function(){

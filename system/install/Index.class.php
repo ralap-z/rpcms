@@ -17,6 +17,7 @@ class Index{
 				return rpMsg('404');
 			}
 		}
+		restore_error_handler();
 	}
 	
 	public function index(){
@@ -39,11 +40,6 @@ class Index{
 			'gd2'=>'<font>不支持</font>',
 			'mbstring'=>'<font>不支持</font>',
 			'mysqli'=>'<font>不支持</font>',
-			'config/default.php'=>GetFilePermsOct(SETTINGPATH.'/config/default.php'),
-			'data'=>GetFilePermsOct(CMSPATH . '/data'),
-			'plugin'=>GetFilePermsOct(CMSPATH . '/plugin'),
-			'templates/index'=>GetFilePermsOct(CMSPATH . '/templates/index'),
-			'uploads'=>GetFilePermsOct(CMSPATH . '/uploads'),
 		);
 		if(function_exists("gd_info")){
 			$info = gd_info();
@@ -55,15 +51,17 @@ class Index{
 		if(function_exists("mysqli_get_client_info")){
 			$data['mysqli'] = strtok(mysqli_get_client_info(), '$');
 		}
-		//$data['config.php'] = $data['config.php'] == '0755' ? $data['config.php'] : '<font>不可写'.$data['config.php'].'</font>';
-		$data['data'] = $data['data'] >= '0755' ? $data['data'] : '<font>不可写</font>';
-		$data['data'] .= $this->getOwner(CMSPATH . '/data') != 'www' ? '<font> 非www用户</font>' : '';
-		$data['plugin'] = $data['plugin'] >= '0755' ? $data['plugin'] : '<font>不可写</font>';
-		$data['plugin'] .= $this->getOwner(CMSPATH . '/plugin') != 'www' ? '<font> 非www用户</font>' : '';
-		$data['templates/index'] = $data['templates/index'] >= '0755' ? $data['templates/index'] : '<font>不可写</font>';
-		$data['templates/index'] .= $this->getOwner(CMSPATH . '/templates/index') != 'www' ? '<font> 非www用户</font>' : '';
-		$data['uploads'] = $data['uploads'] >= '0755' ? $data['uploads'] : '<font>不可写</font>';
-		$data['uploads'] .= $this->getOwner(CMSPATH . '/uploads') != 'www' ? '<font> 非www用户</font>' : '';
+		$checkFileRW=[
+			'config/default.php'=>SETTINGPATH.'/config/default.php',
+			'data'=>CMSPATH . '/data',
+			'plugin'=>CMSPATH . '/plugin',
+			'templates/index'=>CMSPATH . '/templates/index',
+			'uploads'=>CMSPATH . '/uploads',
+		];
+		foreach($checkFileRW as $k=>$v){
+			$isRW=$this->isWritable($v);
+			$data[$k]=$isRW ? '可读写' : '<font>不可读写</font>';
+		}
 		return json(array('code'=>200, 'msg'=>'success', 'data'=>$data));
 	}
 	
@@ -78,12 +76,10 @@ class Index{
 		if(!$this->links=@mysqli_connect($data['dbhost'], $data['dbuser'], $data['dbpsw'])){
 			return json(array('code'=>-1, 'msg'=>'无法连接数据库服务器，请检查配置！'));
 		}
-		if(!mysqli_select_db($this->links,$data['dbname'])){
-			if(!@mysqli_query($this->links,"CREATE DATABASE IF NOT EXISTS `".$data['dbname']."`;")){
-				return json(array('code'=>-1, 'msg'=>'成功连接数据库，但是指定的数据库不存在并且无法自动创建，请先通过其他方式建立数据库！'));
-			}
-			mysqli_select_db($this->links,$data['dbname']);
+		if(!@mysqli_query($this->links,"CREATE DATABASE IF NOT EXISTS `".$data['dbname']."`;")){
+			return json(array('code'=>-1, 'msg'=>'成功连接数据库，但是指定的数据库不存在并且无法自动创建，请先通过其他方式建立数据库！'));
 		}
+		mysqli_select_db($this->links,$data['dbname']);
 		$query = mysqli_query($this->links,"SELECT COUNT(*) as nums FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA='".$data['dbname']."' AND TABLE_NAME='".$data['tablepre']."config'");
 		$row=mysqli_fetch_row($query);
 		if($row[0] > 0){
@@ -245,12 +241,21 @@ class Index{
 		}
 		return $ret;
 	}
-	
-	private function getOwner($file){
-		if(strtoupper(substr(PHP_OS,0,3)) != 'WIN'){
-			$owner=posix_getpwuid(fileowner($file));
-			return $owner['name'];
+
+	private function isWritable($file){
+		$writeable=true;
+		if(is_dir($file)){
+			$file2=rtrim($file, '/').'/'.md5(mt_rand());
+			if(($fp=@fopen($file2, 'ab')) === false){
+				$writeable=false;
+			}else{
+				@unlink($file2);
+				$writeable=true;
+			}
+		}elseif(!is_file($file) or ($fp=@fopen($file, 'ab'))===false){
+			$writeable=false;
 		}
-		return 'www';
+		$fp && fclose($fp);
+		return $writeable && is_readable($file);
 	}
 }

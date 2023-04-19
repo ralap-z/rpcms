@@ -24,6 +24,7 @@ class Db{
 	private $group = '';
 	private $results = '';
 	private $isGetSql = false;
+	private $options;
 	
 	public function __construct(){
 		$this->options=Config::get('db');

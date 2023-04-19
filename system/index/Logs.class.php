@@ -27,6 +27,8 @@ class Logs extends base{
 		$this->setKeywords();
 		$this->setDescription();
 		$this->assign('title',(!empty($this->webConfig['seoTitle']) ? $this->webConfig['seoTitle'] : $this->webConfig['webName']));
+		$this->assign('listType','index');
+		$this->assign('listId','');
 		$this->assign('logList',$logData['list']);
 		$this->assign('pageHtml',$pageHtml);
 		return $this->display('/index');

@@ -260,6 +260,10 @@ class App{
 			$_REQUEST=array_merge($_REQUEST, $this->params);
 			$this->parseModule($path);
 		}
+		if(isset($this->params['id']) && Config::get('webConfig.id_encrypt')){
+			$id=Url::numberEncrypt($this->params['id'], 2);
+			$id != '' && $this->params['id']=$id;
+		}
 		if(empty($this->route['action'])){
 			if(isset($this->domainRules[$this->subDomain])){
 				$this->pathArr=array_merge(array_values(array_filter($this->route)), $this->pathArr);

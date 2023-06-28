@@ -160,6 +160,7 @@ class Logs extends Base{
 		}else{
 			unset($data['alias']);
 		}
+		Hook::doHook('admin_logs_post',array($logid, &$data, $oldData));
 		if(!empty($logid)){
 			if(!empty($checkAlias) && $checkAlias['id'] != $logid){
 				return json(array('code'=>-1, 'msg'=>'别名重复，请更换别名'));

@@ -90,6 +90,9 @@ class Url{
 		}
 		$isRule=false;
 		$ext=$App->pageExt;
+		if(Config::get('webConfig.id_encrypt') && isset($data['id']) && is_numeric($data['id'])){
+			$data['id']=self::numberEncrypt($data['id']);
+		}
 		if(isset($ruleGroup[$url])){
 			$patternUrl=$ruleGroup[$url]['patternUrl'];
 			$param=$ruleGroup[$url]['param'];
@@ -284,5 +287,83 @@ class Url{
         }
 		$url=$isQuery ? $url : explode('?', $url)[0];
 		return $isDomain ? $App::server('REQUEST_SCHEME').'://'.$App::server('HTTP_HOST').$url : $url;
+	}
+	
+	public static function numberEncrypt($num, $type=1){
+		$strBase=self::shuffleKey('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890', Config::get('webConfig.id_encrypt_salt'));
+		$minEnLen=10;
+		$checkNum=0;
+		$guard=(int)ceil(strlen($strBase) / 3);
+		$guardStr=substr($strBase, 0, $guard);
+		$guardStrLen=strlen($guardStr);
+		$strBase=substr($strBase, $guard);
+		$strBaseLen=strlen($strBase);
+		$res='';
+		if($type == 1){
+			do{
+				$quota=bcmod($num, $strBaseLen);
+				$res=$strBase[$quota] . $res;
+				$num=strval(bcdiv($num, $strBaseLen));
+				$checkNum+=$quota;
+			}while($num);
+			$end=true;
+			$checkNumByNum=$checkNum;
+			while(strlen($res) < $minEnLen - 1){
+				$quota=($checkNumByNum + $num * $strBaseLen) % $guardStrLen;
+				if($end){
+					$res.=$guardStr[$quota];
+				}else{
+					$res=$guardStr[$quota] . $res;
+				}
+				$end=!$end;
+				$num++;
+				$checkNum+=$quota;
+			}
+			$checkNum=$checkNum % 11;
+			$res.=$strBase[$checkNum];
+			return $res;
+		}else{
+			$check=substr($num, -1);
+			$numArr=[];
+			foreach(str_split(substr($num, 0, -1)) as $v){
+				$pos=strpos($guardStr, $v);
+				if($pos !== false){
+					$checkNum+=$pos;
+					continue;
+				}
+				$numArr[]=$v;
+			}
+			$numLen=count($numArr);
+			$res=0;
+			foreach($numArr as $k=>$v){
+				$pos=strpos($strBase, $v);
+				$checkNum+=$pos;
+				$number=bcmul($pos, bcpow($strBaseLen, ($numLen - $k - 1)));
+				$res=strval(bcadd($res, sprintf('%.0f', $number)));
+			}
+			$checkNum=$checkNum % 11;
+			$checkNum=$strBase[$checkNum];
+			if($checkNum != $check){
+				return '';
+			}
+			return $res;
+		}
+	}
+
+	private static function shuffleKey($key, $salt){
+		if(!strlen($salt)){
+			return $key;
+		}
+		$keyLen=strlen($key);
+		$saltLen=strlen($salt);
+		for($i=$keyLen - 1, $v=0, $p=0; $i > 0; $i--, $v++){
+			$v %= strlen($salt);
+			$p += $int = ord($salt[$v]);
+			$j=($int + $p + $v) % $i;
+			$temp=$key[$j];
+			$key[$j]=$key[$i];
+			$key[$i]=$temp;
+		}
+		return $key;
 	}
 }

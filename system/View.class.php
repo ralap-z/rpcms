@@ -182,7 +182,7 @@ class View{
 	}
 	
 	private function compress_html($string){
-		preg_match_all('/<pre(\s[^>]*)?>.*<\/pre>|<code(\s[^>]*)?>.*<\/code>|<?php(.*)?>/Uis', $string, $matches);
+		preg_match_all('/<pre(\s[^>]*)?>.*<\/pre>|<code(\s[^>]*)?>.*<\/code>|<\?php(.*)\?>/Uis', $string, $matches);
 		if(is_array($matches[0])){
 			foreach($matches[0] as $key=>$val){
 				$string=str_replace($val, '{*=*=*=*'.$key.'*=*=*=*}', $string);

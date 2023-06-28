@@ -45,7 +45,8 @@ class Zip{
 		if($this->zip->open($this->zipfile) == true){
 			$appname = $this->zip->getNameIndex(0);
 		}
-		return preg_match('/\/$/i', $appname) ? rtrim($appname,'/\\') : '';
+		$appname=explode('/', $appname)[0] .'/';
+		return $appname;
 	}
 	
 	public function getFiles($file){
@@ -63,6 +64,17 @@ class Zip{
 			}
 		}
 		return array('code'=>-1,'msg'=>'zip文件打开错误或目录不可读写');
+	}
+	
+	public function compress($name){
+		try{
+			$this->zip->open($name, \ZipArchive::CREATE);
+			$this->addFileToZip($this->zipfile);
+			$this->zip->close();
+			return true;
+        }catch(Exception $e){
+			return false;
+        }
 	}
 	
 	public function down($name=''){
@@ -86,5 +98,21 @@ class Zip{
 	
 	public function close(){
 		$this->zip->close();
+	}
+	
+	private function addFileToZip($path){
+		$handler = opendir($path);
+		while(($filename = readdir($handler)) !== false){
+			if($filename != "." && $filename != ".."){
+				$filePath = $path.'/'.$filename;
+				if(is_dir($filePath)){
+					$this->addFileToZip($filePath);
+				}else{ 
+					$entryName=ltrim(str_replace($this->zipfile, '', $filePath), '/');
+					$this->zip->addFile($filePath, $entryName);
+				}
+			}
+		}
+		@closedir($handler);
 	}
 }

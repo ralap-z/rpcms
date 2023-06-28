@@ -50,28 +50,43 @@
 				<div class="me_input me_input_line"><label>启用单页别名</label><input type="checkbox" name="pageAlias" value="1" {if isset($option['pageAlias']) && $option['pageAlias'] == 1}checked{/if}></div>
 				<div class="me_input me_input_line"><label>启用标签别名</label><input type="checkbox" name="tagAlias" value="1" {if isset($option['tagAlias']) && $option['tagAlias'] == 1}checked{/if}></div>
 				<div class="me_input me_input_line"><label>启用专题别名</label><input type="checkbox" name="specialAlias" value="1" {if isset($option['specialAlias']) && $option['specialAlias'] == 1}checked{/if}></div>
+				<div class="me_input"><label>发布自动更新缓存</label><input type="checkbox" name="isPostUpCache" value="1" {if isset($option['isPostUpCache']) && $option['isPostUpCache'] == 1}checked{/if}><p class="tips" style="line-height: 2.4rem;">关闭后不会自动更新，需手动更新缓存（标签、分类、专题、统计、文章归档）</p></div>
 			</div>
 			<div id="tab3" class="tab">
-				<div class="me_input me_input_line"><label>开启API</label><input type="checkbox" name="api_status" value="1" {if isset($option['api_status']) && $option['api_status'] == 1}checked{/if}></div>
-				<div class="me_input big"><label>API-token加密key</label><input type="text" name="api_token_key" value="{$option['api_token_key']|default=''}"><p class="tips">如果API的token泄露，可以更换此参数</a></p></div>
-				<div class="me_input big"><label>API限流(分钟)</label><input type="text" name="api_max_req" value="{$option['api_max_req']|default=''}"><p class="tips">每分钟最大的请求次数，为空或者0时表示不限流，如果需要限流，请先下载并启用<a href="http://app.rpcms.cn/index/app.html?id=116" target="_blank">filecache插件</a></p></div>
-				<br>
-				<div class="me_input"><label>自动跳转</label><input type="checkbox" name="wap_auto" value="1" {if isset($option['wap_auto']) && $option['wap_auto'] == 1}checked{/if}><p class="tips" style="line-height: 2.4rem;">开启后，手机端用户访问将自动跳转到设置的二级域名</p></div>
-				<div class="me_input big"><label>手机端域名</label><input type="text" name="wap_domain" value="{$option['wap_domain']|default=''}"><p class="tips">手机端二级域名，如为m.xxx.com，则填写m</p></div>
-				<div class="me_input big"><label>手机端模板</label><select name="wap_template">
-					<option value="">选择手机端模板</option>
-				{foreach $tempList as $k=>$v}
-					<option value="{$v}" {php}echo $option['wap_template'] == $v ? 'selected' : '';{/php}>{$v}</option>
-				{/foreach}
-				</select><p class="tips" style="line-height: 2.4rem;">手机端模板名称，请确保填写的模板存在</p></div>
-				<br/>
+				<div class="me_group">
+					<label>API</label>
+					<div class="me_group_content">
+						<div class="me_input me_input_line"><label>开启API</label><input type="checkbox" name="api_status" value="1" {if isset($option['api_status']) && $option['api_status'] == 1}checked{/if}></div>
+						<div class="me_input big"><label>API-token加密key</label><input type="text" name="api_token_key" value="{$option['api_token_key']|default=''}"><p class="tips">如果API的token泄露，可以更换此参数</a></p></div>
+						<div class="me_input big"><label>API限流(分钟)</label><input type="text" name="api_max_req" value="{$option['api_max_req']|default=''}"><p class="tips">每分钟最大的请求次数，为空或者0时表示不限流，如果需要限流，请先下载并启用<a href="http://app.rpcms.cn/index/app.html?id=116" target="_blank">filecache插件</a></p></div>
+					</div>
+				</div>
+				<div class="me_group">
+					<label>手机端</label>
+					<div class="me_group_content">
+						<div class="me_input"><label>自动跳转</label><input type="checkbox" name="wap_auto" value="1" {if isset($option['wap_auto']) && $option['wap_auto'] == 1}checked{/if}><p class="tips" style="line-height: 2.4rem;">开启后，手机端用户访问将自动跳转到设置的二级域名</p></div>
+						<div class="me_input big"><label>手机端域名</label><input type="text" name="wap_domain" value="{$option['wap_domain']|default=''}"><p class="tips">手机端二级域名，如为m.xxx.com，则填写m</p></div>
+						<div class="me_input big"><label>手机端模板</label><select name="wap_template">
+							<option value="">选择手机端模板</option>
+						{foreach $tempList as $k=>$v}
+							<option value="{$v}" {php}echo $option['wap_template'] == $v ? 'selected' : '';{/php}>{$v}</option>
+						{/foreach}
+						</select><p class="tips" style="line-height: 2.4rem;">手机端模板名称，请确保填写的模板存在</p></div>
+					</div>
+				</div>
+				<div class="me_group">
+					<label>ID设置</label>
+					<div class="me_group_content">
+						<div class="me_input me_input_line"><label>加密</label><input type="checkbox" name="id_encrypt" value="1" {if isset($option['id_encrypt']) && $option['id_encrypt'] == 1}checked{/if}></div>
+						<div class="me_input big"><label>salt</label><input type="text" name="id_encrypt_salt" value="{$option['id_encrypt_salt']|default=''}"><p class="tips">不同salt加密结果不一样，更改salt将使之前的加密结果失效。支持：字母或数字</a></p></div>
+					</div>
+				</div>
 				<div class="me_input me_input_line"><label>缩略图</label>
 					<input type="number" name="attImgWitch" value="{$option['attImgWitch']|default=''}" placeholder="缩略图宽度">
 					<span class="text" style="width: auto;background: transparent;">x</span>
 					<input type="number" name="attImgHeight" value="{$option['attImgHeight']|default=''}" placeholder="缩略图高度">
 				</div>
 				<div class="me_input"><label>验证码类型</label><select name="captha_style"><option value="1">字符型</option><option value="2">计算型</option></select></div>
-				<div class="me_input"><label>发布更新缓存</label><input type="checkbox" name="isPostUpCache" value="1" {if isset($option['isPostUpCache']) && $option['isPostUpCache'] == 1}checked{/if}><p class="tips" style="line-height: 2.4rem;">关闭后不会自动更新，需手动更新缓存（标签、分类、专题、统计、文章归档）</p></div>
 			</div>
 			<div id="tab4" class="tab">
 				<div class="me_input me_input_line"><label>评论开启</label><input type="checkbox" name="commentStatus" value="1" {if isset($option['commentStatus']) && $option['commentStatus'] == 1}checked{/if}></div>

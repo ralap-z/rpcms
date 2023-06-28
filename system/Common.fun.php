@@ -848,6 +848,9 @@ function Debug_Exception_Handler($exception){
 	if($errorCode == 1500){
 		if($isDevelop){
 			$message=json_decode($exception->getMessage(), true);
+			if(!is_array($message['message'])){
+				$message['message']=[$message['message']];
+			}
 			if(!empty($message['sql'])){
 				$message['message'][]='SQL：'.$message['sql'];
 			}

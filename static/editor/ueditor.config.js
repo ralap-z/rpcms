@@ -18,7 +18,7 @@
 			'removeformat', 'formatmatch', 'autotypeset', 'pasteplain', 'indent', '|', 'map'
 		],[
 			'customstyle', 'paragraph', 'fontfamily', 'fontsize', '|',
-			'link', 'unlink', 'insertimage', 'scrawl', 'music', 'insertvideo', 'spechars', '|', 
+			'link', 'unlink', 'insertimage', 'scrawl', 'music', 'insertvideo', 'insertframe', 'spechars', '|', 
 			'insertcode', 'blockquote', 'horizontal', 'inserttable', 'cleardoc', 'source',
         ]]
         //当鼠标放在工具栏上时显示的tooltip提示,留空支持自动多语言配置，否则以配置值为准
@@ -375,7 +375,7 @@
 			header: [],
 			hr:     [],
 			i:      ['class', 'style'],
-			img:    ['src', 'alt', 'title', 'width', 'height', 'id', '_src', 'loadingclass', 'class', 'data-latex'],
+			img:    ['src', 'alt', 'title', 'width', 'height', 'id', '_src', '_url', 'style', 'loadingclass', 'class', 'data-latex'],
 			ins:    ['datetime'],
 			li:     ['class', 'style'],
 			mark:   [],
@@ -400,7 +400,8 @@
 			tt:     [],
 			u:      [],
 			ul:     ['class', 'style'],
-			video:  ['autoplay', 'controls', 'loop', 'preload', 'src', 'height', 'width', 'class', 'style']
+			video:  ['autoplay', 'controls', 'loop', 'preload', 'src', 'height', 'width', 'class', 'style'],
+			iframe:  ['src', 'height', 'width', 'class', 'style', 'scrolling', 'frameborder', 'align', 'allowfullscreen']
 		}
     };
 

@@ -40,7 +40,7 @@ img{display: inline-block;vertical-align: middle;border: none;}
 .me_form:after,.me_input:after{content:'';display:block;height:0;clear:both;}
 .me_form{background: #fff;padding: 0.5rem 1rem;}
 .me_group{margin-bottom: 2rem;}
-.me_group > label{font-size: 1.2rem;margin-bottom: 0.3rem;display: block;}
+.me_group > label{font-size: 1.2rem;margin-bottom: 0.3rem;display: block;font-weight: 600;}
 .me_group .me_group_content{margin-left: 1rem;}
 .me_input{margin-bottom: 0.5rem;}
 .me_input > label{height: 2.4rem;line-height: 2.4rem;float:left;margin-right: 0.5rem;}

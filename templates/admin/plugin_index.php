@@ -74,8 +74,14 @@ $(document).ready(function(){
 			a=_this.parents('tr').data('id'),
 			b=_this.data('value');
 		$.ajaxpost("{:url('plugin/upStatus')}",{'id':a,'status':(b == 1 ? 1 : -1)},function(res){
-			$.Msg(res.msg);
-			res.code == 200 && setTimeout(function(){window.location.reload()},2200);
+			if(res.code == 200){
+				$.Msg(res.msg);
+				setTimeout(function(){window.location.reload()},2200);
+			}else if(res.code == -2){
+				$.alert(res.msg);
+			}else{
+				$.Msg(res.msg);
+			}
 		});
 	}),
 	$(".delete").click(function(){

@@ -81,6 +81,14 @@
 						<div class="me_input big"><label>salt</label><input type="text" name="id_encrypt_salt" value="{$option['id_encrypt_salt']|default=''}"><p class="tips">不同salt加密结果不一样，更改salt将使之前的加密结果失效。支持：字母或数字</a></p></div>
 					</div>
 				</div>
+				<div class="me_group">
+					<label>登录安全</label>
+					<div class="me_group_content">
+						<div class="me_input big"><label>错误次数</label><input type="number" name="adminLoginErrMax" value="{$option['adminLoginErrMax']|default=''}"><p class="tips">当登录错误次数达到设置限值时，账号将被封锁。空或0表示不开启</a></p></div>
+						<div class="me_input big"><label>封锁时长</label><input type="number" name="adminLoginErrTime" value="{$option['adminLoginErrTime']|default='30'}"><p class="tips">单位：分钟</a></p></div>
+						<div class="me_input me_input_line"><label>单点登录</label><input type="checkbox" name="adminLoginUnique" value="1" {if isset($option['adminLoginUnique']) && $option['adminLoginUnique'] == 1}checked{/if}></div>
+					</div>
+				</div>
 				<div class="me_input me_input_line"><label>缩略图</label>
 					<input type="number" name="attImgWitch" value="{$option['attImgWitch']|default=''}" placeholder="缩略图宽度">
 					<span class="text" style="width: auto;background: transparent;">x</span>

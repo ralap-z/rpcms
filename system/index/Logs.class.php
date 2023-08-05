@@ -90,7 +90,7 @@ class Logs extends base{
 	
 	public function detail(){
 		$dateStr=isset($this->params['id']) ? strip_tags(strDeep($this->params['id'])) : '';
-		if(is_numeric($dateStr)){
+		if($this->isNumberId($dateStr)){
 			$where=array('id'=>intval($dateStr));
 		}else{
 			$where=array('alias'=>$dateStr);

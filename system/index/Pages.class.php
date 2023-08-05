@@ -20,7 +20,7 @@ class Pages extends base{
 		}
 		$page=isset($this->params['page']) ? intval($this->params['page']) : 1;
 		$pages=Cache::read('pages');
-		if(is_numeric($this->params['id'])){
+		if($this->isNumberId($this->params['id'])){
 			$pageId=intval($this->params['id']);
 		}else{
 			$pages2=array_column($pages,NULL,'alias');

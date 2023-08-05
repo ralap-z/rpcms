@@ -12,6 +12,7 @@ class Special extends Base{
 	
 	public function index(){
 		View::assign('special',Cache::read('special'));
+		View::assign('tempFileHtml',$this->getTempFile());
 		return View::display('/special_index');
 	}
 	

@@ -35,7 +35,7 @@
 		<div class="me_input"><label>作者</label><select name="authorId">{$authorHtml|raw}</select></div>
 		<div class="me_input"><label>别名</label><input type="text" name="alias" value="{$pageData['alias']|default=''}"></div>
 		<div class="me_input"><label>密码</label><input type="text" name="password" value="{$pageData['password']|default=''}"></div>
-		<div class="me_input"><label>模板</label><input type="text" name="template" placeholder="指定模板请输入模板名称" value="{$pageData['template']|default=''}"></div>
+		<div class="me_input"><label>模板</label><select name="template">{$tempFileHtml|raw}</select></div>
 		<div class="me_input"><label>时间</label><input type="text" name="createTime" value="{$pageData['createTime']|default=date('Y-m-d H:i:s')}"></div>
 		<div class="me_input"><label>评论</label><input type="checkbox" name="isRemark" value="1" {if $pageData['isRemark'] != 0}checked{/if}></div>
 		<div class="extendBox">{hook:admin_pages_edit_hook3($pageData)}</div>

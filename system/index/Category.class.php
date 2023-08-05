@@ -20,7 +20,7 @@ class Category extends base{
 			redirect($this->App->baseUrl);
 		}
 		$page=isset($this->params['page']) ? intval($this->params['page']) : 1;
-		if(is_numeric($this->params['id'])){
+		if($this->isNumberId($this->params['id'])){
 			$cateId=intval($this->params['id']);
 		}else{
 			$category2=array_column(self::$category,NULL,'alias');

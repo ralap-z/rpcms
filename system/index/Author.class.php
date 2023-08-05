@@ -17,7 +17,7 @@ class Author extends base{
 		}
 		$page=isset($this->params['page']) ? intval($this->params['page']) : 1;
 		$user=Cache::read('user');
-		if(is_numeric($this->params['id'])){
+		if($this->isNumberId($this->params['id'])){
 			$userId=intval($this->params['id']);
 		}else{
 			$user2=array_column($user,NULL,'nickname');

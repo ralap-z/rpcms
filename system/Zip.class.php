@@ -45,7 +45,7 @@ class Zip{
 		if($this->zip->open($this->zipfile) == true){
 			$appname = $this->zip->getNameIndex(0);
 		}
-		$appname=explode('/', $appname)[0] .'/';
+		$appname=explode('/', $appname)[0];
 		return $appname;
 	}
 	

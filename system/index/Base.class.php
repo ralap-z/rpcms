@@ -113,6 +113,12 @@ class Base{
 		View::assign('description',!empty($desc) ? ($firstAppned ? $desc.'，'.$this->webConfig['description'] : $desc) : $this->webConfig['description']);
 	}
 	
+	protected function isNumberId($str){
+		$idOrigin=input('id');
+		$idEncrypt=Config::get('webConfig.id_encrypt');
+		return (!$idEncrypt && is_numeric($str)) || ($idEncrypt && $idOrigin != $str);
+	}
+	
 	/*
 	*获取公共配置
 	*/

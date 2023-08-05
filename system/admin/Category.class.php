@@ -12,6 +12,7 @@ class Category extends Base{
 	
 	public function index(){
 		View::assign('category',Cache::read('category'));
+		View::assign('tempFileHtml',$this->getTempFile());
 		return View::display('/category_index');
 	}
 	

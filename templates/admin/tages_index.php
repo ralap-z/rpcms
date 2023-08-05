@@ -53,7 +53,7 @@
 		<form class="me_form addTages" action="" onSubmit="return false">
 			<div class="me_input me_input_line"><label>名称</label><input type="text" class="tagName" value=""></div>
 			<div class="me_input me_input_line"><label>别名</label><input type="text" class="alias" value="" placeholder="英文、数字、-和_；请勿和标签重名"></div>
-			<div class="me_input me_input_line"><label>模板</label><input type="text" class="template" value=""></div>
+			<div class="me_input me_input_line"><label>模板</label><select class="template">{$tempFileHtml|raw}</select></div>
 			<div class="me_input"><label>SEO标题</label><input type="text" class="seo_title" value="" style="width: calc(100% - 4.5rem);"></div>
 			<div class="me_input"><label>SEO描述</label><textarea class="seo_desc" style="width: calc(100% - 4.5rem);"></textarea></div>
 			<div class="rp_row">

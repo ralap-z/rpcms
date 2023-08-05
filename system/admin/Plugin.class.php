@@ -18,7 +18,7 @@ class Plugin extends Base{
 		foreach($pluginDir as $k=>$v){
 			$pluginFile=PLUGINPATH .'/'.$v;
 			$indexFile=$pluginFile .'/Index.class.php';
-			if(file_exists($indexFile) && is_readable($indexFile) && $data=$this->getPluginData($pluginFile)){
+			if(is_file($indexFile) && is_readable($indexFile) && $data=$this->getAddonsData($pluginFile, 'plugin')){
 				$plugin[$v]=$data;
 			}
 		}
@@ -149,8 +149,12 @@ class Plugin extends Base{
 	private function openPlugin($plugin){
 		$pluginFile=PLUGINPATH .'/'.$plugin;
 		$indexFile=$pluginFile .'/Index.class.php';
-		if(!is_string($plugin) || !preg_match("/^[\w\-\_]+$/", $plugin) || !file_exists($indexFile)){
+		if(!is_string($plugin) || !preg_match("/^[\w\-\_]+$/", $plugin) || !is_file($indexFile)){
 			return array('code'=>-1,'msg'=>'插件不存在');
+		}
+		$check=$this->checkAddoneRequest($pluginFile, 'plugin');
+		if(!empty($check)){
+			return array('code'=>-2,'msg'=>$check);
 		}
 		$res=Db::name('plugin')->where("ppath='".$plugin."'")->find();
 		if(!empty($res) && $res['status'] == 0){
@@ -179,34 +183,5 @@ class Plugin extends Base{
 			return array('code'=>200,'msg'=>'插件安装成功');
 		}
 		return array('code'=>-1,'msg'=>'插件安装失败，请稍后重试');
-	}
-	
-	private function getPluginData($pluginFile){
-		$authorFile=$pluginFile.'/author.json';
-		$pluginDir=str_replace(CMSPATH, $this->App->appPath, $pluginFile);
-		if(file_exists($authorFile) && is_readable($authorFile)){
-			$authorData=array();
-			$str=@file_get_contents($authorFile);
-			preg_match("/name:(.*)/i", $str, $pluginName);
-			preg_match("/version:(.*)/i", $str, $pluginVersion);
-			preg_match("/date:(.*)/i", $str, $pluginDate);
-			preg_match("/url:(.*)/i", $str, $pluginUrl);
-			preg_match("/description:(.*)/i", $str, $pluginDescription);
-			preg_match("/author:(.*)/i", $str, $pluginAuthor);
-			preg_match("/authorEmail:(.*)/i", $str, $pluginAuthorEmail);
-			preg_match("/authorUrl:(.*)/i", $str, $pluginAuthorUrl);
-			$authorData['name']=isset($pluginName[1]) ? strip_tags(str_replace(array('\'',','),'',trim($pluginName[1]))) : '';
-			$authorData['version']=isset($pluginVersion[1]) ? strip_tags(str_replace(array('\'',','),'',trim($pluginVersion[1]))) : '';
-			$authorData['date']=isset($pluginDate[1]) ? strip_tags(str_replace(array('\'',','),'',trim($pluginDate[1]))) : '';
-			$authorData['url']=isset($pluginUrl[1]) ? strip_tags(str_replace(array('\'',','),'',trim($pluginUrl[1]))) : '';
-			$authorData['description']=isset($pluginDescription[1]) ? strip_tags(str_replace(array('\'',','),'',trim($pluginDescription[1]))) : '';
-			$authorData['author']=isset($pluginAuthor[1]) ? strip_tags(str_replace(array('\'',','),'',trim($pluginAuthor[1]))) : '';
-			$authorData['authorEmail']=isset($pluginAuthorEmail[1]) ? strip_tags(str_replace(array('\'',','),'',trim($pluginAuthorEmail[1]))) : '';
-			$authorData['authorUrl']=isset($pluginAuthorUrl[1]) ? strip_tags(str_replace(array('\'',','),'',trim($pluginAuthorUrl[1]))) : '';
-			$authorData['icon']=file_exists($pluginFile.'/icon.png') ? $pluginDir.'/icon.png' : '/static/images/plugin_icon.jpg';
-			$authorData['setting']=file_exists($pluginFile.'/Setting.class.php') ? true : false;
-			return $authorData;
-		}
-		return false;
 	}
 }

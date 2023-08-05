@@ -34,6 +34,7 @@ class Pages extends Base{
 		);
 		View::assign('pageData',$pageData);
 		View::assign('authorHtml',me_createAuthorOption());
+		View::assign('tempFileHtml',$this->getTempFile());
 		return View::display('/pages_add');
 	}
 	
@@ -47,6 +48,7 @@ class Pages extends Base{
 		View::assign('pageId',$id);
 		View::assign('pageData',$pageData);
 		View::assign('authorHtml',me_createAuthorOption($pageData['authorId']));
+		View::assign('tempFileHtml',$this->getTempFile($pageData['template']));
 		return View::display('/pages_add');
 	}
 	

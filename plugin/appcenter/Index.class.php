@@ -116,13 +116,13 @@ class Index extends Plugin{
 				break;
 			case 'check':
 				$template=\rp\Cache::read('template');
-				$tdata=$this->getTempData($template['name']);
+				$tdata=$this->getAddonsData($template['name'], 'temp');
 				$temp=array($template['name']=>$tdata['version']);
 				$plugin=array();
 				foreach($this->App->allPlugin as $k=>$v){
 					$pluginFile=PLUGINPATH .'/'.$v;
 					$indexFile=$pluginFile .'/Index.class.php';
-					if(file_exists($indexFile) && is_readable($indexFile) && $pdata=$this->getPluginData($pluginFile)){
+					if(file_exists($indexFile) && is_readable($indexFile) && $pdata=$this->getAddonsData($pluginFile, 'plugin')){
 						$plugin[$v]=$pdata['version'];
 					}
 				}
@@ -148,36 +148,22 @@ class Index extends Plugin{
 		return $this->display('template/index');
 	}
 	
-	private function getTempData($temp){
-		$authorFile=TMPPATH . '/index/'.$temp.'/author.json';
-		if(file_exists($authorFile) && is_readable($authorFile)){
-			$authorData=array();
-			$str=@file_get_contents($authorFile);
-			preg_match("/name:(.*)/i", $str, $pluginName);
-			preg_match("/version:(.*)/i", $str, $pluginVersion);
-			preg_match("/date:(.*)/i", $str, $pluginDate);
-			$authorData['name']=isset($pluginName[1]) ? strip_tags(str_replace(array('\'',','),'',trim($pluginName[1]))) : '';
-			$authorData['version']=isset($pluginVersion[1]) ? strip_tags(str_replace(array('\'',','),'',trim($pluginVersion[1]))) : '';
-			$authorData['date']=isset($pluginDate[1]) ? strip_tags(str_replace(array('\'',','),'',trim($pluginDate[1]))) : '';
+	protected function getAddonsData($path, $addonsType='temp'){
+		$authorFile=$addonsType == 'temp' ? TMPPATH . '/index/'.$path.'/author.json' : $path.'/author.json';
+		$authorData=array(
+			'name'=>'',
+			'version'=>'',
+			'date'=>'',
+		);
+		if(!is_file($authorFile) || !is_readable($authorFile)){
 			return $authorData;
 		}
-		return false;
-	}
-	
-	private function getPluginData($pluginFile){
-		$authorFile=$pluginFile.'/author.json';
-		$pluginDir=str_replace(CMSPATH, $this->App->appPath, $pluginFile);
-		if(file_exists($authorFile) && is_readable($authorFile)){
-			$authorData=array();
-			$str=@file_get_contents($authorFile);
-			preg_match("/name:(.*)/i", $str, $pluginName);
-			preg_match("/version:(.*)/i", $str, $pluginVersion);
-			preg_match("/date:(.*)/i", $str, $pluginDate);
-			$authorData['name']=isset($pluginName[1]) ? strip_tags(str_replace(array('\'',','),'',trim($pluginName[1]))) : '';
-			$authorData['version']=isset($pluginVersion[1]) ? strip_tags(str_replace(array('\'',','),'',trim($pluginVersion[1]))) : '';
-			$authorData['date']=isset($pluginDate[1]) ? strip_tags(str_replace(array('\'',','),'',trim($pluginDate[1]))) : '';
-			return $authorData;
-		}
-		return false;
+		$str=@file_get_contents($authorFile);
+		$str='{'.rtrim(str_replace(["\r\n", "\n", '：'], ['', '', ':'], $str), ',').'}';
+		$str=preg_replace("/([\{\}\,]+)\s?'?\s?(\w*?)\s?'?\s?:\s?/", '\\1"\\2":', $str);
+		$str=preg_replace(["/'([^']*)'/", "/\s(?=\s)/", "/\t+/"], ['"$1"', '\\1', ''], $str);
+		$str=json_decode($str, true);
+		$authorData=array_merge($authorData, $str);
+		return $authorData;
 	}
 }

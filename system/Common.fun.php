@@ -37,7 +37,18 @@ function autoLoadClass($class){
 }
 
 function isLogin(){
-	return !empty(session('MEADMIN')) ? true : false;
+	$sAdmin=session('MEADMIN');
+	if(empty($sAdmin)){
+		return false;
+	}
+	$isUnique=rp\Config::get('webConfig.adminLoginUnique') ?? false;
+	if($isUnique){
+		$admin=rp\Db::name('user')->where(array('id'=>$sAdmin['uid']))->field('sessionToken')->find();
+		if($admin['sessionToken'] != $sAdmin['sessionToken']){
+			return false;
+		}
+	}
+	return true;
 }
 
 function psw($str){

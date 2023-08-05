@@ -88,8 +88,10 @@
 					{if $v['topId'] == 0}<option value="{$v['id']}">{$v['cate_name']}</option>{/if}
 				{/foreach}
 			</select></div>
-			<div class="me_input me_input_line"><label>列表模板</label><input type="text" class="temp_list" value=""></div>
-			<div class="me_input me_input_line"><label>内容模板</label><input type="text" class="temp_logs" value=""></div>
+			<div class="me_row">
+				<div class="me_input me_input_line"><label>列表模板</label><select class="temp_list">{$tempFileHtml|raw}</select></div>
+				<div class="me_input me_input_line"><label>内容模板</label><select class="temp_logs">{$tempFileHtml|raw}</select></div>
+			</div>
 			<div class="me_input"><label>SEO标题</label><input type="text" class="seo_title" value="" style="width: calc(100% - 6rem);"></div>
 			<div class="me_input"><label>SEO关键词</label><input type="text" class="seo_key" value="" style="width: calc(100% - 6rem);"></div>
 			<div class="me_input"><label>SEO描述</label><textarea class="seo_desc" style="width: calc(100% - 6rem);"></textarea></div>

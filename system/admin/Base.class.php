@@ -81,4 +81,85 @@ class Base{
 		$option=Cache::read('option');
 		return isset($option['key']) ? $option['key'] : '';
 	}
+	
+	protected function getAddonsData($path, $addonsType='temp'){
+		$authorFile=$path.'/author.json';
+		$pluginDir=str_replace(CMSPATH, $this->App->appPath, $path);
+		$authorData=array(
+			'name'=>'',
+			'version'=>'',
+			'date'=>'',
+			'url'=>'',
+			'description'=>'',
+			'author'=>'',
+			'authorEmail'=>'',
+			'authorUrl'=>'',
+			'preview'=>'/static/images/temp_preview.jpg',
+			'icon'=>'/static/images/plugin_icon.jpg',
+			'setting'=>false,
+			'require'=>[],
+		);
+		if(!is_file($authorFile) || !is_readable($authorFile)){
+			return $authorData;
+		}
+		$str=@file_get_contents($authorFile);
+		$str='{'.rtrim(str_replace(["\r\n", "\n", '：'], ['', '', ':'], $str), ',').'}';
+		$str=preg_replace("/([\{\}\,]+)\s?'?\s?(\w*?)\s?'?\s?:\s?/", '\\1"\\2":', $str);
+		$str=preg_replace(["/'([^']*)'/", "/\s(?=\s)/", "/\t+/"], ['"$1"', '\\1', ''], $str);
+		$str=json_decode($str, true);
+		$authorData=array_merge($authorData, $str);
+		$settingFile=$addonsType == 'temp' ? 'setting.php' : 'Setting.class.php';
+		is_file($path.'/'.$settingFile) && $authorData['setting']=true;
+		is_file($path.'/icon.png') && $authorData['icon']=$pluginDir.'/icon.png';
+		is_file($path.'/preview.jpg') && $authorData['preview']=$pluginDir.'/preview.jpg';
+		return $authorData;
+	}
+	protected function checkAddoneRequest($filePath, $addonsType='temp'){
+		$data=$this->getAddonsData($filePath);
+		if(empty($data['require'])){
+			return;
+		}
+		$check=$message=[];
+		foreach($data['require'] as $k=>$v){
+			$pluginFile=PLUGINPATH .'/'.$k;
+			$check[$k]=$this->getAddonsData($pluginFile);
+			if(empty($check[$k]['version'])){
+				$message[]='【'.$k.'】(v'.$v.')未安装';
+				continue;
+			}
+			if(version_compare($check[$k]['version'], $v, '<')){
+				$message[]='【'.$k.'/'.$check[$k]['name'].'】版本过低，要求 >= v'.$v;
+				continue;
+			}
+			if(!pluginCheck($k)){
+				$message[]='【'.$k.'/'.$check[$k]['name'].'】(v'.$check[$k]['version'].')未启用';
+			}
+		}
+		unset($check);
+		return implode('<br>', $message);
+	}
+	protected function getTempFile($defaultValue=''){
+		$template=Cache::read('template');
+		$tempPath=TMPPATH . '/index/'.$template['name'];
+		$data=glob($tempPath.'/*.php');
+		$data=array_map(function($v){
+			return pathinfo($v, PATHINFO_FILENAME);
+		}, $data);
+		$meTmpName=array_merge($this->me_tmpName, ['header', 'footer', '404', 'Hook.class']);
+		$data=array_filter($data, function($v)use($meTmpName){
+			return !in_array($v, $meTmpName);
+		});
+		$data=array_combine($data, $data);
+		foreach($data as $k=>&$v){
+			$handle=@fopen($tempPath.'/'.$v.'.php', "r");
+			preg_match('/\/\*(.+?)\*\//', fgets($handle), $matches);
+			$v=$matches[1] ?? $v;
+			fclose($handle);
+		}
+		$html='<option value="">选择模板</option>';
+		foreach($data as $key=>$value){
+			$html.='<option value="'.$key.'" '.($key == $defaultValue ? "selected" : "").'>'.$value.'</option>';
+		}
+		return $html;
+	}
 }

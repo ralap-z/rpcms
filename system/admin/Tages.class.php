@@ -23,6 +23,7 @@ class Tages extends Base{
 		$pageHtml=pageInation($count,$limit,$page);
 		View::assign('list',$res);
 		View::assign('pageHtml',$pageHtml);
+		View::assign('tempFileHtml',$this->getTempFile());
 		return View::display('/tages_index');
 	}
 	

@@ -17,7 +17,7 @@ class Temp extends Base{
 		$tempDir=getDirsInDir($tempIndex);
 		$temp=array();
 		foreach($tempDir as $k=>$v){
-			$data=$this->getTempData($tempIndex .'/'.$v);
+			$data=$this->getAddonsData($tempIndex .'/'.$v, 'temp');
 			$temp[$v]=$data;
 		}
 		$tempDefault=Db::name('config')->where('cname = "template"')->field('cvalue')->find();
@@ -37,7 +37,11 @@ class Temp extends Base{
 		}
 		$tempDir=TMPPATH . '/index/'.$value;
 		if(!is_dir($tempDir)){
-			return array('code'=>-1,'msg'=>'模板不存在');
+			return json(array('code'=>-1,'msg'=>'模板不存在'));
+		}
+		$check=$this->checkAddoneRequest($tempDir, 'temp');
+		if(!empty($check)){
+			return json(array('code'=>-2,'msg'=>$check));
 		}
 		if(Db::name('config')->where('cname = "template"')->update(array('cvalue'=>$value))){
 			$default=TMPPATH . '/index/'.$value . '/default.php';
@@ -124,35 +128,6 @@ class Temp extends Base{
 			View::assign('settingFile',$settingFile);
 			return View::display('/temp_setting');
 		}
-	}
-	
-	private function getTempData($tempFile){
-		$authorFile=$tempFile.'/author.json';
-		$tempDir=str_replace(CMSPATH, $this->App->appPath, $tempFile);
-		if(file_exists($authorFile) && is_readable($authorFile)){
-			$authorData=array();
-			$str=@file_get_contents($authorFile);
-			preg_match("/name:(.*)/i", $str, $pluginName);
-			preg_match("/version:(.*)/i", $str, $pluginVersion);
-			preg_match("/date:(.*)/i", $str, $pluginDate);
-			preg_match("/url:(.*)/i", $str, $pluginUrl);
-			preg_match("/description:(.*)/i", $str, $pluginDescription);
-			preg_match("/author:(.*)/i", $str, $pluginAuthor);
-			preg_match("/authorEmail:(.*)/i", $str, $pluginAuthorEmail);
-			preg_match("/authorUrl:(.*)/i", $str, $pluginAuthorUrl);
-			$authorData['name']=isset($pluginName[1]) ? strip_tags(str_replace(array('\'',','),'',trim($pluginName[1]))) : '';
-			$authorData['version']=isset($pluginVersion[1]) ? strip_tags(str_replace(array('\'',','),'',trim($pluginVersion[1]))) : '';
-			$authorData['date']=isset($pluginDate[1]) ? strip_tags(str_replace(array('\'',','),'',trim($pluginDate[1]))) : '';
-			$authorData['url']=isset($pluginUrl[1]) ? strip_tags(str_replace(array('\'',','),'',trim($pluginUrl[1]))) : '';
-			$authorData['description']=isset($pluginDescription[1]) ? strip_tags(str_replace(array('\'',','),'',trim($pluginDescription[1]))) : '';
-			$authorData['author']=isset($pluginAuthor[1]) ? strip_tags(str_replace(array('\'',','),'',trim($pluginAuthor[1]))) : '';
-			$authorData['authorEmail']=isset($pluginAuthorEmail[1]) ? strip_tags(str_replace(array('\'',','),'',trim($pluginAuthorEmail[1]))) : '';
-			$authorData['authorUrl']=isset($pluginAuthorUrl[1]) ? strip_tags(str_replace(array('\'',','),'',trim($pluginAuthorUrl[1]))) : '';
-			$authorData['preview']=file_exists($tempFile.'/preview.jpg') ? $tempDir.'/preview.jpg' : '/static/images/temp_preview.jpg';
-			$authorData['setting']=file_exists($tempFile.'/setting.php') ? true : false;
-			return $authorData;
-		}
-		return false;
 	}
 	
 }

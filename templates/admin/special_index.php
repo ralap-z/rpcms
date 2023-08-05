@@ -63,7 +63,7 @@
 					<span>选择图片</span>
 				</div>
 			</div>
-			<div class="me_input me_input_line" style="vertical-align: top;"><label>列表模板</label><input type="text" class="temp_list" value=""></div>
+			<div class="me_input me_input_line" style="vertical-align: top;"><label>列表模板</label><select class="temp_list">{$tempFileHtml|raw}</select></div>
 			<div class="me_input"><label>SEO标题</label><input type="text" class="seo_title" value="" style="width: calc(100% - 6rem);"></div>
 			<div class="me_input"><label>SEO描述</label><textarea class="seo_desc" style="width: calc(100% - 6rem);"></textarea></div>
 			<div class="rp_row">

@@ -52,7 +52,7 @@
 		<div class="me_input"><label>专题</label><select name="specialId">{$specialHtml|raw}</select></div>
 		<div class="me_input"><label>别名</label><input type="text" name="alias" value="{$logData['alias']|default=''}" placeholder="仅字母、数字、-和_"></div>
 		<div class="me_input"><label>密码</label><input type="text" name="password" value="{$logData['password']|default=''}"></div>
-		<div class="me_input"><label>模板</label><input type="text" name="template" placeholder="指定模板请输入模板名称" value="{$logData['template']|default=''}"></div>
+		<div class="me_input"><label>模板</label><select name="template">{$tempFileHtml|raw}</select></div>
 		<div class="me_input"><label>时间</label><input type="text" name="createTime" value="{$logData['createTime']|default=date('Y-m-d H:i:s')}"></div>
 		
 		<div class="me_input me_input_line"><label>置顶</label><input type="checkbox" name="isTop" value="1" {if $logData['isTop'] != 0}checked{/if}></div>

@@ -87,6 +87,7 @@ class Logs extends Base{
 		View::assign('categoryHtml',me_createCateOption());
 		View::assign('authorHtml',me_createAuthorOption());
 		View::assign('specialHtml',me_createSpecialOption());
+		View::assign('tempFileHtml',$this->getTempFile());
 		return View::display('/logs_add');
 	}
 	
@@ -112,6 +113,7 @@ class Logs extends Base{
 		View::assign('categoryHtml',me_createCateOption($logData['cateId']));
 		View::assign('authorHtml',me_createAuthorOption($logData['authorId']));
 		View::assign('specialHtml',me_createSpecialOption($logData['specialId']));
+		View::assign('tempFileHtml',$this->getTempFile($logData['template']));
 		return View::display('/logs_add');
 	}
 	

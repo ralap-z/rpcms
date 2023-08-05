@@ -19,7 +19,7 @@ class Tags extends base{
 		$tages=Cache::read('tages');
 		$tages2=array_column($tages,NULL,'alias');
 		$tages3=array_column($tages,NULL,'tagName');
-		if(is_numeric($this->params['id'])){
+		if($this->isNumberId($this->params['id'])){
 			$tagId=intval($this->params['id']);
 		}elseif(isset($tages2[$this->params['id']])){
 			$tagId=$tages2[$this->params['id']]['id'];

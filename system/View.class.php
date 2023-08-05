@@ -175,7 +175,7 @@ class View{
 		$view=self::instance();
 		$view->includeFile[$tempDir]=filemtime($tempDir);
 		$content=$view->CompileFile(@file_get_contents($tempDir));
-		$content=preg_replace(['/<\?php\s+if\s+[\(]!defined\([\'\"]CMSPATH[\'\"]\).*\?>/','/\?>\s*<\?php\s/s'], ['',''], $content);
+		$content=preg_replace(['/<\?php.*if\s+[\(]!defined\([\'\"]CMSPATH[\'\"]\).*\?>/','/\?>\s*<\?php\s/s'], ['',''], $content);
 		$content="<?php if(!defined('CMSPATH')) exit();/*".serialize($view->includeFile)."*/?>\n".$this->compress_html($content);
 		@file_put_contents($cashFiles, $content);
 		$view->includeFile=[];

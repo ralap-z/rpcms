@@ -17,7 +17,7 @@ class Special extends base{
 		}
 		$page=isset($this->params['page']) ? intval($this->params['page']) : 1;
 		$special=Cache::read('special');
-		if(is_numeric($this->params['id'])){
+		if($this->isNumberId($this->params['id'])){
 			$specialId=intval($this->params['id']);
 		}else{
 			$special2=array_column($special,NULL,'alias');

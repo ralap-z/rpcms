@@ -54,8 +54,14 @@ $(document).ready(function(){
 		var _this=$(this),
 			a=_this.parents('.temp_item').data('value');
 		$.ajaxpost("{:url('temp/upTemp')}",{'value':a},function(res){
-			$.Msg(res.msg);
-			res.code == 200 && setTimeout(function(){window.location.reload()},2200);
+			if(res.code == 200){
+				$.Msg(res.msg);
+				setTimeout(function(){window.location.reload()},2200);
+			}else if(res.code == -2){
+				$.alert(res.msg);
+			}else{
+				$.Msg(res.msg);
+			}
 		});
 	}),
 	$(".delete").click(function(){

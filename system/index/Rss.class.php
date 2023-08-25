@@ -58,11 +58,11 @@ class Rss extends base{
 	private function baidu(){
 		header('Content-type: application/xml');
 		echo '<?xml version="1.0" encoding="utf-8"?>
-				<urlset>';
+				<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
 		if($this->page == 1){
 			echo '<url>
 						<loc>'.$this->App->baseUrl.'</loc>
-						<lastmod>'.$this->getLastTime().'</lastmod>
+						<lastmod>'.date('Y-m-d', strtotime($this->getLastTime())).'</lastmod>
 						<changefreq>always</changefreq>
 						<priority>1.0</priority>
 					</url>';
@@ -79,7 +79,7 @@ class Rss extends base{
 				$this->num++;
 				echo '<url>
 					<loc>'.$this->App->baseUrl.Url::page($v['id']).'</loc>
-					<lastmod>'.$v['createTime'].'</lastmod>
+					<lastmod>'.date('Y-m-d', strtotime($v['createTime'])).'</lastmod>
 					<changefreq>weekly</changefreq>
 					<priority>0.6</priority>
 				</url>';
@@ -88,7 +88,7 @@ class Rss extends base{
 		foreach($this->getLogs() as $v){
 			echo '<url>
 				<loc>'.$this->App->baseUrl.Url::logs($v['id']).'</loc>
-				<lastmod>'.(!empty($v['updateTime']) ? $v['updateTime'] : $v['createTime']).'</lastmod>
+				<lastmod>'.date('Y-m-d', strtotime(!empty($v['updateTime']) ? $v['updateTime'] : $v['createTime'])).'</lastmod>
 				<changefreq>weekly</changefreq>
 				<priority>0.6</priority>
 			</url>';

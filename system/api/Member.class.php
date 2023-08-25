@@ -63,9 +63,9 @@ class Member extends Base{
 			$this->response('',401,'用户名或密码不能为空');
 		}
 		if(checkForm('email',$username)){
-			$member=Db::name('user')->where(array('email'=>$username,'role'=>array('in',"'admin','member'")))->find();
+			$member=Db::name('user')->where(array('email'=>$username,'role'=>array('in','admin,member')))->find();
 		}else{
-			$member=Db::name('user')->where(array('username'=>$username,'role'=>array('in',"'admin','member'")))->find();
+			$member=Db::name('user')->where(array('username'=>$username,'role'=>array('in','admin,member')))->find();
 		}
 		if(empty($member) || $member['password'] != psw($password)){
 			$this->response('',401,'用户名或密码错误');

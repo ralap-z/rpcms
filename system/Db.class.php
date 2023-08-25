@@ -158,11 +158,19 @@ class Db{
 			switch($value[0]){
 				case 'in':
 				case 'not in':
-					return '{key} '.$value[0].'('.$this->escapeString($value[1]).')';
+					$pre=substr($value[1], 0, 4);
+					if($pre == 'sql:'){
+						$val=substr($value[1], 4);
+					}else{
+						$val=array_unique(is_array($value[1]) ? $value[1] : explode(',', $value[1]));
+						$val=array_map(function($v){return "'".$this->escapeString($v)."'";}, $val);
+						$val=implode(',', $val);
+					}
+					return '{key} '.$value[0].'('.$val.')';
 					break;
 				case 'exists':
 				case 'not exists':
-					return ' '.$value[0].'('.$this->escapeString($value[1]).')';
+					return ' '.$value[0].'('.$value[1].')';
 					break;
 				case 'between':
 				case 'not between':

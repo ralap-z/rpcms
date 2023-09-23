@@ -27,6 +27,7 @@ class Login{
 		$time=input('server.REQUEST_TIME');
 		$errorMax=Config::get('webConfig.adminLoginErrMax') ?? 5;
 		$errorTime=Config::get('webConfig.adminLoginErrTime') ?? 30;
+		$user['updateTime']=$user['updateTime'] ?: '';
 		if($user['failureNum'] >= $errorMax && $time - strtotime($user['updateTime']) < $errorTime*60){
 			return json(array('code'=>-1,'msg'=>'账户锁定，请'.$errorTime.'分钟后登录'));
         }

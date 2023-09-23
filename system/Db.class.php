@@ -131,7 +131,7 @@ class Db{
 				$k=str_replace(array('&','|'),array(' and ',' or '),$k);
 				$oldKn = array_map(function($item){return '/{key}/';}, $kn);
 				if(is_array($v)){
-					$v=count($v) == count($v,1) ? $this->parseItem($v) : array_map(array($this,'buildValue'), $v);
+					$v=count($v) == count($v,1) || in_array($v[0], ['in', 'not in']) ? $this->parseItem($v) : array_map(array($this,'buildValue'), $v);
 				}else{
 					$v=$this->parseValue($v);
 				}
@@ -158,7 +158,7 @@ class Db{
 			switch($value[0]){
 				case 'in':
 				case 'not in':
-					$pre=substr($value[1], 0, 4);
+					$pre=is_string($value[1]) ? substr($value[1], 0, 4) : '';
 					if($pre == 'sql:'){
 						$val=substr($value[1], 4);
 					}else{

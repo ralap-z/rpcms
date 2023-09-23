@@ -109,23 +109,24 @@ class Upload{
 		if((!file_exists($this->dirNames) && !mkdir($this->dirNames, 0777, true)) || !is_writeable($this->dirNames)){
 			return false;
 		}
-		switch($this->fileTypes){
-			case '.png':
-				if(function_exists('imagepng') && imagepng($newImg, $thumPath)){
+		$type=image_type_to_extension($size[2], false);
+		switch($type){
+			case 'png':
+				if(function_exists('imagepng') && imagepng($newImg, $thumPath, 0)){
 					ImageDestroy($newImg);
 					return $thumPath;
 				}
 				break;
-			case '.gif':
+			case 'gif':
 				if(function_exists('imagegif') && imagegif($newImg, $thumPath)){
 					ImageDestroy($newImg);
 					return $thumPath;
 				}
 				break;
-			case '.jpg':
-			case '.jpeg':
+			case 'jpg':
+			case 'jpeg':
 			default:
-				if(function_exists('imagejpeg') && imagejpeg($newImg, $thumPath)){
+				if(function_exists('imagejpeg') && imagejpeg($newImg, $thumPath, -1)){
 					ImageDestroy($newImg);
 					return $thumPath;
 				}

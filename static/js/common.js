@@ -106,7 +106,7 @@ $(document).ready(function(){
 		var a=$(this).data("model-type"),
 			b=".me_model_"+a;
 		var maxH=$(window).height() * 0.7;
-		$(b).length > 0 && ($(".me_model").hide(),$(".veil").show(),$(b).show(),$(b).outerHeight() >= maxH && $(b).find(".contentes").css("height",(maxH - $(b).find(".title").outerHeight())+"px"));
+		$(b).length > 0 && ($(".me_model").hide(),$(".veil").show(),$(b).show(),$(b).find(".contentes").outerHeight() >= maxH && $(b).find(".contentes").css("height",(maxH - $(b).find(".title").outerHeight())+"px"));
 	})
 	$("body").on("click",".me_model_close",function(){
 		var callback=$(this).data('callback');

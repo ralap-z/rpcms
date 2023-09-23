@@ -41,7 +41,8 @@ function isLogin(){
 	if(empty($sAdmin)){
 		return false;
 	}
-	$isUnique=rp\Config::get('webConfig.adminLoginUnique') ?? false;
+	$isUnique=rp\Config::get('webConfig.adminLoginUnique');
+	$isUnique=isset($isUnique) ? $isUnique : false;
 	if($isUnique){
 		$admin=rp\Db::name('user')->where(array('id'=>$sAdmin['uid']))->field('sessionToken')->find();
 		if($admin['sessionToken'] != $sAdmin['sessionToken']){

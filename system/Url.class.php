@@ -323,6 +323,9 @@ class Url{
 			$res.=$strBase[$checkNum];
 			return $res;
 		}else{
+			if(strlen($num) != $minEnLen){
+				return '';
+			}
 			$check=substr($num, -1);
 			$numArr=[];
 			foreach(str_split(substr($num, 0, -1)) as $v){

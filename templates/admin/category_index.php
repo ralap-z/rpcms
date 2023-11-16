@@ -5,6 +5,7 @@
 .upSort{margin-top: 0.4rem;margin-left: 0;}
 .addCate .me_input label{width: 5rem;text-align: right;}
 .me_model .rp_row{text-align: right;}
+.submitIcon{margin-left: 5px;color: #7d7d7d;}
 </style>
 <div class="me_body">
 	<div class="me_head">
@@ -41,7 +42,7 @@
 				<tr data-id="{$v['id']}">
 					<td><input type="text" name="cate[]" value="{$v['sort']}" class="sortInput" maxlength="4"></td>
 					<td>{$v['id']}</td>
-					<td><a href="{php}echo rp\Url::cate($v['id']){/php}" title="点击查看" target="_blank">{$v['cate_name']}</a></td>
+					<td><a href="{php}echo rp\Url::cate($v['id']){/php}" title="点击查看" target="_blank">{$v['cate_name']}{if $v['is_submit'] == 1}<i class="me-icon me-icon-upload-circle submitIcon"></i>{/if}</a></td>
 					<td>{$v['alias']}</td>
 					<td>{$v['temp_list']}</td>
 					<td>{$v['temp_logs']}</td>
@@ -56,7 +57,7 @@
 					<tr data-id="{$sv['id']}">
 						<td><input type="text" name="cate[{$sv['id']}]" value="{$sv['sort']}" class="sortInput" maxlength="4"></td>
 						<td>{$sv['id']}</td>
-						<td>└&nbsp;&nbsp;<a href="{php}echo rp\Url::cate($sv['id']){/php}" title="点击查看" target="_blank">{$sv['cate_name']}</a></td>
+						<td>└&nbsp;&nbsp;<a href="{php}echo rp\Url::cate($sv['id']){/php}" title="点击查看" target="_blank">{$sv['cate_name']}{if $sv['is_submit'] == 1}<i class="me-icon me-icon-upload-circle submitIcon"></i>{/if}</a></td>
 						<td>{$sv['alias']}</td>
 						<td>{$sv['temp_list']}</td>
 						<td>{$sv['temp_logs']}</td>

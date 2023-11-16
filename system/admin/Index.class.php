@@ -27,7 +27,14 @@ class Index extends Base{
 	}
 	
 	public function webset(){
-		View::assign('option',Cache::read('option'));
+		$option=Cache::read('option');
+		if(!empty($option['logWeight'])){
+			array_walk($option['logWeight'], function(&$v, $k){
+				$v=$k.'='.$v;
+			});
+			$option['logWeight']=implode(PHP_EOL, $option['logWeight']);
+		}
+		View::assign('option',$option);
 		View::assign('tempList',getDirsInDir(TMPPATH . '/index'));
 		return View::display('/webset_index');
 	}
@@ -42,6 +49,14 @@ class Index extends Base{
 			});
 			$fileTypesArr=array_map(function($v){return trim($v);},$fileTypesArr);
 			$data['fileTypes']=join(',',$fileTypesArr);
+		}
+		if(!empty($data['logWeight'])){
+			$data['logWeight']=explode(PHP_EOL,$data['logWeight']);
+			$data['logWeight']=array_map(function($v){
+				list($sk, $sv)=explode('=',(!empty($v) ? $v : '='));
+				return array($sk=>$sv);
+			},$data['logWeight']);
+			$data['logWeight']=array_reduce($data['logWeight'], 'array_merge', array());
 		}
 		if(Db::name('config')->where('cname="webconfig"')->find()){
 			$res=Db::name('config')->where('cname="webconfig"')->update(array('cvalue'=>json_encode($data)));

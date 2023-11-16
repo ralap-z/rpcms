@@ -76,20 +76,7 @@ class Base{
 				$order['a.updateTime']='desc';
 				break;
 			case 'weight':
-				$logWeight=explode(PHP_EOL,$this->webConfig['logWeight']);
-				$logWeight=array_map(function($v){
-					list($sk, $sv)=explode('=',(!empty($v) ? $v : '='));
-					return array($sk=>$sv);
-				},$logWeight);
-				$logWeight=array_reduce($logWeight, 'array_merge', array());
-				$orderStr=array();
-				$orderStr[]=isset($logWeight['views']) ? 'a.views*'.$logWeight['views'] : '';
-				$orderStr[]=isset($logWeight['comnum']) ? 'a.comnum*'.$logWeight['comnum'] : '';
-				$orderStr[]=isset($logWeight['upnum']) ? 'a.upnum*'.$logWeight['upnum'] : '';
-				$orderStr=array_filter($orderStr);
-				if(!empty($orderStr)){
-					$order['('.join('+',$orderStr).')']='desc';
-				}
+				$order['a.weight']='desc';
 				break;
 			default:
 				$order['a.id']='desc';

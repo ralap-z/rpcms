@@ -10,74 +10,85 @@
 // +----------------------------------------------------------------------
 
 namespace rp;
+
 class Db{
 	protected static $instance;
-	private static $_mysqli=[];
-	private static $prefix;
-	private static $table;
-	private static $slave;
+	private $_mysqli=[];
+	private $options;
+	private $prefix;
+	private $table;
 	private $field = '*';
 	private $join = '';
 	private $where = array();
 	private $limit = '';
 	private $order = '';
 	private $group = '';
-	private $results = '';
+	private $slave;
 	private $isGetSql = false;
-	private $options;
+	private $results = '';
 	
-	public function __construct(){
-		$this->options=Config::get('db');
-		self::$prefix=$this->options["prefix"];
-	}
-	
-	public static function instance($slave=''){
-        if(is_null(self::$instance)){
-            self::$instance = new self();
-        }
-		if(!empty($slave) && empty(self::$_mysqli[$slave])){
-			self::$_mysqli[$slave]=self::$instance->connect();
-		}
-        return self::$instance;
-    }
-	
-	public static function close(){
-		if(!empty(self::$_mysqli)){
-			foreach(self::$_mysqli as $_v){
-				$_v->close();
+	public function __construct($connectName='default'){
+		if($connectName == 'default'){
+			$this->options=Config::get('db');
+		}else{
+			$config=SETTINGPATH.'/config/'.$connectName.'.php';
+			if(!is_file($config)){
+				throw new \Exception(json_encode(['message'=>'database config file is not find']));
 			}
-			self::$_mysqli=NULL;
-			self::$instance=NULL;
+			$config=include $config;
+			$this->options=$config['db'];
 		}
-	}
-
-	public static function name($table){
-		$con=self::instance();
-		$con->_reset_sql();
-		self::$table=self::$prefix . $table;
-		return $con;
+		$this->prefix=$this->options["prefix"];
 	}
 	
-	public static function table($table){
-		$con=self::instance();
-		$con->_reset_sql();
-		self::$table=$table;
-		return $con;
+	public static function connect($name='default'){
+		return self::instance($name);
 	}
 	
 	public static function transaction(){
-		$con=self::instance('w');
-		self::$_mysqli['w']->begin_transaction();
+		$con=self::connect();
+		empty($con->_mysqli['w']) && $con->_mysqli['w']=$con->createLink();
+		$con->_mysqli['w']->begin_transaction();
 	}
-	
+
 	public static function commit(){
-		$con=self::instance('w');
-		self::$_mysqli['w']->commit();
+		$con=self::connect();
+		$con->_mysqli['w']->commit();
+	}
+
+	public static function rollback(){
+		$con=self::connect();
+		$con->_mysqli['w']->rollback();
 	}
 	
-	public static function rollback(){
-		$con=self::instance('w');
-		self::$_mysqli['w']->rollback();
+	public static function close(){
+		self::$instance=NULL;
+	}
+	
+	public static function instance($connectName='default'){
+		if(empty(self::$instance[$connectName])){
+			$obj=new self($connectName);
+			empty($obj->_mysqli['r']) && $obj->_mysqli['r']=$obj->createLink();
+			self::$instance[$connectName]=$obj;
+		}
+		return self::$instance[$connectName];
+	}
+	
+	public function _name($table){
+		$this->_reset_sql();
+		$this->table=$this->prefix . $table;
+		return $this;
+	}
+	
+	public function _table($table){
+		$this->_reset_sql();
+		$this->table=$table;
+		return $this;
+	}
+	
+	public function alias($alias=''){
+		!empty($alias) && $this->table.=" as ".$alias;
+		return $this;
 	}
 	
 	public function field($field='*'){
@@ -88,17 +99,12 @@ class Db{
 		return $this;
 	}
 	
-	public function alias($alias=''){
-		!empty($alias) && self::$table.=" as ".$alias;
-		return $this;
-	}
-
 	public function join($table, $condition = null, $type = 'left'){
 		if(is_array($table) && count($table) != count($table,true)){
 			foreach($table as $key=>$val){
 				if(is_array($val) && !empty($val)){
 					$jtype=(isset($val[2]) && !empty($val[2])) ? $val[2] : $type;
-					$jointable = is_array($val[0]) ? $val[0][0].' '.$val[0][1] : (0 === strpos($val[0], '(') ? $val[0] : self::$prefix . $val[0]);
+					$jointable = is_array($val[0]) ? $val[0][0].' '.$val[0][1] : (0 === strpos($val[0], '(') ? $val[0] : $this->prefix . $val[0]);
 					$this->join.=" ".$jtype." join ". $jointable;
 					!empty($val[1]) && $this->join.=" on ".$val[1];
 				}
@@ -108,8 +114,8 @@ class Db{
 				$jointable = $table[0].' '.$table[1];
 			}else if(0 === strpos($table, '(')) {
 				$jointable = $table;
-            }else{
-				$jointable = self::$prefix . $table;
+			}else{
+				$jointable = $this->prefix . $table;
 			}
 			
 			$this->join.=" ".$type." join ". $jointable;
@@ -117,7 +123,7 @@ class Db{
 		}
 		return $this;
 	}
-
+	
 	public function where($where){
 		if(empty($where)) return $this;
 		if(is_array($where)){
@@ -142,66 +148,6 @@ class Db{
 		}else{
 			$this->where[]=$where;
 		}
-		return $this;
-	}
-	
-	private function buildWhere(){
-		return !empty($this->where) ? " where ".join(" and ",$this->where) : "";
-	}
-	
-	private function buildValue($sv){
-		return is_array($sv) ? $this->parseItem($sv) : $this->parseValue($sv);
-	}
-	
-	private function parseItem($value){
-		if(in_array(strtolower($value[0]),array('=','<>','!=','>','<','>=','<=','like','not like','in','not in','between','not between','exists','not exists','exp','find_in_set'))){
-			switch($value[0]){
-				case 'in':
-				case 'not in':
-					$pre=is_string($value[1]) ? substr($value[1], 0, 4) : '';
-					if($pre == 'sql:'){
-						$val=substr($value[1], 4);
-					}else{
-						$val=array_unique(is_array($value[1]) ? $value[1] : explode(',', $value[1]));
-						$val=array_map(function($v){return "'".$this->escapeString($v)."'";}, $val);
-						$val=implode(',', $val);
-					}
-					return '{key} '.$value[0].'('.$val.')';
-					break;
-				case 'exists':
-				case 'not exists':
-					return ' '.$value[0].'('.$value[1].')';
-					break;
-				case 'between':
-				case 'not between':
-					return '({key} '.$value[0].' \''.$this->escapeString($value[1]).'\' and \''.$this->escapeString($value[2]).'\')';
-					break;
-				case 'exp':
-					return "({key} regexp '".$this->escapeString($value[1])."')";
-					break;
-				case 'find_in_set':
-					return "find_in_set('".$this->escapeString($value[1])."',{key})";
-					break;
-				case 'like':
-				case 'not like':
-					return "{key} ".$value[0]." '".$this->escapeString($value[1])."'";
-					break;
-				default:
-					return count($value) > 1 ? "{key} ".$value[0]." '".$this->escapeString($value[1])."'" : "{key} = '".$this->escapeString($value[0])."'";
-			}
-		}else{
-			$value = array_map(array($this,'parseValue'), $value);
-		}
-		return $value;
-	}
-
-	private function parseValue($value){
-		return '{key} '.(in_array(strtolower($value),array('null','not null')) ? 'is '.$value : "= '".$this->escapeString($value)."'");
-	}
-	
-	
-	public function limit($limit){
-		(!empty($limit) && false === strpos($limit, '(')) && $this->limit=" limit ".$limit;
 		return $this;
 	}
 	
@@ -237,46 +183,43 @@ class Db{
 	
 	public function slave($slaveName){
 		$slaveName=(string)$slaveName;
-		self::$slave=$slaveName;
+		$this->slave=$slaveName;
 		return $this;
 	}
 	
 	public function find($type="assoc"){
 		$this->limit=' limit 1';
-		$sql="select ".$this->field." from ".self::$table.$this->join.$this->buildWhere().$this->group.$this->order.$this->limit;
+		$sql="select ".$this->field." from ".$this->table.$this->join.$this->buildWhere().$this->group.$this->order.$this->limit;
 		if($this->isGetSql){
 			return $sql;
 		}
 		$this->results=$this->execute($sql, 'r');
 		$res=$this->result($type);
-		$this->_reset_sql();
 		return $res;
 	}
 	
 	public function count($key="*"){
-		$sql="select count(".$key.") as me_count from ".self::$table.$this->join.$this->buildWhere().$this->group;
+		$sql="select count(".$key.") as me_count from ".$this->table.$this->join.$this->buildWhere().$this->group;
 		if($this->isGetSql){
 			return $sql;
 		}
 		$this->results=$this->execute($sql, 'g');
 		$res=$this->result();
-		$this->_reset_sql();
 		return $res["me_count"];
 	}
 	
 	public function sum($field){
-		$sql="select sum(".$field.") as me_sum from ".self::$table.$this->join.$this->buildWhere().$this->group;
+		$sql="select sum(".$field.") as me_sum from ".$this->table.$this->join.$this->buildWhere().$this->group;
 		if($this->isGetSql){
 			return $sql;
 		}
 		$this->results=$this->execute($sql, 'g');
 		$res=$this->result();
-		$this->_reset_sql();
 		return $res["me_sum"];
 	}
 	
 	public function select($type="assoc"){
-		$sql="select ".$this->field." from ".self::$table.$this->join.$this->buildWhere().$this->group.$this->order.$this->limit;
+		$sql="select ".$this->field." from ".$this->table.$this->join.$this->buildWhere().$this->group.$this->order.$this->limit;
 		if($this->isGetSql){
 			return $sql;
 		}
@@ -286,16 +229,6 @@ class Db{
 		}
 		return $this->yieldResult();
 	}
-	private function returnResult($type){
-		$res=$this->result($type,"all");
-		$this->_reset_sql();
-		return $res;
-	}
-	private function yieldResult(){
-		while($row=$this->results->fetch_assoc()){
-			yield $row;
-		}
-	}
 	
 	public function getSql($isGet=true){
 		$this->isGetSql=$isGet;
@@ -304,7 +237,6 @@ class Db{
 	
 	public function query($sql){
 		$this->results=$this->execute($sql, 'r');
-		$this->_reset_sql();
 		return $this;
 	}
 	
@@ -372,12 +304,11 @@ class Db{
 		}
 		$key="(`".join("`,`",$key_arr)."`)";
 		$vals=join(",",$val_arr).";";
-		$sql="insert ".$modifier." into ".self::$table.$key." values".$vals;
+		$sql="insert ".$modifier." into ".$this->table.$key." values".$vals;
 		if($this->isGetSql){
 			return $sql;
 		}
 		$this->execute($sql, 'w');
-		$this->_reset_sql();
 		return !empty($this->insert_id()) ? $this->insert_id() : $this->affected_rows();
 	}
 	
@@ -387,88 +318,74 @@ class Db{
 			$strs[]=$v === NULL  ? "`".$k."` = NULL" : "`".$k."` ='".$this->escapeString($v, false)."'";
 		}
 		$updata=join(" , ",$strs);
-		$sql="update ".$modifier." ".self::$table." SET ".$updata.$this->buildWhere();
+		$sql="update ".$modifier." ".$this->table." SET ".$updata.$this->buildWhere();
 		if($this->isGetSql){
 			return $sql;
 		}
-		$this->_reset_sql();
 		return $this->execute($sql, 'w');
 	}
 	
 	public function setInc($field,$val=1){
-		$sql="update ".self::$table." SET `".$field."`=".$field."+".$val." ".$this->buildWhere();
+		$sql="update ".$this->table." SET `".$field."`=".$field."+".$val." ".$this->buildWhere();
 		if($this->isGetSql){
 			return $sql;
 		}
-		$this->_reset_sql();
 		return $this->execute($sql, 'w');
 	}
 	
 	public function setDec($field,$val=1){
-		$sql="update ".self::$table." SET `".$field."`=".$field."-".$val." ".$this->buildWhere();
+		$sql="update ".$this->table." SET `".$field."`=".$field."-".$val." ".$this->buildWhere();
 		if($this->isGetSql){
 			return $sql;
 		}
-		$this->_reset_sql();
 		return $this->execute($sql, 'w');
 	}
 	
 	public function dele(){
-		$sql="delete from ".self::$table.$this->buildWhere().$this->order.$this->limit;
+		$sql="delete from ".$this->table.$this->buildWhere().$this->order.$this->limit;
 		if($this->isGetSql){
 			return $sql;
 		}
-		$this->_reset_sql();
 		return $this->execute($sql, 'w');
 	}
 	
 	public function insert_id(){
-		return self::$_mysqli['w']->insert_id;
+		return $this->_mysqli['w']->insert_id;
 	}
 	
 	public function affected_rows(){
-		return self::$_mysqli['w']->affected_rows;
+		return $this->_mysqli['w']->affected_rows;
 	}
 	
 	public function server_info(){
-		return self::$_mysqli['r']->server_info;
+		return $this->_mysqli['r']->server_info;
 	}
-	
+
 	public function server_version(){
-		return self::$_mysqli['r']->server_version;
+		return $this->_mysqli['r']->server_version;
 	}
 	
-	private function connect(){
-		$link = mysqli_init();
-		$link->options(MYSQLI_OPT_CONNECT_TIMEOUT, 10);
-		if(!$link->real_connect($this->options["hostname"], $this->options["username"], $this->options["password"], $this->options['database'])){
-			throw new \Exception(json_encode(['message'=>'Connect Error (' . $link->connect_errno . ') '. $link->connect_error]), 1500);
+	private function returnResult($type){
+		$res=$this->result($type,"all");
+		return $res;
+	}
+	private function yieldResult(){
+		while($row=$this->results->fetch_assoc()){
+			yield $row;
 		}
-		$link->set_charset($this->options["charset"]);
-		return $link;
-	}
-	
-	private function _reset_sql(){
-		self::$table='';
-		$this->field = '*';
-		$this->join = '';
-		$this->where = array();
-		$this->limit = '';
-		$this->order = '';
-		$this->group = '';
-		$this->isGetSql = false;
 	}
 	
 	private function execute($sql, $slave='r'){
-		if(!empty(self::$slave)){
-			$slave=self::$slave;
+		if(!empty($this->slave)){
+			$slave=$this->slave;
 		}
-		if(empty(self::$_mysqli[$slave])){
-			self::$_mysqli[$slave]=$this->connect();
+		if(empty($this->_mysqli[$slave])){
+			$this->_mysqli[$slave]=$this->createLink();
 		}
-		$res=self::$_mysqli[$slave]->query($sql, MYSQLI_USE_RESULT);
+		$res=$this->_mysqli[$slave]->query($sql, MYSQLI_USE_RESULT);
+		$this->_reset_sql();
 		if(!$res){
-			$error=self::$_mysqli[$slave]->error_list;
+			$error=$this->_mysqli[$slave]->error_list;
 			$errorMsg=[
 				'message'=>[],
 				'sql'=>$sql,
@@ -484,9 +401,99 @@ class Db{
 		}
 		return $res;
 	}
+	
+	private function createLink(){
+		$link = mysqli_init();
+		$link->options(MYSQLI_OPT_CONNECT_TIMEOUT, 10);
+		if(!$link->real_connect($this->options["hostname"], $this->options["username"], $this->options["password"], $this->options['database'])){
+			throw new \Exception(json_encode(['message'=>'Connect Error (' . $link->connect_errno . ') '. $link->connect_error]), 1500);
+		}
+		$link->set_charset($this->options["charset"]);
+		return $link;
+	}
+	
+	private function _reset_sql(){
+		$this->table='';
+		$this->field = '*';
+		$this->join = '';
+		$this->where = array();
+		$this->limit = '';
+		$this->order = '';
+		$this->group = '';
+		$this->isGetSql = false;
+	}
+	
+	private function buildWhere(){
+		return !empty($this->where) ? " where ".join(" and ",$this->where) : "";
+	}
+	
+	private function buildValue($sv){
+		return is_array($sv) ? $this->parseItem($sv) : $this->parseValue($sv);
+	}
+
+	private function parseItem($value){
+		if(in_array(strtolower($value[0]),array('=','<>','!=','>','<','>=','<=','like','not like','in','not in','between','not between','exists','not exists','exp','find_in_set'))){
+			switch($value[0]){
+				case 'in':
+				case 'not in':
+					$pre=is_string($value[1]) ? substr($value[1], 0, 4) : '';
+					if($pre == 'sql:'){
+						$val=substr($value[1], 4);
+					}else{
+						$val=array_unique(is_array($value[1]) ? $value[1] : explode(',', $value[1]));
+						$val=array_map(function($v){return "'".$this->escapeString($v)."'";}, $val);
+						$val=implode(',', $val);
+					}
+					return '{key} '.$value[0].'('.$val.')';
+					break;
+				case 'exists':
+				case 'not exists':
+					return ' '.$value[0].'('.$value[1].')';
+					break;
+				case 'between':
+				case 'not between':
+					return '({key} '.$value[0].' \''.$this->escapeString($value[1]).'\' and \''.$this->escapeString($value[2]).'\')';
+					break;
+				case 'exp':
+					return "({key} regexp '".$this->escapeString($value[1])."')";
+					break;
+				case 'find_in_set':
+					return "find_in_set('".$this->escapeString($value[1])."',{key})";
+					break;
+				case 'like':
+				case 'not like':
+					return "{key} ".$value[0]." '".$this->escapeString($value[1])."'";
+					break;
+				default:
+					return count($value) > 1 ? "{key} ".$value[0]." '".$this->escapeString($value[1])."'" : "{key} = '".$this->escapeString($value[0])."'";
+			}
+		}else{
+			$value = array_map(array($this,'parseValue'), $value);
+		}
+		return $value;
+	}
+
+	private function parseValue($value){
+		return '{key} '.(in_array(strtolower($value),array('null','not null')) ? 'is '.$value : "= '".$this->escapeString($value)."'");
+	}
+	
+	public function limit($limit){
+		(!empty($limit) && false === strpos($limit, '(')) && $this->limit=" limit ".$limit;
+		return $this;
+	}
+	
 	private function escapeString($str, $filterBackslash=true){
 		$filterBackslash && $str=str_replace('\\','\\\\',$str);
-        return addslashes($str);
-    }
+		return addslashes($str);
+	}
 	
+	public function __call($method, $params){
+		in_array($method, ['name', 'table']) && $method='_'.$method;
+		return call_user_func_array([$this, $method], $params);
+	}
+	
+	public static function __callStatic($method, $params){
+		in_array($method, ['name', 'table']) && $method='_'.$method;
+		return call_user_func_array([static::connect(), $method], $params);
+	}
 }

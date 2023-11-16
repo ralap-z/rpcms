@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS `%pre%attachment` (
   `logId` int(10) NULL DEFAULT '0',
   `pageId` int(10) NULL DEFAULT '0' COMMENT '单页ID',
   `authorId` int(10) NOT NULL,
-  `createTime` datetime DEFAULT NULL,
+  `createTime` datetime NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `filetype` (`filetype`),
   KEY `logId` (`logId`),
@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS `%pre%category` (
   `temp_list` varchar(200) DEFAULT '',
   `temp_logs` varchar(200) DEFAULT '',
   `is_submit` tinyint(1) DEFAULT '0' COMMENT '是否支持投稿, 0不支持 1支持',
-  `createTime` datetime DEFAULT NULL,
+  `createTime` datetime NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `alias` (`alias`),
   KEY `sort` (`sort`),
@@ -49,7 +49,7 @@ CREATE TABLE IF NOT EXISTS `%pre%comment` (
   `content` text NOT NULL,
   `ip` varchar(15) NOT NULL,
   `agent` text NOT NULL,
-  `createTime` datetime DEFAULT NULL,
+  `createTime` datetime NULL DEFAULT CURRENT_TIMESTAMP,
   `status` tinyint(1) DEFAULT '0' COMMENT '状态, 0发布 1审核',
   PRIMARY KEY (`id`),
   KEY `logId` (`logId`),
@@ -98,8 +98,9 @@ CREATE TABLE IF NOT EXISTS `%pre%logs` (
   `comnum` int(10) DEFAULT '0' COMMENT '评论量',
   `upnum` int(10) DEFAULT '0' COMMENT '点赞量',
   `template` varchar(200) DEFAULT '',
-  `updateTime` datetime DEFAULT NULL,
-  `createTime` datetime DEFAULT NULL,
+  `updateTime` datetime on update CURRENT_TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+  `createTime` datetime NULL DEFAULT CURRENT_TIMESTAMP,
+  `weight` DOUBLE(15,6) NULL DEFAULT '0',
   `extend` longtext NULL DEFAULT NULL COMMENT '扩展数据',
   `status` tinyint(1) DEFAULT '0' COMMENT '状态, 0发布 1审核 2草稿 -1下架 -2审核不通过',
   PRIMARY KEY (`id`),
@@ -114,6 +115,7 @@ CREATE TABLE IF NOT EXISTS `%pre%logs` (
   KEY `specialId` (`specialId`),
   KEY `tages` (`tages`),
   KEY `upnum` (`upnum`),
+  KEY `weight` (`weight`),
   KEY `isTop` (`status`,`isTop`,`updateTime`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='文章列表';
 
@@ -148,7 +150,7 @@ CREATE TABLE IF NOT EXISTS `%pre%pages` (
   `authorId` int(10) NOT NULL,
   `comnum` int(10) DEFAULT '0' COMMENT '评论量',
   `template` varchar(200) DEFAULT '',
-  `createTime` datetime DEFAULT NULL,
+  `createTime` datetime NULL DEFAULT CURRENT_TIMESTAMP,
   `isRemark` tinyint(1) DEFAULT '0' COMMENT '是否评论 0否 1是',
   `extend` longtext NULL DEFAULT NULL COMMENT '扩展数据',
   `status` tinyint(1) DEFAULT '0' COMMENT '状态, 0发布 1审核 2草稿 -1下架',
@@ -209,9 +211,35 @@ CREATE TABLE IF NOT EXISTS `%pre%special` (
   `seo_desc` text,
   `upnum` int(10) DEFAULT '0' COMMENT '点赞量',
   `temp_list` varchar(200) DEFAULT '',
-  `updateTime` datetime DEFAULT NULL,
-  `createTime` datetime DEFAULT NULL,
+  `updateTime` datetime NULL DEFAULT CURRENT_TIMESTAMP,
+  `createTime` datetime NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `alias` (`alias`),
   KEY `title` (`title`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='专题';
+
+DELIMITER $$
+CREATE TRIGGER `updateWeight` BEFORE UPDATE ON `%pre%logs`
+FOR EACH ROW BEGIN
+	DECLARE logNumber DOUBLE DEFAULT 0;
+	DECLARE views INT;
+	DECLARE comnum INT;
+	DECLARE upnum INT;
+	DECLARE daysCreate INT;
+	DECLARE daysUpdate INT;
+	DECLARE configJson VARCHAR(255);
+	IF OLD.views != NEW.views OR OLD.comnum != NEW.comnum OR OLD.upnum != NEW.upnum THEN
+		SELECT cvalue->"$.logWeight" INTO configJson FROM %pre%config WHERE cname = "webconfig";
+		SET views = IFNULL(JSON_UNQUOTE(JSON_EXTRACT(configJson, '$.views')), 0);
+		SET comnum = IFNULL(JSON_UNQUOTE(JSON_EXTRACT(configJson, '$.comnum')), 0);
+		SET upnum = IFNULL(JSON_UNQUOTE(JSON_EXTRACT(configJson, '$.upnum')), 0);
+		SET logNumber = NEW.views * views + NEW.comnum * comnum + NEW.upnum * upnum;
+		SET daysCreate=TIMESTAMPDIFF(SECOND, NEW.createTime, NOW());
+		SET daysUpdate=TIMESTAMPDIFF(SECOND, NEW.updateTime, NOW());
+		IF NEW.updateTime != NEW.createTime AND daysUpdate < 86400*7 THEN
+			SET daysCreate=daysCreate - daysUpdate;
+		END IF;
+		SET NEW.weight = logNumber / POW(daysCreate/ 86400, 2);
+	END IF;
+END$$
+DELIMITER ;

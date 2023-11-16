@@ -69,17 +69,21 @@ class Index{
 		global $App;
 		set_error_handler(null);
 		$data=input('post.');
-		$data['tablepre']=!empty($data['tablepre']) ? $data['tablepre'] : 'me_';
+		$data['tablepre']=!empty($data['tablepre']) ? $data['tablepre'] : 'rp_';
 		if(empty($data['dbhost']) || empty($data['dbuser']) || empty($data['dbpsw']) || empty($data['dbname']) || empty($data['username']) || empty($data['userpsw'])){
 			return json(array('code'=>-1, 'msg'=>'数据错误，请填写完整信息！'));
 		}
-		if(!$this->links=@mysqli_connect($data['dbhost'], $data['dbuser'], $data['dbpsw'])){
-			return json(array('code'=>-1, 'msg'=>'无法连接数据库服务器，请检查配置！'));
+		try{
+			if(!$this->links=@mysqli_connect($data['dbhost'], $data['dbuser'], $data['dbpsw'])){
+				return json(array('code'=>-1, 'msg'=>'无法连接数据库服务器，请检查配置！'));
+			}
+			if(!@mysqli_query($this->links,"CREATE DATABASE IF NOT EXISTS `".$data['dbname']."`;")){
+				return json(array('code'=>-1, 'msg'=>'成功连接数据库，但是指定的数据库不存在并且无法自动创建，请先通过其他方式建立数据库！'));
+			}
+			mysqli_select_db($this->links,$data['dbname']);
+		}catch(\mysqli_sql_exception $e){
+			return json(array('code'=>-1, 'msg'=>'数据库操作异常，请检查配置。'."\r\n".'错误：'.$e->getMessage()));
 		}
-		if(!@mysqli_query($this->links,"CREATE DATABASE IF NOT EXISTS `".$data['dbname']."`;")){
-			return json(array('code'=>-1, 'msg'=>'成功连接数据库，但是指定的数据库不存在并且无法自动创建，请先通过其他方式建立数据库！'));
-		}
-		mysqli_select_db($this->links,$data['dbname']);
 		$query = mysqli_query($this->links,"SELECT COUNT(*) as nums FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA='".$data['dbname']."' AND TABLE_NAME='".$data['tablepre']."config'");
 		$row=mysqli_fetch_row($query);
 		if($row[0] > 0){
@@ -208,7 +212,7 @@ class Index{
 		return @file_put_contents($configFile, $config);
 	}
 	
-	private function _sql_execute($sql,$tablepre = '',$default = 'me_') {
+	private function _sql_execute($sql,$tablepre = '',$default = 'rp_') {
 		$sqls = $this->_sql_split($sql,$tablepre,$default);
 		if(is_array($sqls)){
 			foreach($sqls as $sql){
@@ -227,6 +231,15 @@ class Index{
 		$sql = str_replace("\r", "\n", $sql);
 		$ret = array();
 		$num = 0;
+		$endRet=array();
+		preg_match_all('/DELIMITER\s+([^\s]+)\s+(.*?)\s+DELIMITER ;/s', $sql, $matches, PREG_SET_ORDER);
+		if(!empty($matches)){
+			foreach($matches as $k=>$v){
+				if(empty($v[2])) continue;
+				$endRet[]=str_replace($v[1], ';', $v[2]);
+			}
+			$sql=preg_replace('/DELIMITER\s+([^\s]+)\s+(.*?)\s+DELIMITER ;/s', '', $sql);
+		}
 		$queriesarray = explode(";\n", trim($sql));
 		unset($sql);
 		foreach($queriesarray as $query){
@@ -239,7 +252,7 @@ class Index{
 			}
 			$num++;
 		}
-		return $ret;
+		return array_merge($ret, $endRet);
 	}
 
 	private function isWritable($file){

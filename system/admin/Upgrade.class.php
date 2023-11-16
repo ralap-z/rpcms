@@ -118,7 +118,17 @@ class Upgrade extends Base{
 	}
 	
 	private function executeSql($sql){
+		$endSql=array();
+		preg_match_all('/DELIMITER\s+([^\s]+)\s+(.*?)\s+DELIMITER ;/s', $sql, $matches, PREG_SET_ORDER);
+		if(!empty($matches)){
+			foreach($matches as $k=>$v){
+				if(empty($v[2])) continue;
+				$endSql[]=str_replace($v[1], ';', $v[2]);
+			}
+			$sql=preg_replace('/DELIMITER\s+([^\s]+)\s+(.*?)\s+DELIMITER ;/s', '', $sql);
+		}
 		$sql = explode(';', $sql);
+		$sql=array_merge($sql, $endSql);
 		$options = \rp\Config::get('db');
 		$db=Db::instance();
 		$db::transaction();

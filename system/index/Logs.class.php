@@ -20,7 +20,7 @@ class Logs extends base{
 	public function index(){
 		$total=Cache::read('total');
 		$page=isset($this->params['page']) ? intval($this->params['page']) : 1;
-		$logData=$this->LogsMod->page($page)->order(array('a.updateTime'=>'desc'))->select();
+		$logData=$this->LogsMod->page($page)->order($this->getLogOrder())->select();
 		$logData['count']=!empty($total) ? $total['logNum'] : 0;
 		unset($total);
 		$pageHtml=pageInationHome($logData['count'],$logData['limit'],$logData['page'],'index');

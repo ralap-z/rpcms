@@ -53,7 +53,7 @@ class Config{
 	* @param  string $name 配置参数名（支持二级配置 . 号分割）
 	* @return mixed
 	*/
-	public static function get($name = null){
+	public static function get($name = null, $default=null){
 		// 无参数时获取所有
 		if(empty($name)){
 			return self::$config;
@@ -61,12 +61,12 @@ class Config{
 		// 非二级配置时直接返回
 		if (!strpos($name, '.')) {
 			$name = strtolower($name);
-			return isset(self::$config[$name]) ? self::$config[$name] : null;
+			return isset(self::$config[$name]) ? self::$config[$name] : $default;
 		}
 		// 二维数组设置和获取支持
 		$nameArr    = explode('.', $name, 2);
 		$nameArr[0] = strtolower($nameArr[0]);
-		return isset(self::$config[$nameArr[0]][$nameArr[1]]) ? self::$config[$nameArr[0]][$nameArr[1]] : null;
+		return isset(self::$config[$nameArr[0]][$nameArr[1]]) ? self::$config[$nameArr[0]][$nameArr[1]] : $default;
 	}
 	
 	/**

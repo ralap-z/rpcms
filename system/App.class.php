@@ -92,6 +92,7 @@ class App{
 		$moduleConfig=SETTINGPATH.'/config/'.$this->route['module'].'.php';
 		if(!in_array($this->route['module'],array('index','install','admin','api')) && is_file($moduleConfig)){
 			Config::set(include_once $moduleConfig);
+			Config::set(['db_connect'=>$this->route['module']]);
 			Db::close();
 		}
 		return $this->invokeClass($controllerName, $this->route['action']);

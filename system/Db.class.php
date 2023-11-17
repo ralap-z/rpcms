@@ -27,21 +27,17 @@ class Db{
 	private $isGetSql = false;
 	private $results = '';
 	
-	public function __construct($connectName='default'){
-		if($connectName == 'default'){
-			$this->options=Config::get('db');
-		}else{
-			$config=SETTINGPATH.'/config/'.$connectName.'.php';
-			if(!is_file($config)){
-				throw new \Exception(json_encode(['message'=>'database config file is not find']));
-			}
-			$config=include $config;
-			$this->options=$config['db'];
+	public function __construct($connectName){
+		$config=SETTINGPATH.'/config/'.$connectName.'.php';
+		if(!is_file($config)){
+			throw new \Exception(json_encode(['message'=>'database config file is not find']));
 		}
+		$config=include $config;
+		$this->options=$config['db'];
 		$this->prefix=$this->options["prefix"];
 	}
 	
-	public static function connect($name='default'){
+	public static function connect($name=''){
 		return self::instance($name);
 	}
 	
@@ -65,7 +61,10 @@ class Db{
 		self::$instance=NULL;
 	}
 	
-	public static function instance($connectName='default'){
+	public static function instance($connectName=''){
+		if(empty($connectName)){
+			$connectName=config::get('db_connect', 'default');
+		}
 		if(empty(self::$instance[$connectName])){
 			$obj=new self($connectName);
 			empty($obj->_mysqli['r']) && $obj->_mysqli['r']=$obj->createLink();

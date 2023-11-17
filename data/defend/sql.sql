@@ -98,7 +98,7 @@ CREATE TABLE IF NOT EXISTS `%pre%logs` (
   `comnum` int(10) DEFAULT '0' COMMENT '评论量',
   `upnum` int(10) DEFAULT '0' COMMENT '点赞量',
   `template` varchar(200) DEFAULT '',
-  `updateTime` datetime on update CURRENT_TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+  `updateTime` datetime NULL DEFAULT CURRENT_TIMESTAMP,
   `createTime` datetime NULL DEFAULT CURRENT_TIMESTAMP,
   `weight` DOUBLE(15,6) NULL DEFAULT '0',
   `extend` longtext NULL DEFAULT NULL COMMENT '扩展数据',

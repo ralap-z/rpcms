@@ -109,14 +109,16 @@ CREATE TABLE IF NOT EXISTS `%pre%logs` (
   KEY `comnum` (`comnum`),
   KEY `updateTime` (`updateTime`),
   KEY `views` (`views`),
-  KEY `title` (`title`),
   KEY `authorId` (`authorId`),
   KEY `cateId` (`cateId`),
   KEY `specialId` (`specialId`),
   KEY `tages` (`tages`),
   KEY `upnum` (`upnum`),
   KEY `weight` (`weight`),
-  KEY `isTop` (`status`,`isTop`,`updateTime`)
+  KEY `isTop` (`status`,`isTop`,`updateTime`),
+  FULLTEXT(title, content) WITH PARSER ngram,
+  FULLTEXT(title) WITH PARSER ngram,
+  FULLTEXT(content) WITH PARSER ngram
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='文章列表';
 
 CREATE TABLE IF NOT EXISTS `%pre%nav` (

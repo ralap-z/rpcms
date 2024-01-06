@@ -16,6 +16,7 @@ class LogsMod{
 	private $pageMax;
 	private $tagesData;
 	private $cateData;
+	private $fieldFirst='a.id';
 	
 	public function __construct(){
 		$this->limit=!empty(Config::get('webConfig.pagesize')) ? Config::get('webConfig.pagesize') : 10;
@@ -54,7 +55,9 @@ class LogsMod{
 	
 	public function search($title){
 		$title=strip_tags(strDeep($title));
-		$this->whereArr['a.title|a.content']=array('like','%'.$title.'%');
+		$this->whereStr='MATCH(title, content) Against(\''.addslashes($title).'\' IN BOOLEAN MODE)';
+		$this->fieldFirst.=',(match(title) Against(\''.addslashes($title).'\' IN BOOLEAN MODE)*2 + match(content) Against(\''.addslashes($title).'\' IN BOOLEAN MODE)) as score';
+		$this->order='score';
 		return $this;
 	}
 	
@@ -109,7 +112,7 @@ class LogsMod{
 	}
 	
 	public function select(){
-		$sonSql=Db::name('logs')->alias('a')->where($this->whereArr)->where($this->whereStr)->field('a.id')->limit(($this->page-1)*$this->limit.','.$this->limit)->order($this->order)->getSql()->select();	
+		$sonSql=Db::name('logs')->alias('a')->where($this->whereArr)->where($this->whereStr)->field($this->fieldFirst)->limit(($this->page-1)*$this->limit.','.$this->limit)->order($this->order)->getSql()->select();	
 		$list=$this->getData($sonSql);
 		Hook::doHook('index_logs_list',array(&$list));
 		return array('count'=>0,'limit'=>$this->limit,'page'=>$this->page,'list'=>$list);

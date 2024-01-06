@@ -32,7 +32,7 @@ class View{
 	
 	public static function assign($name, $value=''){
 		if(is_array($name)){
-            self::$data=array_merge($this->data, $name);
+			self::$data=array_merge(self::$data, $name);
         }else{
 			self::$data[$name]=$value;
         }
@@ -175,7 +175,7 @@ class View{
 		$view=self::instance();
 		$view->includeFile[$tempDir]=filemtime($tempDir);
 		$content=$view->CompileFile(@file_get_contents($tempDir));
-		$content=preg_replace(['/<\?php.*if\s+[\(]!defined\([\'\"]CMSPATH[\'\"]\).*\?>/','/\?>\s*<\?php\s/s'], ['',''], $content);
+		$content=preg_replace(['/<\?php[^>]+if\s+[\(]!defined\([\'\"]CMSPATH[\'\"]\)[^>]+\?>/','/\?>\s*<\?php\s/s'], ['',''], $content);
 		$content="<?php if(!defined('CMSPATH')) exit();/*".serialize($view->includeFile)."*/?>\n".$this->compress_html($content);
 		@file_put_contents($cashFiles, $content);
 		$view->includeFile=[];
@@ -224,8 +224,8 @@ class View{
         if($i = preg_match_all('/\{(php|pre)\}([\D\d]+?)\{\/(php|pre)\}/si', $content, $matches) > 0){
             if(isset($matches[2])){
                 foreach($matches[2] as $j => $p){
-                    $content=str_replace($p, '<!-- parse_middle_code'.$j.'-->', $content);
-                    $this->uncompiledCodeStore[$j]=['type'=>$matches[1][$j], 'content'=>$p];
+					$content=preg_replace('/'.preg_quote($p, '/').'/', '<!-- parse_middle_code'.$j.'-->', $content, 1);
+					$this->uncompiledCodeStore[$j]=['type'=>$matches[1][$j], 'content'=>$p];
                 }
             }
         }

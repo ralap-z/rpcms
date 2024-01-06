@@ -153,13 +153,13 @@ class Index extends Base{
 				$this->App->resetHook();
 				break;
 			case 'temp':
-				$cashFiles=CMSPATH .'/data/cache/index';
+				$cashFiles=CMSPATH .'/data/temp/index';
 				if(file_exists($cashFiles)){
 					deleteFile($cashFiles);
 				}
 				break;
 			case 'plugin':
-				$cashFiles=CMSPATH .'/data/cache/plugin';
+				$cashFiles=CMSPATH .'/data/temp/plugin';
 				if(file_exists($cashFiles)){
 					deleteFile($cashFiles);
 				}

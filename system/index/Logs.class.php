@@ -73,7 +73,7 @@ class Logs extends base{
 		if(Hook::hasHook('index_search')){
 			return Hook::doHook('index_search',array($key,$page),true)[0];
 		}
-		$logData=$this->LogsMod->title($key)->page($page)->select();
+		$logData=$this->LogsMod->search($key)->page($page)->select();
 		$logData['count']=$this->LogsMod->getCount();
 		$pageHtml=pageInationHome($logData['count'],$logData['limit'],$logData['page'],'search',$key);
 		$key=htmlentities($key);

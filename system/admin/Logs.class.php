@@ -25,8 +25,9 @@ class Logs extends Base{
 		$limit=10;
 		$where=array();
 		$search=array();
+		$whereStr='';
 		if(!empty($key)){
-			$where['a.title']=array('like','%'.$key.'%');
+			$whereStr='MATCH(title) Against(\''.addslashes($key).'\' IN BOOLEAN MODE)';
 			$search[]="key=".$key;
 		}
 		if(!empty($cateId)){
@@ -54,7 +55,7 @@ class Logs extends Base{
 				'a.id'=>'desc',
 			);
 		}
-		$count=Db::name('logs')->alias('a')->where($where)->field('a.id')->count();
+		$count=Db::name('logs')->alias('a')->where($whereStr)->where($where)->field('a.id')->count();
 		$pages=ceil($count / $limit);
         if($page >= $pages && $pages > 0){
             $page=$pages;
@@ -62,7 +63,7 @@ class Logs extends Base{
 		$res=Db::name('logs')->alias('a')->join(array(
 			array('category as b force index(PRIMARY)','a.cateId=b.id','left'),
 			array('user as c force index(PRIMARY)','a.authorId=c.id','left'),
-		))->where($where)->field('a.id,a.title,a.comnum,a.upnum,a.views,a.isTop,a.createTime,a.status,b.cate_name,c.nickname')->order($orderBy)->limit(($page-1)*$limit.','.$limit)->select();
+		))->where($whereStr)->where($where)->field('a.id,a.title,a.comnum,a.upnum,a.views,a.isTop,a.createTime,a.status,b.cate_name,c.nickname')->order($orderBy)->limit(($page-1)*$limit.','.$limit)->select();
 		$pageHtml=pageInation($count,$limit,$page,'',join('&',$search));
 		View::assign('categoryHtml',me_createCateOption($cateId));
 		View::assign('tages',Cache::read('tages'));

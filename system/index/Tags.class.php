@@ -50,6 +50,7 @@ class Tags extends base{
 		$this->assign('listType','tages');
 		$this->assign('logList',$logData['list']);
 		$this->assign('pageHtml',$pageHtml);
+		$this->assign('tag',$tagData);
 		return $this->display('/'.$template);
 	}
 }

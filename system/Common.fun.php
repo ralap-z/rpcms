@@ -168,12 +168,13 @@ function csrf_token_check(){
 */
 function checkForm($type,$val){
 	$pattern=array(
-		'url'=>"/((?:(https|http|ftp|rtsp|mms):)?\/\/)?((?:(1\d{2}|2[0-5]{2}|\d{1,2})\.){3}(1\d{2}|2[0-5]{2}|\d{1,2}){1,3}|(?:[0-9a-z_!~*'()-]+\.)*(?:[0-9a-z][0-9a-z-]{0,61})?[0-9a-z]\.([a-z]{2,6}))(?::[0-9]{1,4})?((\/[0-9a-z_!~*'\(\).;?:@&=+$,%\#-]+)+)?(\/?)/i",
+		'url'=>"/((?:(https|http|ftp|rtsp|mms):)?\/\/)?((?:(1\d{2}|25[0-5]|2[0-4][0-9]|\d{1,2})\.){3}(1\d{2}|25[0-5]|2[0-4][0-9]|\d{1,2}){1,3}|(?:[0-9a-z_!~*'()-]+\.)*(?:[0-9a-z][0-9a-z-]{0,61})?[0-9a-z]\.([a-z]{2,6}))(?::[0-9]{1,4})?((\/[0-9a-z_!~*'\(\).;?:@&=+$,%\#-]+)+)?(\/?)/i",
 		'email'=>'/^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/i',
 		'phone'=>'/^1[3,4,5,6,7,8]\d{9}$/i',
 		'telephone'=>'/^0(([1,2]\d)|([3-9]\d{2}))-\d{7,8}$/i',
 		'en'=>'/^[a-zA-Z]+$/i',
 		'400phone'=>'/^400((-| )?\d{3,4}){2}$/i',
+		'ip'=>'/^((25[0-5]|2[0-4][0-9]|\d{1,2}?)\.){3}(25[0-5]|2[0-4][0-9]|\d{1,2}?)/i',
 	);
 	if(isset($pattern[$type]) && !preg_match($pattern[$type], $val)){
 		return false;
@@ -622,6 +623,21 @@ function clear_html($content, $tages, $retainContent=false){
 		$content = preg_replace($preg, $replace, $content);
 	}
 	return $content;
+}
+
+/*
+*parse_url 逆向，组装URL
+*@param urlArr url数组
+*/
+function build_url(array $urlArr){
+	$url=[];
+	!empty($urlArr['scheme']) && !empty($urlArr['host']) && $url[]=$urlArr['scheme'].':';
+	!empty($urlArr['host']) && $url[]='//'.$urlArr['host']; 
+	!empty($urlArr['port']) && $url[]=':'.$urlArr['port'];
+	!empty($urlArr['path']) && $url[]=$urlArr['path'];
+	!empty($urlArr['query']) && $url[]='?'. (is_array($urlArr['query']) ? http_build_query($urlArr['query']) : $urlArr['query']);
+	!empty($urlArr['fragment']) && $url[]='#'.urlencode($urlArr['fragment']);
+	return implode('', $url);
 }
 
 function uploadFiles($file,$logId=0,$pageId=0){

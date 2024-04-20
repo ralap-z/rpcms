@@ -72,7 +72,7 @@ class Plugin extends Base{
 		if(empty($res)){
 			rpMsg('插件未安装');
 		}
-		$pluginName='plugin\\'.strtolower($plugin).'\\'.ucfirst($controller);
+		$pluginName='plugin\\'.$plugin.'\\'.ucfirst($controller);
 		$pluginClass=new $pluginName;
 		$res='';
 		if(method_exists($pluginClass,$action)){
@@ -134,7 +134,7 @@ class Plugin extends Base{
 		if(!Db::name('plugin')->where("ppath='".$plugin."'")->find()){
 			return array('code'=>-1,'msg'=>'插件已卸载');
 		}
-		$pluginName='plugin\\'.strtolower($plugin).'\\Index';
+		$pluginName='plugin\\'.$plugin.'\\Index';
 		$pluginClass=new $pluginName;
 		if(method_exists($pluginClass,'uninstall')){
 			$res=$pluginClass->uninstall();

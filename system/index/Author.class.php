@@ -38,6 +38,7 @@ class Author extends base{
 		$this->assign('listType','author');
 		$this->assign('logList',$logData['list']);
 		$this->assign('pageHtml',$pageHtml);
+		$this->assign('author',$user[$userId]);
 		return $this->display('/list');
 	}
 }

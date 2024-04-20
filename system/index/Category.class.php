@@ -48,6 +48,7 @@ class Category extends base{
 		$this->assign('cateName',$cateData['cate_name']);
 		$this->assign('logList',$logData['list']);
 		$this->assign('pageHtml',$pageHtml);
+		$this->assign('category',$cateData);
 		return $this->display('/'.$template);
 	}
 	

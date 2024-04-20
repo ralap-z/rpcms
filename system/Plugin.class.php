@@ -108,7 +108,7 @@ class Plugin{
 		if(!file_exists($controllerFile)){
 			return false;
 		}
-		$pluginObj='plugin\\'.strtolower($name).'\\'.ucfirst($controller);
+		$pluginObj='plugin\\'.$name.'\\'.ucfirst($controller);
 		$pluginClass=new $pluginObj;
 		if(method_exists($pluginClass,$action)){
 			return $pluginClass->$action($data);

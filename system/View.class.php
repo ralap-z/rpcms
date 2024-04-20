@@ -188,7 +188,10 @@ class View{
 				$string=str_replace($val, '{*=*=*=*'.$key.'*=*=*=*}', $string);
 			}
 		}
-		$string=trim(preg_replace(["/> *([^ ]*) *</","//","'/\*[^*]*\*/'","/\r\n/","/\n/","/\t/",'/>[ ]+</'], [">\\1<",'','','','','','><'], $string));
+		$string=preg_replace_callback('/<(style|script)\b[^>]*>(.*?)<\/\1>|<\?php(.*?)\?>|{php}(.*?){\/php}/is', function($matches){
+			return preg_replace(['/\/\*.*?\*\//s', '/\/\/.*?$\n/m'], ' ', ($matches[0] ?? ''));
+		}, $string);
+		$string=preg_replace(["/> *([^ ]*) *</","/\r?\n/","/\t/",'/<!--[^!]*-->/','/>[ ]+</'], [">\\1<",'','','','><'], $string);
 		if(is_array($matches[0])){
 			foreach($matches[0] as $key=>$val){
 				$string=str_replace('{*=*=*=*'.$key.'*=*=*=*}', $val, $string);

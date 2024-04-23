@@ -189,7 +189,6 @@ class View{
 			}
 		}
 		/*
-		* 暂时关闭，单行注释有BUG
 		$string=preg_replace_callback('/<(style|script)\b[^>]*>(.*?)<\/\1>|<\?php(.*?)\?>|{php}(.*?){\/php}/is', function($matches){
 			return preg_replace(['/\/\*.*?\*\//s', '/\/\/.*?$\n/m'], ' ', ($matches[0] ?? ''));
 		}, $string);

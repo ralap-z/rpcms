@@ -149,7 +149,7 @@ class Plugin{
 		$plugin=Db::name('plugin')->where('status=0')->select();
 		foreach($plugin as $v){
 			if(file_exists(PLUGINPATH .'/'. $v['ppath']) && file_exists(PLUGINPATH . '/'. $v['ppath'] .'/Index.class.php')){
-				$nameF='plugin\\'.strtolower($v['ppath']).'\\Index';
+				$nameF='plugin\\'.$v['ppath'].'\\Index';
 				$plugin=new $nameF;
 				if(method_exists($plugin,'addHook')){
 					$hooks=$plugin->addHook();

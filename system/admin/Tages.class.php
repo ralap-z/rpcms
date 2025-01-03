@@ -11,18 +11,35 @@ class Tages extends Base{
 	}
 	
 	public function index(){
+		$key=input('key') ? input('key') : '';
 		$page=intval(input('page')) ? intval(input('page')) : 1;
 		$limit=10;
-		$tages=Cache::read('tages');
-		$count=count($tages);
-		$pages = ceil($count / $limit);
-        if($page >= $pages && $pages > 0){
-            $page = $pages;
-        }
-		$res=array_slice($tages, ($page-1)*$limit, $limit);
-		$pageHtml=pageInation($count,$limit,$page);
+		$where=array();
+		$search=array();
+		if(!empty($key)){
+			$where['tagName']=array('like',$key.'%');
+			$search[]="key=".$key;
+		}
+		if(empty($where)){
+			$tages=Cache::read('tages');
+			$count=count($tages);
+			$pages = ceil($count / $limit);
+			if($page >= $pages && $pages > 0){
+				$page = $pages;
+			}
+			$res=array_slice($tages, ($page-1)*$limit, $limit);
+		}else{
+			$count=Db::name('tages')->where($where)->field('id')->count();
+			$pages=ceil($count / $limit);
+			if($page >= $pages && $pages > 0){
+				$page=$pages;
+			}
+			$res=Db::name('tages')->where($where)->limit(($page-1)*$limit.','.$limit)->select();
+		}
+		$pageHtml=pageInation($count,$limit,$page,'',join('&',$search));
 		View::assign('list',$res);
 		View::assign('pageHtml',$pageHtml);
+		View::assign('s_key',$key);
 		View::assign('tempFileHtml',$this->getTempFile());
 		return View::display('/tages_index');
 	}

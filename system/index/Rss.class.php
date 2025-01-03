@@ -52,6 +52,9 @@ class Rss extends base{
 	private function getLastTime(){
 		$logTime=Db::name('logs')->where('status=0')->order(array('updateTime'=>'desc'))->field('updateTime')->find();
 		$pageTime=Db::name('pages')->where('status=0')->order(array('createTime'=>'desc'))->field('createTime')->find();
+		$nowTime=date('Y-m-d H:i:s');
+		$logTime=!empty($logTime) ? $logTime : ['updateTime'=>$nowTime];
+		$pageTime=!empty($pageTime) ? $pageTime : ['createTime'=>$nowTime];
 		return max($logTime['updateTime'],$pageTime['createTime']);
 	}
 	

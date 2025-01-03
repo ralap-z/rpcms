@@ -6,6 +6,14 @@
 .addSpecial .me_input label{width: 5rem;text-align: right;}
 .me_model .rp_row{text-align: right;}
 .imgUpload:after{padding-bottom: 57%;}
+.logsList{}
+.logsList li{line-height: 2.2;}
+.logsList .text{overflow: hidden;text-overflow: ellipsis;white-space: nowrap;display: block;}
+.logsList li:hover{background: #f5f5f5;}
+.logsList .operBtn{color: #c32d25;float: right;}
+.warpAdd{display:none;}
+.logAdd_back{float: right;border: 0;background: none;}
+.logAdd_back:hover{background: none;}
 </style>
 <div class="me_body">
 	<div class="me_head">
@@ -42,6 +50,7 @@
 					<td>{$v['logNum']}</td>
 					<td>
 						<a href="javascript:;" class="operBtn update">编辑</a>
+						<a href="javascript:;" class="operBtn logs">文章</a>
 						<a href="javascript:;" class="operBtn delete">删除</a>
 					</td>
 				</tr>
@@ -72,7 +81,61 @@
 		</form>
 	</div>
 </div>
+<div class="me_model me_anim_bounce me_model_logs">
+	<div class="title">专题文章</div>
+	<a class="me-icon me-icon-close me_model_close" href="javascript:;" data-callback="reaset"></a>
+	<div class="contentes">
+		<div class="warpList">
+			<div class="clear" style="margin-bottom: 1rem;">
+				<button class="rp_btn right addLogs">添加文章</button>
+			</div>
+			<ul class="logsList listHas"></ul>
+		</div>
+		<div class="warpAdd">
+			<div class="logsAdd_form">
+				<div class="me_input me_input_line"><input type="text" name="key" class="logAdd_key" autocomplete="off" placeholder="搜索文章" value=""></div>
+				<div class="me_input me_input_line"><button type="sumbit" class="rp_btn logsAdd_search">搜索</button></div>
+				<button type="button" class="logAdd_back">返回列表</button>
+			</div>
+			<ul class="logsList listData">
+			
+			</ul>
+		</div>
+	</div>
+</div>
 <script>
+function getHasLogList(id, page){
+	let logsList=$(".logsList.listHas");
+	logsList.html(""),logsList.next(".pages").remove();
+	$.ajaxpost("{:url('special/getHasLogs')}",{'id':id, 'page':page},function(res){
+		if(res.code == 200){
+			$.each(res.data, function(a, b){
+				logsList.append('<li class="clear"><a href="javascript:;" class="operBtn doRemoveLogs" data-id="'+b.id+'">移出</a><a href="'+b.url+'" target="_blank" class="text">'+b.title+'</a></li>');
+			});
+			if(res.pagehtml){
+				logsList.after('<div class="pages model_logs_page" style="text-align: center;">'+res.pagehtml+'</div>');
+			}
+		}else{
+			$.Msg(res.msg);
+		}
+	});
+}
+function getDataLogList(key, page){
+	let logsList=$(".logsList.listData");
+	logsList.html(""),logsList.next(".pages").remove();
+	$.ajaxpost("{:url('special/getDataLogs')}",{'key':key, 'page':page},function(res){
+		if(res.code == 200){
+			$.each(res.data, function(a, b){
+				logsList.append('<li class="clear"><a href="javascript:;" class="operBtn doAddLogs" data-id="'+b.id+'">加入</a><a href="'+b.url+'" target="_blank" class="text">'+b.title+'</a></li>');
+			});
+			if(res.pagehtml){
+				logsList.after('<div class="pages model_logs2_page" style="text-align: center;">'+res.pagehtml+'</div>');
+			}
+		}else{
+			$.Msg(res.msg);
+		}
+	});
+}
 $(document).ready(function(){
 	$(".menu_tree").find(".menu_item[data-type='special']").addClass('active');
 	$(".imgFile").change(function(){
@@ -147,6 +210,59 @@ $(document).ready(function(){
 				var data=res.data;
 				box.data('updateId',id),$(".special_title").val(data.title),$(".special_subTitle").val(data.subTitle),$(".special_alias").val(data.alias),$(".seo_title").val(data.seo_title),$(".seo_desc").val(data.seo_desc),$(".temp_list").val(data.temp_list);
 				data.headimg && ($(".imgUpload").find("img").remove(),$(".imgUpload").append('<img src="'+data.headimg+'"/>'));
+			}else{
+				$.Msg(res.msg);
+			}
+		});
+	}),
+	$(".logs").click(function(){
+		let id=$(this).parents('tr').data('id'),
+			box=$(".me_model_logs");
+		$(".veil").show(),box.data("id", id).show();
+		getHasLogList(id, 1);
+	}),
+	$("body").on("click", ".model_logs_page a", function(e){
+		e.preventDefault(),e.stopPropagation();
+		let a=$.url.getParam($(this).attr("href"));
+		getHasLogList(a.id, a.page);
+	}),
+	$(".addLogs").click(function(){
+		$(".warpList").hide(),$(".warpAdd").show();
+		getDataLogList("", 1);
+	}),
+	$("body").on("click", ".model_logs2_page a", function(e){
+		e.preventDefault(),e.stopPropagation();
+		let a=$.url.getParam($(this).attr("href"));
+		getDataLogList(a.key, a.page);
+	}),
+	$(".logsAdd_search").click(function(){
+		let a=$(".logAdd_key").val();
+		getDataLogList(a, 1);
+	}),
+	$(".logAdd_back").click(function(){
+		$(".warpAdd").hide(),$(".warpList").show();
+		let id=$(this).closest(".me_model_logs").data("id");
+		getHasLogList(id, 1);
+	}),
+	$("body").on("click", ".doAddLogs", function(){
+		let _this=$(this),
+			id=_this.data("id"),
+			specialId=_this.closest(".me_model_logs").data("id");
+		(id && specialId) && $.ajaxpost("{:url('special/addLog')}",{'specialId':specialId, 'id':id},function(res){
+			if(res.code == 200){
+				getDataLogList("", 1);
+			}else{
+				$.Msg(res.msg);
+			}
+		});
+	}),
+	$("body").on("click", ".doRemoveLogs", function(){
+		let _this=$(this),
+			id=_this.data("id"),
+			specialId=_this.closest(".me_model_logs").data("id");
+		(id && specialId) && $.ajaxpost("{:url('special/removeLog')}",{'id':id},function(res){
+			if(res.code == 200){
+				getHasLogList(specialIdn, 1);
 			}else{
 				$.Msg(res.msg);
 			}

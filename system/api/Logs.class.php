@@ -180,7 +180,7 @@ class Logs extends Base{
 		if(empty($data['content'])){
 			$this->response('',401,'正文不能为空！');
 		}
-		$data['excerpt']=!empty(strip_tags($param['excerpt'])) ? strip_tags($param['excerpt']) : getContentByLength($param['content']);
+		$data['excerpt']=!empty(strip_tags($param['excerpt'])) ? preg_replace('/\s/u','',strip_tags($param['excerpt'])) : getContentByLength($param['content']);
 		$data['keywords']=str_replace('，',',',strip_tags($param['keywords']));
 		$data['cateId']=intval($param['cateId']);
 		$data['authorId']=intval($param['authorId']);
@@ -209,6 +209,7 @@ class Logs extends Base{
 		}else{
 			unset($data['alias']);
 		}
+		Hook::doHook('admin_logs_post',array($logid, &$data, $oldData));
 		if(!empty($logid)){
 			if(!empty($checkAlias) && $checkAlias['id'] != $logid){
 				$this->response('',401,'别名重复，请更换别名！');
@@ -226,7 +227,7 @@ class Logs extends Base{
 		if($param['type'] != 2){
 			$this->updateCache(5);
 		}
-		Hook::doHook('api_logs_save',array($logid));
+		Hook::doHook('admin_logs_save',array($logid, $oldData));
 		$this->response($logid,200,'操作成功！');
 	}
 	

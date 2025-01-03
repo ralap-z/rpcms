@@ -112,6 +112,11 @@ class Upload{
 		$type=image_type_to_extension($size[2], false);
 		switch($type){
 			case 'png':
+				$bga=imagecolorallocatealpha($newImg, 0, 0, 0, 127);
+				imagecolortransparent($newImg, $bga);
+				imagefill($newImg, 0, 0, $bga);
+				imagetruecolortopalette($newImg, true, 256);
+				imagesavealpha($newImg, true);
 				if(function_exists('imagepng') && imagepng($newImg, $thumPath, 0)){
 					ImageDestroy($newImg);
 					return $thumPath;
@@ -149,7 +154,7 @@ class Upload{
 		if($isThumb && in_array($this->fileTypes, array('.jpg','.jpeg','.png','.gif','.bmp'))){
 			$this->createThumbnail($this->filePath);
 		}
-		Hook::doHook('admin_attach_upload',array($this->filePath));
+		Hook::doHook('admin_attach_upload',array($this->filePath, &$this->fullName));
 		return array('code'=>200, 'msg'=>'SUCCESS', 'data'=>$this->fullName);
 	}
 }

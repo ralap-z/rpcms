@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS `%pre%attachment` (
   KEY `logId` (`logId`),
   KEY `authorId` (`authorId`),
   KEY `pageId` (`pageId`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='附件';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='附件';
 
 CREATE TABLE IF NOT EXISTS `%pre%category` (
   `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS `%pre%category` (
   KEY `alias` (`alias`),
   KEY `sort` (`sort`),
   KEY `topId` (`topId`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='文章分类';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='文章分类';
 
 CREATE TABLE IF NOT EXISTS `%pre%comment` (
   `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -58,7 +58,7 @@ CREATE TABLE IF NOT EXISTS `%pre%comment` (
   KEY `topId` (`topId`),
   KEY `createTime` (`createTime`),
   KEY `status` (`status`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='评论';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='评论';
 
 CREATE TABLE IF NOT EXISTS `%pre%config` (
   `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -66,7 +66,7 @@ CREATE TABLE IF NOT EXISTS `%pre%config` (
   `cvalue` longtext NOT NULL,
   PRIMARY KEY (`id`),
   KEY `cname` (`cname`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='系统配置';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='系统配置';
 
 CREATE TABLE IF NOT EXISTS `%pre%links` (
   `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -78,7 +78,7 @@ CREATE TABLE IF NOT EXISTS `%pre%links` (
   PRIMARY KEY (`id`),
   KEY `sort` (`sort`),
   KEY `status` (`status`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='友情链接';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='友情链接';
 
 CREATE TABLE IF NOT EXISTS `%pre%logs` (
   `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -119,7 +119,7 @@ CREATE TABLE IF NOT EXISTS `%pre%logs` (
   FULLTEXT(title, content) WITH PARSER ngram,
   FULLTEXT(title) WITH PARSER ngram,
   FULLTEXT(content) WITH PARSER ngram
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='文章列表';
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COMMENT='文章列表';
 
 CREATE TABLE IF NOT EXISTS `%pre%nav` (
   `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -139,7 +139,7 @@ CREATE TABLE IF NOT EXISTS `%pre%nav` (
   KEY `status` (`status`),
   KEY `type` (`types`),
   KEY `topId` (`topId`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='导航';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='导航';
 
 CREATE TABLE IF NOT EXISTS `%pre%pages` (
   `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -162,7 +162,7 @@ CREATE TABLE IF NOT EXISTS `%pre%pages` (
   KEY `authorId` (`authorId`),
   KEY `status` (`status`),
   KEY `comnum` (`comnum`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='单页';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='单页';
 
 CREATE TABLE IF NOT EXISTS `%pre%plugin` (
   `ppath` varchar(255) NOT NULL,
@@ -170,7 +170,7 @@ CREATE TABLE IF NOT EXISTS `%pre%plugin` (
   `status` tinyint(1) DEFAULT '0' COMMENT '状态, 0正常 -1关闭',
   KEY `ppath` (`ppath`),
   KEY `status` (`status`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='插件';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='插件';
 
 CREATE TABLE IF NOT EXISTS `%pre%tages` (
   `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -183,7 +183,7 @@ CREATE TABLE IF NOT EXISTS `%pre%tages` (
   PRIMARY KEY (`id`),
   KEY `tagName` (`tagName`),
   KEY `alias` (`alias`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='标签';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='标签';
 
 CREATE TABLE IF NOT EXISTS `%pre%user` (
   `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -201,7 +201,7 @@ CREATE TABLE IF NOT EXISTS `%pre%user` (
   PRIMARY KEY (`id`),
   KEY `username` (`username`),
   KEY `role` (`role`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='用户表';
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COMMENT='用户表';
 
 CREATE TABLE IF NOT EXISTS `%pre%special` (
   `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -218,7 +218,7 @@ CREATE TABLE IF NOT EXISTS `%pre%special` (
   PRIMARY KEY (`id`),
   KEY `alias` (`alias`),
   KEY `title` (`title`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='专题';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='专题';
 
 DELIMITER $$
 CREATE TRIGGER `updateWeight` BEFORE UPDATE ON `%pre%logs`

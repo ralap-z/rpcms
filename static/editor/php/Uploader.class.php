@@ -118,6 +118,7 @@ class Uploader
 		$upload->dirNames = $dirname;
 		$res=$upload->saveFile($file['tmp_name']);
         $this->stateInfo = $res['msg'];
+		!empty($res['data']) && $this->fullName = $res['data'];
     }
 
     /**
@@ -153,6 +154,7 @@ class Uploader
 		$upload->dirNames = $dirname;
 		$res=$upload->saveBase64File($base64Data);
         $this->stateInfo = $res['msg'];
+		!empty($res['data']) && $this->fullName = $res['data'];
     }
 
     /**
@@ -245,7 +247,7 @@ class Uploader
 		$upload->dirNames = $dirname;
 		$res=$upload->saveBase64File(base64_encode($img));
         $this->stateInfo = $res['msg'];
-
+		!empty($res['data']) && $this->fullName = $res['data'];
     }
 
     /**

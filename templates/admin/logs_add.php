@@ -12,10 +12,11 @@
 #excerpt{display:none;}
 .me_input .tips{margin-left: 1rem;color: #f40;}
 .fixed_tab{width: 23.5rem;padding-left: 5rem;padding-top: 1rem;}
+.searchList{top: 2.4rem;left: 2.5rem;width: calc(100% - 2.5rem);min-width: auto;}
 </style>
 <form class="me_form" action="" onSubmit="return false">
 	<div class="left" style="width: calc(100% - 23.5rem);">
-		<div class="me_input big"><label style="width: auto;">标题<font class="tips autoSaveTip"></font></label><input type="text" name="title" value="{$logData['title']|default=''}"></div>
+		<div class="me_input big"><label style="width: auto;">标题<font class="tips autoSaveTip"></font></label><input type="text" name="title" value="{$logData['title']|default=''}" wordlen="true"></div>
 		<div class="me_input big"><label>标签</label><input type="text" name="tagesName" id="tagesName" value="{$logData['tagesName']|default=''}">
 			<span class="inblock allTages">选择标签</span>
 			<div class="taglist">加载中...</div>
@@ -39,7 +40,7 @@
 			{hook:admin_logs_edit_hook($logData)}
 		</div>
 		<div class="me_input big"><label>正文</label><textarea name="content" id="log_content" style="height: 30rem;">{$logData['content']|default=''|raw}</textarea></div>
-		<div class="me_input big"><label style="width: auto;cursor: pointer;" id="excerptBtn">摘要<font style="color: #888;margin-left: 0.5rem;">系统会自动截取文字摘要，你也可以手动书写</font></label><textarea name="excerpt" id="excerpt" style="">{$logData['excerpt']|default=''}</textarea></div>
+		<div class="me_input big"><label style="width: auto;cursor: pointer;" id="excerptBtn">摘要<font style="color: #888;margin-left: 0.5rem;">系统会自动截取文字摘要，你也可以手动书写</font></label><textarea name="excerpt" id="excerpt" style="" wordlen="true">{$logData['excerpt']|default=''}</textarea></div>
 		<div class="me_input big"><label style="width: auto;">关键词<font class="tips autoSaveTip"></font></label><input type="text" name="keywords" value="{$logData['keywords']|default=''}" onafterpaste="this.value=this.value.replace(/，/g,',')" onkeyup="this.value=this.value.replace(/，/g,',')"/></div>
 		<div class="extendBox">{hook:admin_logs_edit_hook2($logData)}</div>
 	</div>
@@ -48,7 +49,7 @@
 			<option value="">选择分类</option>
 			{$categoryHtml|raw}
 		</select></div>
-		<div class="me_input"><label>作者</label><select name="authorId">{$authorHtml|raw}</select></div>
+		<div class="me_input"><label>作者</label><input type="text" class="author_text" value="{$logData['authorName']|default=''}" data-text="{$logData['authorName']|default=''}" placeholder="请选择作者"/><input type="hidden" name="authorId" class="author_value" value="{$logData['authorId']|default=''}"/></div>
 		<div class="me_input"><label>专题</label><select name="specialId">{$specialHtml|raw}</select></div>
 		<div class="me_input"><label>别名</label><input type="text" name="alias" value="{$logData['alias']|default=''}" placeholder="仅字母、数字、-和_"></div>
 		<div class="me_input"><label>密码</label><input type="text" name="password" value="{$logData['password']|default=''}"></div>
@@ -97,6 +98,12 @@ $(document).ready(function(){
 	}),
 	$("#excerptBtn").click(function(){
 		$("#excerpt").slideToggle("fast");
+	}),
+	$(".author_text").inputSearch({
+		defalut:true,
+		url:"{:url('user/search')}",
+		parent:".me_input",
+		valueDom:".author_value"
 	}),
 	$(".uploadBtn").click(function(){
 		var formData = new FormData(),

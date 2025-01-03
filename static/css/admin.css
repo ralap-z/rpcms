@@ -42,7 +42,7 @@ img{display: inline-block;vertical-align: middle;border: none;}
 .me_group{margin-bottom: 2rem;}
 .me_group > label{font-size: 1.2rem;margin-bottom: 0.3rem;display: block;font-weight: 600;}
 .me_group .me_group_content{margin-left: 1rem;}
-.me_input{margin-bottom: 0.5rem;}
+.me_input{margin-bottom: 0.5rem;position: relative;}
 .me_input > label{height: 2.4rem;line-height: 2.4rem;float:left;margin-right: 0.5rem;}
 .me_input > input{height: 2.4rem;line-height: 2.4rem;border: 1px solid #ccc;padding: 0 0.3rem;width: 14rem;float:left;}
 .me_input > select{height: 2.4rem;line-height: 2.4rem;padding: 0 0.5rem;border: 1px solid #ccc;float: left;}
@@ -188,3 +188,11 @@ img{display: inline-block;vertical-align: middle;border: none;}
 .adminMsg_list li a:hover{color: #1fbae8;text-decoration: underline;}
 .adminMsg_list li a.c{color: #f40;font-weight: bold;}
 .adminMsg_list li img{height: 60px;}
+
+.searchList{position: absolute;background: #fff;z-index: 2;padding: 0.5rem 0;box-shadow: 0 1px 9px -5px #000;min-width: 15rem;margin: 0;display:none;}
+.searchList li{line-height: 2;cursor: pointer;padding: 0 0.5rem;}
+.searchList li:hover{background-color: #f5f5f5;}
+.searchList li.notResult{text-align: center;font-size: 12px;color: #999;}
+
+.wordWarp{position: relative;margin-bottom: 0;}
+.wordWarp span{position: absolute;bottom: 0.5rem;right: 0.5rem;color: #666;}

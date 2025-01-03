@@ -150,6 +150,31 @@ $(document).ready(function(){
 		var a=$(this).data("value");
 		return a && ($.winEvent.copyD(a), $.Msg("已复制链接"));
 	})
+	$("input[wordlen],textarea[wordlen]").each(function(){
+		let _this=$(this),
+			a=(_this.attr("wordlen") || true).toString().toLowerCase() === "true",
+			b=_this.closest(".wordWarp"),
+			e=_this.closest(".me_input");
+		if(!a){
+			return true;
+		}
+		if(b.length <= 0){
+			let c=$('<div class="me_input wordWarp"><span>0</span></div>'),
+				d=_this.parent();
+			c.addClass(e.attr('class')).append(_this),d.append(c);
+			b=_this.closest(".wordWarp");
+			let defaultNone=false;
+			if(_this.css("display") === "none"){
+				defaultNone=true,_this.show();
+			}
+			let right=b.offset().left + b.outerWidth() - _this.offset().left - _this.outerWidth();
+			defaultNone && _this.css("display", "none");
+			c.find("span").css("right", "calc("+right+"px + 0.5rem)");
+			_this.off("input").on("input", function(){
+				c.find("span").text(_this.val().length+"字");
+			})
+		}
+	}),$("input[wordlen],textarea[wordlen]").trigger("input");
 	var auth=$.localStorage.get("rpcmsAuth");
 	auth ? authText(auth) : $.getJSON("//www.rpcms.cn/upgrade/auth/check?host="+location.host+"&callback=?", function(res){
 		$.localStorage.set("rpcmsAuth", res.auth, 24*3600),authText(res.auth);

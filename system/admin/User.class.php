@@ -52,6 +52,16 @@ class User extends Base{
 		return View::display('/user_index');
 	}
 	
+	public function search(){
+		$key=strip_tags(input('key'));
+		$where=[];
+		if(!empty($key)){
+			$where['username|nickname']=['like', $key.'%'];
+		}
+		$res=Db::name('user')->where($where)->field('id,if(nickname = "",username, nickname) as title')->order('id','asc')->limit('0,10')->select();
+		return json(['code'=>200, 'msg'=>'success', 'data'=>$res]);
+	}
+	
 	public function getinfo(){
 		$id=intval(input('id')) ? intval(input('id')) : 0;
 		if(empty($id)){

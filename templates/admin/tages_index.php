@@ -9,6 +9,14 @@
 		<div class="me_input me_input_line">
 			<a href="javascript:;" class="rp_btn navAdd" data-model-type="tages">添加标签</a>
 		</div>
+		<form action="" style="display: inline;">
+			<div class="me_input me_input_line">
+				<input type="text" name="key" autocomplete="off" placeholder="搜索标签" style="float: none;width: 20rem;" value="{$s_key}">
+			</div>
+			<div class="me_input me_input_line">
+				<button type="sumbit" class="rp_btn">搜索</button>
+			</div>
+		</form>
 	</div>
 	<table class="me_table">
 		<colgroup>

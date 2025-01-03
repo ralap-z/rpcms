@@ -34,6 +34,9 @@ class App{
 	private $subDomain;
 	
 	public function __construct(){
+		if(empty($_SERVER['REQUEST_SCHEME'])){
+			$_SERVER['REQUEST_SCHEME']=(!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') || (!empty($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == '443') ? 'https' : 'http';
+		}
 		self::$server = $_SERVER;
 		$this->pageExt=Config::get('url_html_suffix', 'html');
 		$this->diyAdmin=Config::get('diy_admin');
@@ -340,17 +343,29 @@ class App{
 	private function isWapAuto(){
 		$wapAuto=Config::get('webConfig.wap_auto');
 		$wapDomain=Config::get('webConfig.wap_domain');
-		if($wapAuto == 1 && isMobile() && !empty($wapDomain) && $this->subDomain != $wapDomain){
-			if(!empty($this->rootDomain)){
-				$mhost=$wapDomain.'.'.$this->rootDomain;
-			}else{
-				$hostData=explode('.',$host);
-				$hostData[0]=$wapDomain;
-				$mhost=implode('.',$hostData);
+		if($wapAuto != 1 || empty($wapDomain)){
+			return;
+		}
+		if(isMobile() && $this->subDomain != $wapDomain){
+			$host=!empty($this->rootDomain) ? $this->rootDomain : self::server('HTTP_HOST');
+			$hostData=explode('.',$host);
+			if($hostData[0] == 'www'){
+				unset($hostData[0]);
 			}
-			$url=self::server('REQUEST_SCHEME').'://'. $mhost .self::server('REQUEST_URI');
+			array_unshift($hostData, $wapDomain);
+			$hostData=implode('.',$hostData);
+			$url=self::server('REQUEST_SCHEME').'://'. $hostData .self::server('REQUEST_URI');
 			redirect($url);
-			exit;
+			return;
+		}
+		if(!isMobile() && $this->subDomain == $wapDomain){
+			$host=self::server('HTTP_HOST');
+			$hostData=explode('.',$host);
+			unset($hostData[0]);
+			$hostData=implode('.',$hostData);
+			$url=self::server('REQUEST_SCHEME').'://'. $hostData .self::server('REQUEST_URI');
+			redirect($url);
+			return;
 		}
 	}
 	

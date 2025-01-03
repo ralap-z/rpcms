@@ -126,8 +126,10 @@ function cookie($name,$value='',$expire=0,$path='/'){
 }
 
 function json($data=array()){
-	header('Content-Type: application/json; charset=utf-8');
-	echo json_encode($data);
+	if(!headers_sent()){
+		header('Content-Type: application/json; charset=utf-8');
+	}
+	echo json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 	exit;
 }
 
@@ -261,7 +263,7 @@ function pageInation($count, $perlogs, $page, $url='', $anchor = '') {
 	$param=[];
 	$isRoute=true;
 	if(empty($url)){
-		$url=$App->nowUrl();
+		$url=rp\Url::now(true, true);
 	}
 	$urlQuery=parse_url($url, PHP_URL_QUERY);
 	if(!empty($urlQuery)){
@@ -495,7 +497,7 @@ function hideStr($type, $str, $replace='*'){
 }
 
 /*标签关键字替换*/
-function content2keyword($content,$limit=1,$maxLink=0){
+function content2keyword($content,$limit=1,$maxLink=5){
 	$tages=function(){
 		$data =rp\Cache::read('tages');
 		foreach($data as $k=>$v){

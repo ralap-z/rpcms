@@ -3,6 +3,7 @@ namespace rp\admin;
 use rp\View;
 use rp\Db;
 use rp\Cache;
+use rp\Url;
 
 class Special extends Base{
 	
@@ -101,6 +102,74 @@ class Special extends Base{
 		$this->checkTemplate($data['temp_list'],'列表');
 		$res=Db::name('special')->where('id='.$id)->update($data);
 		Cache::update('special');
+		return json(array('code'=>200,'msg'=>'修改成功'));
+	}
+	
+	public function getHasLogs(){
+		$id=intval(input('id')) ? intval(input('id')) : 0;
+		if(empty($id)){
+			return json(array('code'=>-1,'msg'=>'ID数据错误'));
+		}
+		$page=intval(input('page')) ? intval(input('page')) : 1;
+		$limit=10;
+		$search=['id='.$id];
+		$where=['specialId'=>$id];
+		$count=Db::name('logs')->where($where)->field('id')->count();
+		$pages=ceil($count / $limit);
+        if($page > $pages){
+            return json(array('code'=>-1,'msg'=>'没有了'));
+        }
+		$data=Db::name('logs')->where($where)->field('id,title')->order(['id'=>'desc'])->limit(($page-1)*$limit.','.$limit)->select();
+		$pageHtml=pageInation($count,$limit,$page,'',join('&',$search));
+		foreach($data as &$v){
+			$v['url']=Url::logs($v['id']);
+		}
+		return json(array('code'=>200,'msg'=>'success','data'=>$data,'pagehtml'=>$pageHtml));
+	}
+	
+	public function getDataLogs(){
+		$key=strip_tags(input('key'));
+		$search=[];
+		$where=['specialId'=>0];
+		$whereStr=$fieldFirst='';
+		$order='id';
+		if(!empty($key)){
+			$search[]='key='.$key;
+			$whereStr='MATCH(title, content) Against(\''.addslashes($key).'\' IN BOOLEAN MODE)';
+			$fieldFirst=',(match(title) Against(\''.addslashes($key).'\' IN BOOLEAN MODE)*2 + match(content) Against(\''.addslashes($key).'\' IN BOOLEAN MODE)) as score';
+			$order='score';
+		}
+		$page=intval(input('page')) ? intval(input('page')) : 1;
+		$limit=10;
+		$count=Db::name('logs')->where($where)->where($whereStr)->field('id')->count();
+		$pages=ceil($count / $limit);
+        if($page > $pages){
+            return json(array('code'=>-1,'msg'=>'没有了'));
+        }
+		$data=Db::name('logs')->where($where)->where($whereStr)->field('id,title'.$fieldFirst)->order([$order=>'desc'])->limit(($page-1)*$limit.','.$limit)->select();
+		$pageHtml=pageInation($count,$limit,$page,'',join('&',$search));
+		foreach($data as &$v){
+			$v['url']=Url::logs($v['id']);
+		}
+		return json(array('code'=>200,'msg'=>'success','data'=>$data,'pagehtml'=>$pageHtml));
+	}
+	
+	public function removeLog(){
+		$id=intval(input('id')) ? intval(input('id')) : 0;
+		if(empty($id)){
+			return json(array('code'=>-1,'msg'=>'ID数据错误'));
+		}
+		$res=Db::name('logs')->where(['id'=>$id])->update(['specialId'=>0]);
+		return json(array('code'=>200,'msg'=>'修改成功'));
+	}
+	
+	public function addLog(){
+		$id=intval(input('id')) ? intval(input('id')) : 0;
+		$specialId=intval(input('specialId')) ? intval(input('specialId')) : 0;
+		if(empty($id) || empty($specialId)){
+			return json(array('code'=>-1,'msg'=>'ID数据错误'));
+		}
+		$res=Db::name('logs')->where(['id'=>$id])->update(['specialId'=>$specialId]);
 		return json(array('code'=>200,'msg'=>'修改成功'));
 	}
 }

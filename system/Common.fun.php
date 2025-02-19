@@ -506,11 +506,12 @@ function content2keyword($content,$limit=1,$maxLink=5){
 	};
 	$isLink=0;
 	foreach($tages() as $k=>$v){
-		if(!empty($maxLink) && $isLink >= $maxLink){
+		if(!empty($maxLink) && $isLink > $maxLink){
 			break;
 		}
 		$regEx='/(?!(<.*?))('.$v['tagName'].')(?!(([^<>]*?)>)|([^>]*?<\/a>))/si';
-		$content=preg_replace($regEx, '<a href="'. rp\Url::tag($v['id']) .'" target="_blank">\2</a>', $content, 1, $islink);
+		$content=preg_replace($regEx, '<a href="'. rp\Url::tag($v['id']) .'" target="_blank">\2</a>', $content, 1, $count);
+		$count && $isLink++;
 	}
 	return $content;
 }
